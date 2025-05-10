@@ -1,0 +1,2744 @@
+---
+title: "CoreTaxaAnalysis_September2024"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#   install.packages("BiocManager")
+# 
+# # Install phyloseq from Bioconductor
+# BiocManager::install("phyloseq")
+# 
+# install.packages("microbiome")
+# 
+# # Install remotes if it's not already installed
+# install.packages("remotes")
+# 
+# # Install microbiome from GitHub
+# remotes::install_github("microbiome/microbiome")
+# 
+# library(microbiome)
+library(tidyverse)
+library(ggplot2)
+library(grid)
+library(dplyr)
+library(vegan)
+library(Hmisc)
+```
+
+## 16S
+## Read in merged data
+
+```{r}
+merged <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_denoise_files/ASCC_16S_feature_table_rem.txt") # 16S
+colnames(merged)
+```
+
+## Convert to characters
+```{r}
+merged <- merged %>%
+  mutate(across(everything(), as.character))
+```
+
+
+## Function to insert "0" after the second underscore
+```{r}
+# Modify column names
+colnames(merged) <- sapply(colnames(merged), function(name) {
+  # Check if "SF" is in the name
+  if (grepl("SF", name)) {
+    # Split by underscores
+    parts <- unlist(strsplit(name, "_"))
+    
+    # Add '0_' after the second underscore
+    if (length(parts) > 2) {
+      paste(c(parts[1], parts[2], "0", parts[3:length(parts)]), collapse = "_")
+    } else {
+      name
+    }
+  } else {
+    name
+  }
+})
+
+# Check the modified column names
+#colnames(merged)
+```
+
+```{r}
+d1 <- merged %>%
+  pivot_longer(2:304, names_to = "Samples", values_to = "Counts") %>%
+  separate(Samples, into = c("SampleID", "Plot", "Unit", "Date", "Site", "NumOfCores", "Depth"), sep = "_") %>%
+  mutate(Counts = as.numeric(Counts)) %>% 
+  mutate(Value=Counts/Counts)
+```
+
+```{r}
+d1 <- d1 %>%
+  mutate_all(~ ifelse(is.na(.), 0, .))
+
+d1$NewColumn <- 1
+```
+
+
+
+## Using cutoffs!
+
+## 40% cutoff
+
+```{r}
+d40 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.4)
+```
+
+## 50% cutoff
+
+```{r}
+d50 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.5)
+```
+
+## 50% cutoff, 0-5cm depth
+
+```{r}
+d50_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, 5-15cm depth
+
+```{r}
+d50_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, OM depth
+
+```{r}
+d50_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF
+
+```{r}
+d50_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF 0-5cm
+
+```{r}
+d50_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF 5-15cm
+
+```{r}
+d50_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF OM
+
+```{r}
+d50_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP
+
+```{r}
+d50_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+
+## 50% cutoff, TP 0-5cm
+
+```{r}
+d50_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP 5-15cm
+
+```{r}
+d50_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP OM
+
+```{r}
+d50_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+## 50% cutoff, SJ
+
+```{r}
+d50_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+## 50% cutoff, SJ 0-5cm
+
+```{r}
+d50_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SJ 5-15cm
+
+```{r}
+d50_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SJ OM
+
+```{r}
+d50_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+
+## 60% cutoff
+
+```{r}
+d60 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.6)
+```
+
+
+
+## 60% cutoff, 0-5cm depth
+
+```{r}
+d60_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, 5-15cm depth
+
+```{r}
+d60_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, OM depth
+
+```{r}
+d60_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6)
+         
+```
+
+## 60% cutoff, SF
+
+```{r}
+d60_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF 0-5cm
+
+```{r}
+d60_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF 5-15cm
+
+```{r}
+d60_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF OM
+
+```{r}
+d60_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP
+
+```{r}
+d60_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+
+## 60% cutoff, TP 0-5cm
+
+```{r}
+d60_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP 5-15cm
+
+```{r}
+d60_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP OM
+
+```{r}
+d60_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+## 60% cutoff, SJ
+
+```{r}
+d60_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+## 60% cutoff, SJ 0-5cm
+
+```{r}
+d60_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SJ 5-15cm
+
+```{r}
+d60_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SJ OM
+
+```{r}
+d70_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+
+## 66% cutoff
+
+```{r}
+d66 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.66)
+```
+
+## 70% cutoff
+
+```{r}
+d70 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.7)
+```
+
+
+
+## 70% cutoff, 0-5cm depth
+
+```{r}
+d70_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, 5-15cm depth
+
+```{r}
+d70_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, OM depth
+
+```{r}
+d70_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7)
+         
+```
+
+## 70% cutoff, SF
+
+```{r}
+d70_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF 0-5cm
+
+```{r}
+d70_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF 5-15cm
+
+```{r}
+d70_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF OM
+
+```{r}
+d70_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP
+
+```{r}
+d70_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+
+## 70% cutoff, TP 0-5cm
+
+```{r}
+d70_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP 5-15cm
+
+```{r}
+d70_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP OM
+
+```{r}
+d70_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+## 70% cutoff, SJ
+
+```{r}
+d70_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+## 70% cutoff, SJ 0-5cm
+
+```{r}
+d70_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SJ 5-15cm
+
+```{r}
+d70_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SJ OM
+
+```{r}
+d70_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+
+
+## 80% cutoff
+
+```{r}
+d80 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.8)
+```
+
+
+
+## 80% cutoff, 0-5cm depth
+
+```{r}
+d80_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, 5-15cm depth
+
+```{r}
+d80_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, OM depth
+
+```{r}
+d80_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8)
+         
+```
+
+## 80% cutoff, SF
+
+```{r}
+d80_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF 0-5cm
+
+```{r}
+d80_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF 5-15cm
+
+```{r}
+d80_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF OM
+
+```{r}
+d80_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, TP
+
+```{r}
+d80_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+
+
+## 80% cutoff, TP 0-5cm
+
+```{r}
+d80_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+## 80% cutoff, TP 5-15cm
+
+```{r}
+d80_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+## 80% cutoff, TP OM
+
+```{r}
+d80_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+## 80% cutoff, SJ
+
+```{r}
+d80_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+## 80% cutoff, SJ 0-5cm
+
+```{r}
+d80_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SJ 5-15cm
+
+```{r}
+d80_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SJ OM
+
+```{r}
+d80_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+
+
+
+
+## 90% cutoff
+
+```{r}
+d90 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.9)
+```
+
+
+
+
+## 90% cutoff, 0-5cm depth
+
+```{r}
+d90_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, 5-15cm depth
+
+```{r}
+d90_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, OM depth
+
+```{r}
+d90_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9)
+         
+```
+
+## 90% cutoff, SF
+
+```{r}
+d90_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SF 0-5cm
+
+```{r}
+d90_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+## 90% cutoff, SF 5-15cm
+
+```{r}
+d90_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SF OM
+
+```{r}
+d90_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP
+
+```{r}
+d90_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+
+
+## 90% cutoff, TP 0-5cm
+
+```{r}
+d90_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP 5-15cm
+
+```{r}
+d90_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP OM
+
+```{r}
+d90_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+## 90% cutoff, SJ
+
+```{r}
+d90_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+## 90% cutoff, SJ 0-5cm
+
+```{r}
+d90_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+## 90% cutoff, SJ 5-15cm
+
+```{r}
+d90_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SJ OM
+
+```{r}
+d90_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+
+## 100% cutoff
+
+```{r}
+d100 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 1)
+```
+
+
+
+
+## 100% cutoff, 0-5cm depth
+
+```{r}
+d100_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, 5-15cm depth
+
+```{r}
+d100_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, OM depth
+
+```{r}
+d100_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, SF
+
+```{r}
+d100_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SF 0-5cm
+
+```{r}
+d100_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SF 5-15cm
+
+```{r}
+d100_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+
+```
+
+## 100% cutoff, SF OM
+
+```{r}
+d100_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, TP
+
+```{r}
+d100_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+
+
+## 100% cutoff, TP 0-5cm
+
+```{r}
+d100_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, TP 5-15cm
+
+```{r}
+d100_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, TP OM
+
+```{r}
+d100_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+
+## 100% cutoff, SJ
+
+```{r}
+d100_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+
+## 100% cutoff, SJ 0-5cm
+
+```{r}
+d100_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SJ 5-15cm
+
+```{r}
+d100_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SJ OM
+
+```{r}
+d100_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+```{r}
+# Install and load the openxlsx package
+install.packages("openxlsx")
+library(openxlsx)
+
+# Create a list of data frames
+all_core_16S <- list(d100 = d100, d100_deep = d100_deep, d100_OM = d100_OM, d100_SF = d100_SF, d100_SF_15 = d100_SF_15, d100_SF_5 = d100_SF_5, d100_SF_OM = d100_SF_OM, d100_shallow = d100_shallow, d100_SJ = d100_SJ, d100_SJ_15 = d100_SJ_15, d100_SJ_5 = d100_SJ_5, d100_SJ_OM = d100_SJ_OM, d100_TP = d100_TP, d100_TP_15 = d100_TP_15, d100_TP_5 = d100_TP_5, d100_TP_OM = d100_TP_OM, d50 = d50, d50_deep = d50_deep, d50_OM = d50_OM, d50_SF = d50_SF, d50_SF_15 = d50_SF_15, d50_SF_5 = d50_SF_5, d50_SF_OM = d50_SF_OM, d50_shallow = d50_shallow, d50_SJ = d50_SJ, d50_SJ_15 = d50_SJ_15, d50_SJ_5 = d50_SJ_5, d50_SJ_OM = d50_SJ_OM, d50_TP = d50_TP, d50_TP_15 = d50_TP_15, d50_TP_5 = d50_TP_5, d50_TP_OM = d50_TP_OM, d60 = d60, d60_deep = d60_deep, d60_OM = d60_OM, d60_SF = d60_SF, d60_SF_15 = d60_SF_15, d60_SF_5 = d60_SF_5, d60_SF_OM = d60_SF_OM, d60_shallow = d60_shallow, d60_SJ = d60_SJ, d60_SJ_15 = d60_SJ_15, d60_SJ_5 = d60_SJ_5, d60_SJ_OM = d60_SJ_OM, d60_TP = d60_TP, d60_TP_15 = d60_TP_15, d60_TP_5 = d60_TP_5, d60_TP_OM = d60_TP_OM, d70 = d70, d70_deep = d70_deep, d70_OM = d70_OM, d70_SF = d70_SF, d70_SF_15 = d70_SF_15, d70_SF_5 = d70_SF_5, d70_SF_OM = d70_SF_OM, d70_shallow = d70_shallow, d70_SJ = d70_SJ, d70_SJ_15 = d70_SJ_15, d70_SJ_5 = d70_SJ_5, d70_SJ_OM = d70_SJ_OM, d70_TP = d70_TP, d70_TP_15 = d70_TP_15, d70_TP_5 = d70_TP_5, d70_TP_OM = d70_TP_OM, d80 = d80,d80_deep = d80_deep, d80_OM = d80_OM, d80_SF = d80_SF, d80_SF_15 = d80_SF_15, d80_SF_5 = d80_SF_5, d80_SF_OM = d80_SF_OM, d80_shallow = d80_shallow, d80_SJ = d80_SJ, d80_SJ_15 = d80_SJ_15, d80_SJ_5 = d80_SJ_5, d80_SJ_OM = d80_SJ_OM, d80_TP = d80_TP, d80_TP_15 = d80_TP_15, d80_TP_5 = d80_TP_5, d80_TP_OM = d80_TP_OM,d90 = d90, d90_deep = d90_deep, d90_OM = d90_OM,  d90_SF = d90_SF, d90_SF_15 = d90_SF_15, d90_SF_5 = d90_SF_5, d90_SF_OM = d90_SF_OM, d90_shallow = d90_shallow, d90_SJ = d90_SJ, d90_SJ_15 = d90_SJ_15, d90_SJ_5 = d90_SJ_5, d90_SJ_OM = d90_SJ_OM, d90_TP = d90_TP, d90_TP_15 = d90_TP_15, d90_TP_5 = d90_TP_5, d90_TP_OM = d90_TP_OM)   
+
+core_60_16S <- list(d60 = d60, d60_deep = d60_deep, d60_OM = d60_OM, d60_SF = d60_SF, d60_SF_15 = d60_SF_15, d60_SF_5 = d60_SF_5, d60_SF_OM = d60_SF_OM, d60_shallow = d60_shallow, d60_SJ = d60_SJ, d60_SJ_15 = d60_SJ_15, d60_SJ_5 = d60_SJ_5, d60_SJ_OM = d60_SJ_OM, d60_TP = d60_TP, d60_TP_15 = d60_TP_15, d60_TP_5 = d60_TP_5, d60_TP_OM = d60_TP_OM)   
+
+core_70_16S <- list(d70 = d70, d70_deep = d70_deep, d70_OM = d70_OM, d70_SF = d70_SF, d70_SF_15 = d70_SF_15, d70_SF_5 = d70_SF_5, d70_SF_OM = d70_SF_OM, d70_shallow = d70_shallow, d70_SJ = d70_SJ, d70_SJ_15 = d70_SJ_15, d70_SJ_5 = d70_SJ_5, d70_SJ_OM = d70_SJ_OM, d70_TP = d70_TP, d70_TP_15 = d70_TP_15, d70_TP_5 = d70_TP_5, d70_TP_OM = d70_TP_OM)
+
+core_80_16S <- list(d80 = d80, d80_deep = d80_deep, d80_OM = d80_OM, d80_SF = d80_SF, d80_SF_15 = d80_SF_15, d80_SF_5 = d80_SF_5, d80_SF_OM = d80_SF_OM, d80_shallow = d80_shallow, d80_SJ = d80_SJ, d80_SJ_15 = d80_SJ_15, d80_SJ_5 = d80_SJ_5, d80_SJ_OM = d80_SJ_OM, d80_TP = d80_TP, d80_TP_15 = d80_TP_15, d80_TP_5 = d80_TP_5, d80_TP_OM = d80_TP_OM)
+
+core_90_16S <- list(d90 = d90, d90_deep = d90_deep, d90_OM = d90_OM,  d90_SF = d90_SF, d90_SF_15 = d90_SF_15, d90_SF_5 = d90_SF_5, d90_SF_OM = d90_SF_OM, d90_shallow = d90_shallow, d90_SJ = d90_SJ, d90_SJ_15 = d90_SJ_15, d90_SJ_5 = d90_SJ_5, d90_SJ_OM = d90_SJ_OM, d90_TP = d90_TP, d90_TP_15 = d90_TP_15, d90_TP_5 = d90_TP_5, d90_TP_OM = d90_TP_OM)
+
+core_100_16S <- list(d100 = d100, d100_deep = d100_deep, d100_OM = d100_OM, d100_SF = d100_SF, d100_SF_15 = d100_SF_15, d100_SF_5 = d100_SF_5, d100_SF_OM = d100_SF_OM, d100_shallow = d100_shallow, d100_SJ = d100_SJ, d100_SJ_15 = d100_SJ_15, d100_SJ_5 = d100_SJ_5, d100_SJ_OM = d100_SJ_OM, d100_TP = d100_TP, d100_TP_15 = d100_TP_15, d100_TP_5 = d100_TP_5, d100_TP_OM = d100_TP_OM)
+
+
+# Create a new workbook
+CoreTaxa_16S_ASCC <- createWorkbook() 
+
+CoreTaxa_60_16S_ASCC <- createWorkbook() 
+
+CoreTaxa_70_16S_ASCC <- createWorkbook()
+
+CoreTaxa_80_16S_ASCC <- createWorkbook() 
+
+CoreTaxa_90_16S_ASCC <- createWorkbook() 
+
+CoreTaxa_100_16S_ASCC <- createWorkbook() 
+
+# Loop through the list of data frames and add them to the workbook in one line
+
+lapply(seq_along(all_core_16S), function(i) {
+  sheet_name <- names(all_core_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_16S_ASCC, sheet_name, all_core_16S[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_60_16S), function(i) {
+  sheet_name <- names(core_60_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_60_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_60_16S_ASCC, sheet_name, core_60_16S[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_70_16S), function(i) {
+  sheet_name <- names(core_70_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_70_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_70_16S_ASCC, sheet_name, core_70_16S[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_80_16S), function(i) {
+  sheet_name <- names(core_80_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_80_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_80_16S_ASCC, sheet_name, core_80_16S[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_90_16S), function(i) {
+  sheet_name <- names(core_90_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_90_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_90_16S_ASCC, sheet_name, core_90_16S[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_100_16S), function(i) {
+  sheet_name <- names(core_100_16S)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_100_16S_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_100_16S_ASCC, sheet_name, core_100_16S[[i]]) # Write data to the sheet
+})
+
+# Save the workbook
+saveWorkbook(CoreTaxa_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/multiple_sheets.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_60_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_60_16S_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_70_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_80_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_80_16S_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_90_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_90_16S_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_100_16S_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_100_16S_ASCC.xlsx", overwrite = TRUE)
+```
+
+
+
+```{r}
+write_csv(d50, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa50_16S_ASCC.csv")
+
+write_csv(d60, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa60_16S_ASCC.csv")
+
+write_csv(d66, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa66_16S_ASCC.csv")
+
+write_csv(d70, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa70_16S_ASCC.csv")
+
+write_csv(d80, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa80_16S_ASCC.csv")
+
+write_csv(d90, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa90_16S_ASCC.csv")
+
+write_csv(d100, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa100_16S_ASCC.csv")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+## ITS
+## Read in merged data
+
+```{r}
+merged <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_OG_rem.txt") # ITS
+
+#colnames(merged)
+```
+
+## Convert to characters
+```{r}
+merged <- merged %>%
+  mutate(across(everything(), as.character))
+```
+
+
+## Function to insert "0" after the second underscore
+```{r}
+# Modify column names
+colnames(merged) <- sapply(colnames(merged), function(name) {
+  # Check if "SF" is in the name
+  if (grepl("SF", name)) {
+    # Split by underscores
+    parts <- unlist(strsplit(name, "_"))
+    
+    # Add '0_' after the second underscore
+    if (length(parts) > 2) {
+      paste(c(parts[1], parts[2], "0", parts[3:length(parts)]), collapse = "_")
+    } else {
+      name
+    }
+  } else {
+    name
+  }
+})
+
+# Check the modified column names
+#colnames(merged)
+```
+
+```{r}
+d1 <- merged %>%
+  pivot_longer(2:305, names_to = "Samples", values_to = "Counts") %>%
+  separate(Samples, into = c("SampleID", "Plot", "Unit", "Date", "Site", "NumOfCores", "Depth"), sep = "_") %>%
+  mutate(Counts = as.numeric(Counts)) %>% 
+  mutate(Value=Counts/Counts)
+```
+
+```{r}
+d1 <- d1 %>%
+  mutate_all(~ ifelse(is.na(.), 0, .))
+
+d1$NewColumn <- 1
+```
+
+## Using cutoffs!
+
+## 40% cutoff
+
+```{r}
+d40 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.4)
+```
+
+## 50% cutoff
+
+```{r}
+d50 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.5)
+```
+
+## 50% cutoff, 0-5cm depth
+
+```{r}
+d50_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, 5-15cm depth
+
+```{r}
+d50_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, OM depth
+
+```{r}
+d50_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF
+
+```{r}
+d50_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF 0-5cm
+
+```{r}
+d50_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF 5-15cm
+
+```{r}
+d50_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SF OM
+
+```{r}
+d50_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP
+
+```{r}
+d50_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+
+## 50% cutoff, TP 0-5cm
+
+```{r}
+d50_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP 5-15cm
+
+```{r}
+d50_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, TP OM
+
+```{r}
+d50_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+## 50% cutoff, SJ
+
+```{r}
+d50_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+## 50% cutoff, SJ 0-5cm
+
+```{r}
+d50_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SJ 5-15cm
+
+```{r}
+d50_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+## 50% cutoff, SJ OM
+
+```{r}
+d50_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.5) 
+```
+
+
+
+## 60% cutoff
+
+```{r}
+d60 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.6)
+```
+
+
+
+## 60% cutoff, 0-5cm depth
+
+```{r}
+d60_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, 5-15cm depth
+
+```{r}
+d60_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, OM depth
+
+```{r}
+d60_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6)
+         
+```
+
+## 60% cutoff, SF
+
+```{r}
+d60_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF 0-5cm
+
+```{r}
+d60_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF 5-15cm
+
+```{r}
+d60_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SF OM
+
+```{r}
+d60_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP
+
+```{r}
+d60_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+
+## 60% cutoff, TP 0-5cm
+
+```{r}
+d60_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP 5-15cm
+
+```{r}
+d60_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, TP OM
+
+```{r}
+d60_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+## 60% cutoff, SJ
+
+```{r}
+d60_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+## 60% cutoff, SJ 0-5cm
+
+```{r}
+d60_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SJ 5-15cm
+
+```{r}
+d60_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+## 60% cutoff, SJ OM
+
+```{r}
+d60_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.6) 
+```
+
+
+
+## 66% cutoff
+
+```{r}
+d66 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.66)
+```
+
+## 70% cutoff
+
+```{r}
+d70 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.7)
+```
+
+
+
+## 70% cutoff, 0-5cm depth
+
+```{r}
+d70_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, 5-15cm depth
+
+```{r}
+d70_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, OM depth
+
+```{r}
+d70_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7)
+         
+```
+
+## 70% cutoff, SF
+
+```{r}
+d70_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF 0-5cm
+
+```{r}
+d70_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF 5-15cm
+
+```{r}
+d70_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SF OM
+
+```{r}
+d70_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP
+
+```{r}
+d70_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+
+## 70% cutoff, TP 0-5cm
+
+```{r}
+d70_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP 5-15cm
+
+```{r}
+d70_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, TP OM
+
+```{r}
+d70_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+## 70% cutoff, SJ
+
+```{r}
+d70_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+## 70% cutoff, SJ 0-5cm
+
+```{r}
+d70_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SJ 5-15cm
+
+```{r}
+d70_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+## 70% cutoff, SJ OM
+
+```{r}
+d70_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.7) 
+```
+
+
+
+
+## 80% cutoff
+
+```{r}
+d80 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.8)
+```
+
+
+
+## 80% cutoff, 0-5cm depth
+
+```{r}
+d80_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, 5-15cm depth
+
+```{r}
+d80_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, OM depth
+
+```{r}
+d80_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8)
+         
+```
+
+## 80% cutoff, SF
+
+```{r}
+d80_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF 0-5cm
+
+```{r}
+d80_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF 5-15cm
+
+```{r}
+d80_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SF OM
+
+```{r}
+d80_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, TP
+
+```{r}
+d80_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+
+
+## 80% cutoff, TP 0-5cm
+
+```{r}
+d80_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+## 80% cutoff, TP 5-15cm
+
+```{r}
+d80_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+
+```
+
+## 80% cutoff, TP OM
+
+```{r}
+d80_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+## 80% cutoff, SJ
+
+```{r}
+d80_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+## 80% cutoff, SJ 0-5cm
+
+```{r}
+d80_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SJ 5-15cm
+
+```{r}
+d80_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+## 80% cutoff, SJ OM
+
+```{r}
+d80_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.8) 
+```
+
+
+
+
+
+
+## 90% cutoff
+
+```{r}
+d90 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 0.9)
+```
+
+
+
+
+## 90% cutoff, 0-5cm depth
+
+```{r}
+d90_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, 5-15cm depth
+
+```{r}
+d90_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, OM depth
+
+```{r}
+d90_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9)
+         
+```
+
+## 90% cutoff, SF
+
+```{r}
+d90_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SF 0-5cm
+
+```{r}
+d90_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+## 90% cutoff, SF 5-15cm
+
+```{r}
+d90_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SF OM
+
+```{r}
+d90_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP
+
+```{r}
+d90_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+
+
+## 90% cutoff, TP 0-5cm
+
+```{r}
+d90_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP 5-15cm
+
+```{r}
+d90_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, TP OM
+
+```{r}
+d90_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+## 90% cutoff, SJ
+
+```{r}
+d90_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+## 90% cutoff, SJ 0-5cm
+
+```{r}
+d90_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+
+```
+
+## 90% cutoff, SJ 5-15cm
+
+```{r}
+d90_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+## 90% cutoff, SJ OM
+
+```{r}
+d90_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 0.9) 
+```
+
+
+
+## 100% cutoff
+
+```{r}
+d100 <- d1 %>%
+  group_by(OTUID) %>%  # Only group by OTUID to calculate presence across all samples
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%
+  arrange(desc(presence)) %>%
+  filter(presence >= 1)
+```
+
+
+
+
+## 100% cutoff, 0-5cm depth
+
+```{r}
+d100_shallow <- d1 %>%
+  filter(Depth == "5") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, 5-15cm depth
+
+```{r}
+d100_deep <- d1 %>%
+  filter(Depth == "15") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, OM depth
+
+```{r}
+d100_OM <- d1 %>%
+  filter(Depth == "OM") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, SF
+
+```{r}
+d100_SF <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SF 0-5cm
+
+```{r}
+d100_SF_5 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SF 5-15cm
+
+```{r}
+d100_SF_15 <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+
+```
+
+## 100% cutoff, SF OM
+
+```{r}
+d100_SF_OM <- d1 %>%
+  filter(Site == "SF") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, TP
+
+```{r}
+d100_TP <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+
+
+## 100% cutoff, TP 0-5cm
+
+```{r}
+d100_TP_5 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, TP 5-15cm
+
+```{r}
+d100_TP_15 <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+## 100% cutoff, TP OM
+
+```{r}
+d100_TP_OM <- d1 %>%
+  filter(Site == "TP") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+
+## 100% cutoff, SJ
+
+```{r}
+d100_SJ <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  group_by(OTUID, Site) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1)
+```
+
+
+## 100% cutoff, SJ 0-5cm
+
+```{r}
+d100_SJ_5 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "5") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SJ 5-15cm
+
+```{r}
+d100_SJ_15 <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "15") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+## 100% cutoff, SJ OM
+
+```{r}
+d100_SJ_OM <- d1 %>%
+  filter(Site == "SJ") %>%     # Filter for 0-5cm depth
+  filter(Depth == "OM") %>% 
+  group_by(OTUID, Site, Depth) %>%              # Group by OTUID
+  summarise(presence = sum(Value == 1) / n(), .groups = "drop") %>%  # Calculate presence
+  arrange(desc(presence)) %>%      # Arrange by presence
+  filter(presence >= 1) 
+```
+
+
+
+```{r}
+# Install and load the openxlsx package
+install.packages("openxlsx")
+library(openxlsx)
+
+# Create a list of data frames
+all_core_ITS <- list(d100 = d100, d100_deep = d100_deep, d100_OM = d100_OM, d100_SF = d100_SF, d100_SF_15 = d100_SF_15, d100_SF_5 = d100_SF_5, d100_SF_OM = d100_SF_OM, d100_shallow = d100_shallow, d100_SJ = d100_SJ, d100_SJ_15 = d100_SJ_15, d100_SJ_5 = d100_SJ_5, d100_SJ_OM = d100_SJ_OM, d100_TP = d100_TP, d100_TP_15 = d100_TP_15, d100_TP_5 = d100_TP_5, d100_TP_OM = d100_TP_OM, d50 = d50, d50_deep = d50_deep, d50_OM = d50_OM, d50_SF = d50_SF, d50_SF_15 = d50_SF_15, d50_SF_5 = d50_SF_5, d50_SF_OM = d50_SF_OM, d50_shallow = d50_shallow, d50_SJ = d50_SJ, d50_SJ_15 = d50_SJ_15, d50_SJ_5 = d50_SJ_5, d50_SJ_OM = d50_SJ_OM, d50_TP = d50_TP, d50_TP_15 = d50_TP_15, d50_TP_5 = d50_TP_5, d50_TP_OM = d50_TP_OM, d60 = d60, d60_deep = d60_deep, d60_OM = d60_OM, d60_SF = d60_SF, d60_SF_15 = d60_SF_15, d60_SF_5 = d60_SF_5, d60_SF_OM = d60_SF_OM, d60_shallow = d60_shallow, d60_SJ = d60_SJ, d60_SJ_15 = d60_SJ_15, d60_SJ_5 = d60_SJ_5, d60_SJ_OM = d60_SJ_OM, d60_TP = d60_TP, d60_TP_15 = d60_TP_15, d60_TP_5 = d60_TP_5, d60_TP_OM = d60_TP_OM, d70 = d70, d70_deep = d70_deep, d70_OM = d70_OM, d70_SF = d70_SF, d70_SF_15 = d70_SF_15, d70_SF_5 = d70_SF_5, d70_SF_OM = d70_SF_OM, d70_shallow = d70_shallow, d70_SJ = d70_SJ, d70_SJ_15 = d70_SJ_15, d70_SJ_5 = d70_SJ_5, d70_SJ_OM = d70_SJ_OM, d70_TP = d70_TP, d70_TP_15 = d70_TP_15, d70_TP_5 = d70_TP_5, d70_TP_OM = d70_TP_OM, d80 = d80,d80_deep = d80_deep, d80_OM = d80_OM, d80_SF = d80_SF, d80_SF_15 = d80_SF_15, d80_SF_5 = d80_SF_5, d80_SF_OM = d80_SF_OM, d80_shallow = d80_shallow, d80_SJ = d80_SJ, d80_SJ_15 = d80_SJ_15, d80_SJ_5 = d80_SJ_5, d80_SJ_OM = d80_SJ_OM, d80_TP = d80_TP, d80_TP_15 = d80_TP_15, d80_TP_5 = d80_TP_5, d80_TP_OM = d80_TP_OM,d90 = d90, d90_deep = d90_deep, d90_OM = d90_OM,  d90_SF = d90_SF, d90_SF_15 = d90_SF_15, d90_SF_5 = d90_SF_5, d90_SF_OM = d90_SF_OM, d90_shallow = d90_shallow, d90_SJ = d90_SJ, d90_SJ_15 = d90_SJ_15, d90_SJ_5 = d90_SJ_5, d90_SJ_OM = d90_SJ_OM, d90_TP = d90_TP, d90_TP_15 = d90_TP_15, d90_TP_5 = d90_TP_5, d90_TP_OM = d90_TP_OM)   
+
+core_60_ITS <- list(d60 = d60, d60_deep = d60_deep, d60_OM = d60_OM, d60_SF = d60_SF, d60_SF_15 = d60_SF_15, d60_SF_5 = d60_SF_5, d60_SF_OM = d60_SF_OM, d60_shallow = d60_shallow, d60_SJ = d60_SJ, d60_SJ_15 = d60_SJ_15, d60_SJ_5 = d60_SJ_5, d60_SJ_OM = d60_SJ_OM, d60_TP = d60_TP, d60_TP_15 = d60_TP_15, d60_TP_5 = d60_TP_5, d60_TP_OM = d60_TP_OM)   
+
+core_70_ITS <- list(d70 = d70, d70_deep = d70_deep, d70_OM = d70_OM, d70_SF = d70_SF, d70_SF_15 = d70_SF_15, d70_SF_5 = d70_SF_5, d70_SF_OM = d70_SF_OM, d70_shallow = d70_shallow, d70_SJ = d70_SJ, d70_SJ_15 = d70_SJ_15, d70_SJ_5 = d70_SJ_5, d70_SJ_OM = d70_SJ_OM, d70_TP = d70_TP, d70_TP_15 = d70_TP_15, d70_TP_5 = d70_TP_5, d70_TP_OM = d70_TP_OM)
+
+core_80_ITS <- list(d80 = d80, d80_deep = d80_deep, d80_OM = d80_OM, d80_SF = d80_SF, d80_SF_15 = d80_SF_15, d80_SF_5 = d80_SF_5, d80_SF_OM = d80_SF_OM, d80_shallow = d80_shallow, d80_SJ = d80_SJ, d80_SJ_15 = d80_SJ_15, d80_SJ_5 = d80_SJ_5, d80_SJ_OM = d80_SJ_OM, d80_TP = d80_TP, d80_TP_15 = d80_TP_15, d80_TP_5 = d80_TP_5, d80_TP_OM = d80_TP_OM)
+
+core_90_ITS <- list(d90 = d90, d90_deep = d90_deep, d90_OM = d90_OM,  d90_SF = d90_SF, d90_SF_15 = d90_SF_15, d90_SF_5 = d90_SF_5, d90_SF_OM = d90_SF_OM, d90_shallow = d90_shallow, d90_SJ = d90_SJ, d90_SJ_15 = d90_SJ_15, d90_SJ_5 = d90_SJ_5, d90_SJ_OM = d90_SJ_OM, d90_TP = d90_TP, d90_TP_15 = d90_TP_15, d90_TP_5 = d90_TP_5, d90_TP_OM = d90_TP_OM)
+
+core_100_ITS <- list(d100 = d100, d100_deep = d100_deep, d100_OM = d100_OM, d100_SF = d100_SF, d100_SF_15 = d100_SF_15, d100_SF_5 = d100_SF_5, d100_SF_OM = d100_SF_OM, d100_shallow = d100_shallow, d100_SJ = d100_SJ, d100_SJ_15 = d100_SJ_15, d100_SJ_5 = d100_SJ_5, d100_SJ_OM = d100_SJ_OM, d100_TP = d100_TP, d100_TP_15 = d100_TP_15, d100_TP_5 = d100_TP_5, d100_TP_OM = d100_TP_OM)
+
+
+# Create a new workbook
+CoreTaxa_ITS_ASCC <- createWorkbook() 
+
+CoreTaxa_60_ITS_ASCC <- createWorkbook() 
+
+CoreTaxa_70_ITS_ASCC <- createWorkbook()
+
+CoreTaxa_80_ITS_ASCC <- createWorkbook() 
+
+CoreTaxa_90_ITS_ASCC <- createWorkbook() 
+
+CoreTaxa_100_ITS_ASCC <- createWorkbook() 
+
+# Loop through the list of data frames and add them to the workbook in one line
+
+lapply(seq_along(all_core_ITS), function(i) {
+  sheet_name <- names(all_core_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_ITS_ASCC, sheet_name, all_core_ITS[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_60_ITS), function(i) {
+  sheet_name <- names(core_60_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_60_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_60_ITS_ASCC, sheet_name, core_60_ITS[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_70_ITS), function(i) {
+  sheet_name <- names(core_70_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_70_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_70_ITS_ASCC, sheet_name, core_70_ITS[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_80_ITS), function(i) {
+  sheet_name <- names(core_80_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_80_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_80_ITS_ASCC, sheet_name, core_80_ITS[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_90_ITS), function(i) {
+  sheet_name <- names(core_90_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_90_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_90_ITS_ASCC, sheet_name, core_90_ITS[[i]]) # Write data to the sheet
+})
+
+lapply(seq_along(core_100_ITS), function(i) {
+  sheet_name <- names(core_100_ITS)[i] # Get the name of the current sheet
+  addWorksheet(CoreTaxa_100_ITS_ASCC, sheet_name) # Add sheet with correct name
+  writeData(CoreTaxa_100_ITS_ASCC, sheet_name, core_100_ITS[[i]]) # Write data to the sheet
+})
+
+# Save the workbook
+saveWorkbook(CoreTaxa_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/multiple_sheets.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_60_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_60_ITS_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_70_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_70_ITS_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_80_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_80_ITS_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_90_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_90_ITS_ASCC.xlsx", overwrite = TRUE)
+
+saveWorkbook(CoreTaxa_100_ITS_ASCC, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_100_ITS_ASCC.xlsx", overwrite = TRUE)
+```
+
+
+
+```{r}
+write_csv(d50, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa50_ITS_ASCC.csv")
+
+write_csv(d60, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa60_ITS_ASCC.csv")
+
+write_csv(d66, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa66_ITS_ASCC.csv")
+
+write_csv(d70, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa70_ITS_ASCC.csv")
+
+write_csv(d80, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa80_ITS_ASCC.csv")
+
+write_csv(d90, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa90_ITS_ASCC.csv")
+
+write_csv(d100, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa100_ITS_ASCC.csv")
+
+write_csv(d50, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa50_ITS_ASCC.csv")
+
+write_csv(d60, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa60_ITS_ASCC.csv")
+
+write_csv(d70, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa70_ITS_ASCC.csv")
+
+```
+
+
+```

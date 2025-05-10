@@ -1,0 +1,444 @@
+# ASCC 2023
+## Maaslin2 volcano plots redo -> 16S
+### 03/05/25
+#### Note: Be sure to check the for the discriminant taxa between sites!! Refer to the script located at /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Rscripts/MaAsLin2/CheckingDiscriminantTaxaByOTU.rmd for additional analysis steps.
+
+**See /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin2_volcano_plots_wNOTES.md for additional information on analysis steps.**
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+```
+
+
+
+```{r}
+# Read in main dataset
+data_sftp5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP shallow") %>% as.data.frame()
+
+# Read in discriminant taxa from Maaslin_discrim_results.xlsx
+discriminant_otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID, ) %>% 
+  pull()
+```
+
+```{r}
+core_taxa_d70 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx", sheet = "d70") %>%
+  select(OTUID)
+
+
+```
+
+```{r}
+# Modify dataset to categorize correctly
+data_sftp5 <- data_sftp5 %>%
+  mutate(
+    log_q = -log10(qval),
+    
+    # Assign colors for enrichment categories
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # Identify Discriminant Taxa
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, "Discriminant Across All Sites", "Regular"),
+    
+    # Identify Core Taxa
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core Across All Sites", NA)  # NA prevents "Not Core" in legend
+  )
+
+# Create the base plot
+plot <- ggplot(data_sftp5, aes(x = coef, y = log_q)) +
+  
+  # Regular taxa (colored based on enrichment)
+  geom_point(aes(color = Enrichment), size = 1.5, alpha = 0.9, stroke = 0.8) +
+
+  # Custom color scheme ensuring all categories appear in the legend
+  scale_color_manual(
+    name = "Enrichment",
+    values = c(
+      "SF Enriched" = "#CC79A7",
+      "TP Enriched" = "#56B4E9",
+      "Non-Significant" = "gray"
+    )
+  ) +
+
+  # Define shape legend explicitly for Discriminant and Core Taxa
+  scale_shape_manual(
+    name = "Taxa Type",
+    values = c(
+      "Discriminant Across All Sites" = 19,  # Solid black circle
+      "Core Across All Sites" = 21  # Hollow yellow circle with black border
+    )
+  ) +
+
+  # Overlay Discriminant Taxa as **solid black circles** (ensuring legend entry)
+  geom_point(
+    data = data_sftp5 %>% filter(Highlight == "Discriminant Across All Sites"),
+    aes(x = coef, y = log_q, shape = "Discriminant Across All Sites"),
+    size = 1.5, color = "black"
+  ) +
+
+  # Overlay Core Taxa as **yellow-filled circles with a black outline** (ensuring legend entry)
+  geom_point(
+    data = data_sftp5 %>% filter(!is.na(Core_Taxa)),
+    aes(x = coef, y = log_q, shape = "Core Across All Sites"),
+    size = 1.5, stroke = 0.8, color = "black", fill = "yellow"
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Enrichment", shape = "Taxa Type") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Print the final plot
+print(plot)
+```
+
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(ggbeeswarm)
+library(dplyr)
+
+# Modify dataset to categorize correctly
+data_sftp5 <- data_sftp5 %>%
+  mutate(
+    log_q = -log10(qval),
+    
+    # Assign colors for enrichment categories
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # Identify Discriminant Taxa
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, "Discriminant Across All Sites", "Regular"),
+    
+    # Identify Core Taxa
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core Across All Sites", NA)  # Avoid "Not Core" in legend
+  )
+
+# Create the beeswarm plot
+plot <- ggplot(data_sftp5, aes(x = coef, y = log_q)) +
+
+  # Beeswarm jittered points with enrichment-based coloring
+  geom_quasirandom(aes(color = Enrichment), size = 1.5, alpha = 0.9, stroke = 0.8) +
+
+  # Custom color scheme for enrichment categories
+  scale_color_manual(
+    name = "Enrichment",
+    values = c(
+      "SF Enriched" = "#CC79A7",
+      "TP Enriched" = "#56B4E9",
+      "Non-Significant" = "gray"
+    )
+  ) +
+
+  # Define shape legend to include Core and Discriminant taxa
+  scale_shape_manual(
+    name = "Taxa Type",
+    values = c(
+      "Regular" = 19,  # Regular filled circles
+      "Discriminant Across All Sites" = 19,  # Solid black circle
+      "Core Across All Sites" = 21  # Hollow yellow circle with black border
+    )
+  ) +
+
+  # Overlay **Discriminant Taxa** as solid black circles
+  geom_point(
+    data = data_sftp5 %>% filter(Highlight == "Discriminant Across All Sites"),
+    aes(x = coef, y = log_q, shape = "Discriminant Across All Sites"),
+    size = 1.5, color = "black", fill = NA
+  ) +
+
+  # Overlay **Core Taxa** as yellow-filled circles with a black outline
+  geom_point(
+    data = data_sftp5 %>% filter(!is.na(Core_Taxa)),
+    aes(x = coef, y = log_q, shape = "Core Across All Sites"),
+    size = 1.5, stroke = 0.8, color = "black", fill = "yellow", inherit.aes = FALSE
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Enrichment", shape = "Taxa Type") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Print the final beeswarm plot
+print(plot)
+```
+
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+
+# Modify dataset to categorize correctly
+data_sftp5 <- data_sftp5 %>%
+  mutate(
+    log_q = -log10(qval),
+    
+    # Assign colors for enrichment categories + Core & Discriminant Taxa
+    Taxa Type = case_when(
+      OTUID %in% core_taxa ~ "Core Across All Sites",
+      qval < 0.05 & OTUID %in% discriminant_otus ~ "Discriminant Across All Sites",
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    )
+  )
+
+# Create the simplified plot with just 4 colors
+plot <- ggplot(data_sftp5, aes(x = coef, y = log_q, color = Taxa_Type)) +
+
+  # Lollipop stems (optional, remove if not needed)
+  geom_segment(aes(xend = coef, y = 0, yend = log_q), size = 0.8, alpha = 0.8) +
+
+  # Points with four distinct colors
+  geom_point(size = 1.8, alpha = 0.9) +
+
+  # Custom color scheme for only 4 categories
+  scale_color_manual(
+    name = "Taxa Type",
+    values = c(
+      "SF Enriched" = "#CC79A7",
+      "TP Enriched" = "#56B4E9",
+      "Non-Significant" = "gray",
+      "Discriminant Across All Sites" = "black",
+      "Core Across All Sites" = "yellow"
+    )
+  ) +
+
+  # Labels & theme
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Taxa Type") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Print the final simplified plot
+print(plot)
+```
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+
+# Modify dataset to categorize correctly
+data_sftp5 <- data_sftp5 %>%
+  mutate(
+    log_q = -log10(qval),
+    
+    # Assign colors for enrichment categories
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # Identify Discriminant Taxa
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, "Discriminant Across All Sites", "Regular"),
+    
+    # Identify Core Taxa
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core Across All Sites", NA)  # Avoid "Not Core" in legend
+  )
+
+# Create the lollipop plot
+plot <- ggplot(data_sftp5, aes(x = coef, y = log_q)) +
+
+  # Lollipop stems: Vertical segments from y=0 to data point
+  geom_segment(aes(x = coef, xend = coef, y = 0, yend = log_q, color = Enrichment), 
+               size = 1.3, alpha = 0.9) +
+
+  # Custom color scheme for enrichment categories
+  scale_color_manual(
+    name = "Enrichment",
+    values = c(
+      "SF Enriched" = "#CC79A7",
+      "TP Enriched" = "#56B4E9",
+      "Non-Significant" = "gray"
+    )
+  ) +
+
+  # Define shape legend for Discriminant and Core Taxa
+  scale_shape_manual(
+    name = "Taxa Type",
+    values = c(
+      "Regular" = 19,  # Regular filled circles
+      "Discriminant Across All Sites" = 19,  # Solid black circle
+      "Core Across All Sites" = 21  # Hollow yellow circle with black border
+    )
+  ) +
+
+  # Overlay **Discriminant Taxa** as solid black circles
+  geom_point(
+    data = data_sftp5 %>% filter(Highlight == "Discriminant Across All Sites"),
+    aes(x = coef, y = log_q, shape = "Discriminant Across All Sites"),
+    size = 2, color = "black", fill = NA
+  ) +
+
+  # Overlay **Core Taxa** as yellow-filled circles with a black outline
+  geom_point(
+    data = data_sftp5 %>% filter(!is.na(Core_Taxa)),
+    aes(x = coef, y = log_q, shape = "Core Across All Sites"),
+    size = 2, stroke = 0.8, color = "black", fill = "yellow", inherit.aes = FALSE
+  ) +
+
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Enrichment", shape = "Taxa Type") +
+  theme_light() +
+  theme(
+    legend.position = "top",
+    panel.border = element_blank()
+  )
+
+# Print the final lollipop plot
+print(plot)
+```
+
+```{r}
+library(ggplot2)
+library(ggridges)
+library(dplyr)
+
+ggplot(data_sftp5, aes(x = coef, y = Enrichment, fill = Enrichment)) +
+  geom_density_ridges(alpha = 0.8) +
+  scale_fill_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9", "Non-Significant" = "gray")) +
+  theme_minimal() +
+  labs(x = "Coefficient", y = "Enrichment Category", title = "Effect Size Distribution")
+```
+
+```{r}
+ggplot(data_sftp5, aes(x = coef, y = log_q)) +
+  geom_bin2d(bins = 30) +
+  scale_fill_viridis_c() +
+  theme_minimal() +
+  labs(x = "Coefficient", y = "-log10(q-value)", title = "Heatmap of Effect Size vs. Significance")
+```
+
+
+```{r}
+library(ggbeeswarm)
+
+ggplot(data_sftp5, aes(x = Enrichment, y = coef, color = Enrichment)) +
+  geom_quasirandom(alpha = 0.8) +
+  scale_color_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9", "Non-Significant" = "gray")) +
+  theme_minimal() +
+  labs(x = "Enrichment Category", y = "Coefficient", title = "Effect Size per Enrichment Category")
+```
+
+```{r}
+library(ggplot2)
+library(ggplotify)
+
+ggplot(data_sftp5, aes(x = reorder(OTUID, coef), y = coef, fill = Enrichment)) +
+  geom_bar(stat = "identity") +
+  coord_polar() +
+  scale_fill_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9", "Non-Significant" = "gray")) +
+  theme_void() +
+  labs(fill = "Enrichment")4
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Summarize effect sizes by family
+top_families <- data_sftp5 %>%
+  group_by(Family, Enrichment) %>%
+  summarize(mean_effect = mean(coef, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(abs(mean_effect))) %>%
+  head(15)  # Select top 15 strongest families
+
+# Plot top families contributing to effect sizes
+ggplot(top_families, aes(x = reorder(Family, mean_effect), y = mean_effect, fill = Enrichment)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for better readability
+  scale_fill_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9")) +
+  theme_minimal() +
+  labs(x = "Taxa Family", y = "Mean Effect Size", fill = "Enrichment",
+       title = "Top 15 Taxa Families Driving the Strongest Effects")
+```
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)  # Needed for separating columns
+
+# Split the taxonomy column into separate levels
+data_sftp5 <- data_sftp5 %>%
+  separate(taxonomy, into = c("Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species"),
+           sep = "; ", fill = "right", extra = "drop") %>%
+  mutate(
+    Family = gsub("f__", "", Family),  # Remove prefix "f__"
+    Genus = gsub("g__", "", Genus),    # Remove prefix "g__"
+    Species = gsub("s__", "", Species) # Remove prefix "s__"
+  )
+
+# Summarize effect sizes by family
+top_families <- data_sftp5 %>%
+  group_by(Family, Enrichment) %>%
+  summarize(mean_effect = mean(coef, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(abs(mean_effect))) %>%
+  head(15)  # Select top 15 strongest families
+
+# Plot top families contributing to effect sizes
+ggplot(top_families, aes(x = reorder(Family, mean_effect), y = mean_effect, fill = Enrichment)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for better readability
+  scale_fill_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9")) +
+  theme_minimal() +
+  labs(x = "Taxa Family", y = "Mean Effect Size", fill = "Enrichment",
+       title = "Top 15 Taxa Families Driving the Strongest Effects")
+```
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)  # Needed for separating columns
+
+# Split the taxonomy column into separate levels
+data_sftp5 <- data_sftp5 %>%
+  separate(taxonomy, into = c("domain", "phylum", "class", "order", "family", "genus", "species"),
+           sep = "; ", fill = "right", extra = "drop") %>%
+  mutate(
+    phylum = gsub("p__", "", phylum)  # Remove "p__" prefix for cleaner labels
+  )
+
+# Summarize effect sizes by phylum
+top_phyla <- data_sftp5 %>%
+  group_by(phylum, Enrichment) %>%
+  summarize(mean_effect = mean(coef, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(abs(mean_effect))) %>%
+  head(15)  # Select top 15 strongest phyla
+
+# Plot top phyla contributing to effect sizes
+ggplot(top_phyla, aes(x = reorder(phylum, mean_effect), y = mean_effect, fill = Enrichment)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +  # Flip for better readability
+  scale_fill_manual(values = c("SF Enriched" = "#CC79A7", "TP Enriched" = "#56B4E9")) +
+  theme_minimal() +
+  labs(x = "Phylum", y = "Mean Effect Size", fill = "Enrichment",
+       title = "Top 15 Phyla Driving the Strongest Effects")
+```

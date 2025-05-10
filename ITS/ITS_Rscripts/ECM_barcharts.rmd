@@ -1,0 +1,639 @@
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+```
+
+//** Load ECM only feature table and metadata **//
+
+
+```{r}
+# Load and merge data
+ECM_feature <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_FUNguild/ECMonly_featuretable.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+```
+
+//** Join feature table with metadata, then join that merged data with the taxa **//
+```{r}
+data_meta <- inner_join(ECM_feature, metadata, by =c("samples"="samples"))
+data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+
+
+
+
+
+
+ ### {#JUST SF} ###
+## Use this for now
+
+```{r}
+sf_data2 <- data_meta_taxa %>%
+  filter(Site == "SF") %>%
+  mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%
+  group_by(samples, Depth, Family) %>%
+  summarize(
+    avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911",  # Dark Brown
+  "#6D2F20",  # Red-Brown
+  "#B75347",  # Light Red
+  "#DF7666",  # Soft Red
+  "#E09351",  # Orange-Brown
+  "#EDC775",  # Yellow
+  "#94B594",  # Soft Green
+  "#6D928F",  # Blue-Green
+  "#224B5E",  # Deep Blue
+  "#11252E"   # Dark Blue
+)
+```
+
+```{r}
+sf_plot <- ggplot(sf_data2, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_bar(stat = "identity") +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sf_plot)
+```
+
+
+```{r}
+top_families <- sf_data2 %>%
+  group_by(Family) %>%
+  summarize(
+    mean_abundance = mean(avg_relative_abundance, na.rm = TRUE)
+  ) %>%
+  slice_max(mean_abundance, n = 10) %>%
+  pull(Family)
+```
+
+
+```{r}
+sf_data_top10 <- sf_data2 %>%
+  filter(Family %in% top_families)
+```
+
+
+```{r}
+sf_plot <- ggplot(sf_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sf_plot)
+```
+
+```{r}
+sf_plot <- ggplot(sf_data_top10, aes(x = Family, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sf_plot)
+```
+
+```{r}
+sf_plot <- ggplot(sf_data_top10, aes(x = Depth, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Family, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sf_plot)
+```
+
+```{r}
+sf_plot <- ggplot(sf_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col(position = "fill") +  # <-- Key change here!
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Proportion (0–1)",
+    fill = "Family"
+  )
+print(sf_plot)
+```
+
+
+```{r}
+ggplot(sf_data_top10, aes(x = samples, y = Family, size = avg_relative_abundance, fill = Family)) +
+  geom_point(alpha = 0.7, shape = 21) +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_size_area()
+```
+ 
+```{r}
+library(treemapify)
+
+ggplot(sf_data_top10, aes(area = avg_relative_abundance, fill = Family, label = Family, x=samples)) +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  geom_treemap() +
+  geom_treemap_text(colour = "white")
+```
+
+
+
+
+
+
+
+
+
+### {#JUST TP} ###
+## Use this for now
+
+```{r}
+tp_data <- data_meta_taxa %>%
+  filter(Site == "TP") %>%
+  mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%
+  group_by(samples, Depth, Family) %>%
+  summarize(
+    avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911", "#6D2F20", "#B75347", "#DF7666", "#E09351", "#EDC775",
+  "#94B594", "#6D928F", "#224B5E", "#11252E", "#B3CDE3", "#FBB4AE",
+  "#CCEBC5", "#DECBE4", "#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC",
+  "#F2F2F2", "#BEBADA", "#80B1D3", "#FB8072"
+)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_bar(stat = "identity") +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(tp_plot)
+```
+
+
+```{r}
+top_families <- tp_data %>%
+  group_by(Family) %>%
+  summarize(
+    mean_abundance = mean(avg_relative_abundance, na.rm = TRUE)
+  ) %>%
+  slice_max(mean_abundance, n = 10) %>%
+  pull(Family)
+```
+
+
+```{r}
+tp_data_top10 <- tp_data %>%
+  filter(Family %in% top_families)
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911",  # Dark Brown
+  "#6D2F20",  # Red-Brown
+  "#B75347",  # Light Red
+  "#DF7666",  # Soft Red
+  "#E09351",  # Orange-Brown
+  "#EDC775",  # Yellow
+  "#94B594",  # Soft Green
+  "#6D928F",  # Blue-Green
+  "#224B5E",  # Deep Blue
+  "#11252E"   # Dark Blue
+)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(tp_plot)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Family, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(tp_plot)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data_top10, aes(x = Depth, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Family, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(tp_plot)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data_top10, aes(x = Depth, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Family, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(tp_plot)
+```
+
+```{r}
+tp_plot <- ggplot(tp_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col(position = "fill") +  # <-- Key change here!
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Proportion (0–1)",
+    fill = "Family"
+  )
+print(tp_plot)
+```
+
+
+```{r}
+ggplot(tp_data_top10, aes(x = samples, y = Family, size = avg_relative_abundance, fill = Family)) +
+  geom_point(alpha = 0.7, shape = 21) +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_size_area()
+```
+ 
+```{r}
+library(treemapify)
+
+ggplot(tp_data_top10, aes(area = avg_relative_abundance, fill = Family, label = Family, x=samples)) +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  geom_treemap() +
+  geom_treemap_text(colour = "white")
+```
+
+
+
+
+ ### {#JUST SJ} ###
+## Use this for now
+
+```{r}
+sj_data <- data_meta_taxa %>%
+  filter(Site == "SJ") %>%
+  mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%
+  group_by(samples, Depth, Family) %>%
+  summarize(
+    avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911", "#6D2F20", "#B75347", "#DF7666", "#E09351", "#EDC775",
+  "#94B594", "#6D928F", "#224B5E", "#11252E", "#B3CDE3", "#FBB4AE",
+  "#CCEBC5", "#DECBE4", "#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC",
+  "#F2F2F2", "#BEBADA", "#80B1D3", "#FB8072"
+)
+```
+
+
+```{r}
+sj_plot <- ggplot(sj_data, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_bar(stat = "identity") +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sj_plot)
+```
+
+
+```{r}
+top_families <- sj_data %>%
+  group_by(Family) %>%
+  summarize(
+    mean_abundance = mean(avg_relative_abundance, na.rm = TRUE)
+  ) %>%
+  slice_max(mean_abundance, n = 10) %>%
+  pull(Family)
+```
+
+
+```{r}
+sj_data_top10 <- sj_data %>%
+  filter(Family %in% top_families)
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911",  # Dark Brown
+  "#6D2F20",  # Red-Brown
+  "#B75347",  # Light Red
+  "#DF7666",  # Soft Red
+  "#E09351",  # Orange-Brown
+  "#EDC775",  # Yellow
+  "#94B594",  # Soft Green
+  "#6D928F",  # Blue-Green
+  "#224B5E",  # Deep Blue
+  "#11252E"   # Dark Blue
+)
+```
+
+```{r}
+sj_plot <- ggplot(sj_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sj_plot)
+```
+
+```{r}
+sj_plot <- ggplot(sj_data_top10, aes(x = Family, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sj_plot)
+```
+
+```{r}
+sj_plot <- ggplot(sj_data_top10, aes(x = Depth, y = avg_relative_abundance, fill = Family)) +
+  geom_col() +
+  facet_wrap(~Family, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+
+print(sj_plot)
+```
+
+
+```{r}
+sj_plot <- ggplot(sj_data_top10, aes(x = samples, y = avg_relative_abundance, fill = Family)) +
+  geom_col(position = "fill") +  # <-- Key change here!
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors[1:10]) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Proportion (0–1)",
+    fill = "Family"
+  )
+print(sj_plot)
+```
+
+
+```{r}
+ggplot(sj_data_top10, aes(x = samples, y = Family, size = avg_relative_abundance, fill = Family)) +
+  geom_point(alpha = 0.7, shape = 21) +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_size_area()
+```
+ 
+```{r}
+library(treemapify)
+
+ggplot(sj_data_top10, aes(area = avg_relative_abundance, fill = Family, label = Family, x=samples)) +
+facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  geom_treemap() +
+  geom_treemap_text(colour = "white")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## looking at EVERYTHING
+ {#EVERYTHING}
+```{r}
+data_meta_taxa2 <- data_meta_taxa %>% 
+    mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%  # Reorder Depth levels
+    group_by(Family,samples,Depth) %>%  # Group by Phylum, samples, and Depth
+    summarize(
+        avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances for each sample
+        .groups = "drop"
+    )
+```
+
+
+```{r}
+plot <- ggplot(data_meta_taxa2, aes(x = Depth, y = avg_relative_abundance, fill = Family)) +
+  geom_bar(stat = "identity") +
+#   facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = fam_colors) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Family"
+  )
+print(plot)
+```
+
+
+
+```{r}
+sf_data <- data_meta_taxa %>%
+  filter(Site == "SF") %>%  # Subset for SF and top 10 phyla
+  mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%  # Reorder Depth levels
+  group_by(OTUID,Depth) %>%  # Group by Phylum, samples, and Depth
+  summarize(
+    avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances for each sample
+    .groups = "drop"
+  )
+```
+
+```{r}
+sf_data3 <- data_meta_taxa %>%
+  filter(Site == "SF") %>%  # Subset for SF and top 10 phyla
+  mutate(Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))) %>%  # Reorder Depth levels
+  group_by(OTUID,Family,samples) %>%  # Group by Phylum, samples, and Depth
+  summarize(
+    total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),
+    num_samples = n_distinct(samples),
+    avg_relative_abundance = total_relative_abundance / num_samples,  # Sum relative abundances for each sample
+    .groups = "drop"
+  )
+```
+
+```{r}
+fam_colors <- c(
+  "#3B1911", "#6D2F20", "#B75347", "#DF7666", "#E09351", "#EDC775",
+  "#94B594", "#6D928F", "#224B5E", "#11252E", "#B3CDE3", "#FBB4AE",
+  "#CCEBC5", "#DECBE4", "#FED9A6", "#FFFFCC", "#E5D8BD", "#FDDAEC",
+  "#F2F2F2", "#BEBADA", "#80B1D3", "#FB8072"
+)
+```
+
+
+

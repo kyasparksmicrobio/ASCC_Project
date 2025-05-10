@@ -1,0 +1,93 @@
+
+
+
+
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+```
+
+
+
+```{r}
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+```
+
+
+```{r}
+data_meta <- inner_join(merged, metadata, by =c("samples"="samples"))
+data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+```{r}
+SF <- subset(data_meta_taxa, Site == "SF")
+TP <- subset(data_meta_taxa, Site == "TP")
+SJ <- subset(data_meta_taxa, Site == "SJ")
+```
+
+```{r}
+top_10_phyla <- SJ %>%
+  filter(!is.na(Phyla) & Phyla != "") %>%  # Remove empty or NA Phyla
+  group_by(Phyla) %>%
+  summarize(Total_Abundance = sum(Relative_Abundance, na.rm = TRUE)) %>%
+  arrange(desc(Total_Abundance)) %>%  # Sort by highest abundance
+  slice_max(Total_Abundance, n = 10)  
+```
+
+```{r}
+top_10_phyla_names <- top_10_phyla$Phyla
+```
+
+```{r}
+data_top_10_phyla <- SF %>%
+  filter(Phyla %in% top_10_phyla_names)
+
+data_top_10_phyla <-TP %>%
+  filter(Phyla %in% top_10_phyla_names)
+
+data_top_10_phyla <-SJ %>%
+  filter(Phyla %in% top_10_phyla_names)
+```
+
+```{r}
+filtered_data <- data_top_10_phyla %>%
+  filter(Relative_Abundance >= .01)
+```
+
+```{r}
+phyla_colors <- c(
+  "#3B1911",  # Dark Brown
+  "#6D2F20",  # Red-Brown
+  "#B75347",  # Light Red
+  "#DF7666",  # Soft Red
+  "#E09351",  # Orange-Brown
+  "#EDC775",  # Yellow
+  "#94B594",  # Soft Green
+  "#6D928F",  # Blue-Green
+  "#224B5E",  # Deep Blue
+  "#11252E"   # Dark Blue
+)
+
+# Create bar plot with custom Phylum colors
+ggplot(filtered_data, aes(x = samples, y = Relative_Abundance, fill = Phyla)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  
+  # Apply custom colors to Phyla
+  scale_fill_manual(values = phyla_colors) +
+  
+  guides(fill = guide_legend(ncol = 1)) +
+  
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 10)
+  )
+```

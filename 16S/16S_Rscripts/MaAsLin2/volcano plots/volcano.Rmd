@@ -1,0 +1,41 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+data <- read_csv("maaslin_getmm1/all_results.csv")
+```
+
+```{r}
+p <- ggplot(data, aes(coef, log10, color=Potential)) +
+  geom_point() +
+  theme_bw() +
+  #scale_color_manual(values = color) +
+  labs(x="Coef",y="-log10FDR") +
+  geom_hline(yintercept = 0.6, lty=4,col="grey",lwd=0.6) +
+  geom_vline(xintercept = 0, lty=4,col="grey",lwd=0.6)+
+  theme(
+        panel.grid=element_blank(),
+        axis.title = element_text(size = 16),
+        axis.text = element_text(size = 14))+xlim(-1,1)
+p
+```
+```{r}
+p <- ggplot(data, aes(coef, qval, color=Potential)) +
+  geom_point() +
+  theme_bw() +
+  #scale_color_manual(values = color) +
+  labs(x="Coef",y="qvalue") +
+  geom_hline(yintercept = 0.25, lty=4,col="grey",lwd=0.6) +
+  geom_vline(xintercept = 0, lty=4,col="grey",lwd=0.6)+
+  theme(
+        panel.grid=element_blank(),
+        axis.title = element_text(size = 16),
+        axis.text = element_text(size = 14))+xlim(-1,1)
+p
+```

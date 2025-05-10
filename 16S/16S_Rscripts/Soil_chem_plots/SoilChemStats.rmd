@@ -1,0 +1,838 @@
+```{r}
+# Load necessary libraries
+library(tidyverse)   # For data manipulation and visualization
+library(ggplot2)     # For plotting
+library(corrplot)    # For correlation heatmap
+library(car)         # For ANOVA
+library(rstatix)     # For Kruskal-Wallis Test
+library(randomForest) # For Random Forest regression
+library(caret)       # For model evaluation
+install.packages("caret")
+```
+
+
+```{r}
+# Load the dataset
+file_path <- ("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.txt")
+df <- read.delim(file_path, sep="\t", header=TRUE)
+
+# Check the first few rows
+head(df)
+
+# Check for missing values
+colSums(is.na(df))
+```
+
+
+**downlaod this table**
+
+```{r}
+# Drop the 'Sampling_Date' column since it is mostly missing
+df <- df %>% select(-Sampling_Date)
+
+# Convert categorical columns to factors
+df$ASCC_Site <- as.factor(df$ASCC_Site)
+df$Depth <- as.factor(df$Depth)
+
+# Summary statistics of the dataset
+summary(df)
+
+# Convert summary to a dataframe and save as CSV
+summary_df <- as.data.frame(do.call(cbind, lapply(df, summary)))
+write.csv(summary_df, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/summary_statistics.csv", row.names = TRUE)
+
+```
+
+
+
+
+```{r}
+# Select only numeric columns
+df_numeric <- df %>% select(DOC, TDN, Na, NH4, K, Mg, Ca, Cl, NO3, PO4, SO4)
+
+# Compute correlation matrix
+cor_matrix <- cor(df_numeric, use = "complete.obs")
+
+# Plot correlation heatmap
+corrplot(cor_matrix, method = "color", type = "upper", tl.col = "black", tl.cex = 0.8)
+```
+
+```{r}
+# ANOVA to test if DOC significantly differs across sites
+anova_result <- aov(DOC ~ ASCC_Site, data = df)
+summary(anova_result)
+anova_result <- aov(DOC ~ Depth, data = df)
+summary(anova_result)
+```
+
+```{r}
+# Kruskal-Wallis Test (alternative to ANOVA for non-normal data)
+kruskal_test <- kruskal_test(df, DOC ~ ASCC_Site)
+kruskal_test
+```
+
+
+
+```{r}
+# Load necessary package
+library(rstatix)
+
+# List of soil chemistry variables to analyze
+soil_chem_vars <- c("DOC", "TDN", "Na", "NH4", "K", "Mg", "Ca", "Cl", "NO3", "PO4", "SO4")
+
+# Function to perform ANOVA and Kruskal-Wallis test for each variable
+run_tests <- function(var) {
+  # ANOVA for ASCC_Site
+  anova_site <- aov(reformulate("ASCC_Site", response = var), data = df)
+  print(paste("ANOVA for", var, "by ASCC_Site"))
+  print(summary(anova_site))
+
+  # ANOVA for Depth
+  anova_depth <- aov(reformulate("Depth", response = var), data = df)
+  print(paste("ANOVA for", var, "by Depth"))
+  print(summary(anova_depth))
+  
+  # Kruskal-Wallis Test for ASCC_Site
+  kruskal_site <- kruskal_test(df, reformulate("ASCC_Site", response = var))
+  print(paste("Kruskal-Wallis Test for", var, "by ASCC_Site"))
+  print(kruskal_site)
+  
+  # Kruskal-Wallis Test for Depth
+  kruskal_depth <- kruskal_test(df, reformulate("Depth", response = var))
+  print(paste("Kruskal-Wallis Test for", var, "by Depth"))
+  print(kruskal_depth)
+  
+  cat("\n------------------------------\n")  # Separator for readability
+}
+
+# Run the tests for each soil chemistry variable
+lapply(soil_chem_vars, run_tests)
+
+sink("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/anova_kruskal_results.txt")  # Redirect output to a text file
+lapply(soil_chem_vars, run_tests)
+sink()  # Stop redirecting output
+```
+
+```{r}
+# Load necessary libraries
+library(rstatix)
+library(dplyr)
+
+# List of soil chemistry variables
+soil_chem_vars <- c("DOC", "TDN", "Na", "NH4", "K", "Mg", "Ca", "Cl", "NO3", "PO4", "SO4")
+
+# Create an empty dataframe to store results
+results_table <- data.frame(
+  Variable = character(),
+  Test = character(),
+  Grouping_Factor = character(),
+  Statistic = numeric(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Function to perform ANOVA and Kruskal-Wallis test
+run_tests <- function(var) {
+  # ANOVA for ASCC_Site
+  anova_site <- aov(reformulate("ASCC_Site", response = var), data = df)
+  anova_summary <- summary(anova_site)
+  
+  # Store ANOVA results in the table
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+  
+  # ANOVA for Depth
+  anova_depth <- aov(reformulate("Depth", response = var), data = df)
+  anova_summary <- summary(anova_depth)
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # Kruskal-Wallis Test for ASCC_Site
+  kruskal_site <- kruskal_test(df, reformulate("ASCC_Site", response = var))
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = kruskal_site$statistic,
+    P_Value = kruskal_site$p
+  ))
+
+  # Kruskal-Wallis Test for Depth
+  kruskal_depth <- kruskal_test(df, reformulate("Depth", response = var))
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "Depth",
+    Statistic = kruskal_depth$statistic,
+    P_Value = kruskal_depth$p
+  ))
+}
+
+# Run the tests for each soil chemistry variable
+lapply(soil_chem_vars, run_tests)
+
+# Print the results table
+print(results_table)
+
+# Save results as CSV
+write.csv(results_table, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/anova_kruskal_results.csv", row.names = FALSE)
+
+# Save results as an Excel file (Optional)
+install.packages("openxlsx")
+library(openxlsx)
+write.xlsx(results_table, "anova_kruskal_results.xlsx")
+```
+
+
+```{r}
+# Select only soil chemistry variables
+soil_chem_data <- df %>% select(DOC, TDN, Na, NH4, K, Mg, Ca, Cl, NO3, PO4, SO4)
+
+# Compute a distance matrix (using Euclidean distance)
+dist_matrix <- vegdist(soil_chem_data, method = "bray")
+```
+
+```{r}
+# Run PERMANOVA with 999 permutations
+permanova_site <- adonis2(dist_matrix ~ ASCC_Site, data = df, permutations = 999)
+
+# Print results
+print(permanova_site)
+
+# Run PERMANOVA for Depth
+permanova_depth <- adonis2(dist_matrix ~ Depth, data = df, permutations = 999)
+
+# Print results
+print(permanova_depth)
+
+# Convert results to a dataframe and save as CSV
+permanova_results <- as.data.frame(permanova_site)
+write.csv(permanova_results, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/permanova_results.csv", row.names = TRUE)
+```
+
+
+
+
+```{r}
+# Load necessary libraries
+# install.packages("vegan")  # For PERMANOVA
+# install.packages("rstatix")  # For Kruskal-Wallis
+# install.packages("dplyr")  # For data wrangling
+# install.packages("openxlsx")  # For saving results
+
+# library(vegan)
+# library(rstatix)
+# library(dplyr)
+# library(openxlsx)
+
+# Load Water Extractable Soil Chemistry dataset
+file_path <- ("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.txt")
+df <- read.delim(file_path, sep="\t", header=TRUE)
+
+# Convert categorical columns to factors
+df$ASCC_Site <- as.factor(df$ASCC_Site)  # Adjust based on correct site column
+df$Depth <- as.factor(df$Depth)
+
+# Select soil chemistry variables for analysis
+water_extract_vars <- c("DOC", "TDN", "Na", "NH4", "K", "Mg", "Ca", "Cl", "NO3", "PO4", "SO4")
+
+# Create an empty dataframe to store results
+results_table <- data.frame(
+  Variable = character(),
+  Test = character(),
+  Grouping_Factor = character(),
+  Statistic = numeric(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Function to perform ANOVA, Kruskal-Wallis, and PERMANOVA
+run_tests <- function(var) {
+  # ANOVA for ASCC_Site
+  anova_site <- aov(reformulate("ASCC_Site", response = var), data = df)
+  anova_summary <- summary(anova_site)
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # ANOVA for Depth
+  anova_depth <- aov(reformulate("Depth", response = var), data = df)
+  anova_summary <- summary(anova_depth)
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # Kruskal-Wallis Test for ASCC_Site
+  kruskal_site <- kruskal_test(df, reformulate("ASCC_Site", response = var))
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = kruskal_site$statistic,
+    P_Value = kruskal_site$p
+  ))
+
+  # Kruskal-Wallis Test for Depth
+  kruskal_depth <- kruskal_test(df, reformulate("Depth", response = var))
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "Depth",
+    Statistic = kruskal_depth$statistic,
+    P_Value = kruskal_depth$p
+  ))
+
+  # PERMANOVA for a single variable (handling missing values)
+  df_filtered <- df %>% drop_na(all_of(var))  # Ensure no missing values for this variable
+  soil_data <- df_filtered %>% select(all_of(var))  # Select single variable
+  dist_matrix <- vegdist(soil_data, method = "euclidean")  # Compute distance matrix
+
+  # PERMANOVA for ASCC_Site
+  permanova_site <- adonis2(dist_matrix ~ ASCC_Site, data = df_filtered, permutations = 999)
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "PERMANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = permanova_site$F[1],
+    P_Value = permanova_site$`Pr(>F)`[1]
+  ))
+
+  # PERMANOVA for Depth
+  permanova_depth <- adonis2(dist_matrix ~ Depth, data = df_filtered, permutations = 999)
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "PERMANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = permanova_depth$F[1],
+    P_Value = permanova_depth$`Pr(>F)`[1]
+  ))
+}
+
+# Run tests for each soil chemistry variable in the Water Extractable dataset
+lapply(water_extract_vars, run_tests)
+
+# Print the results table
+print(results_table)
+
+write.csv(results_table, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/anova_kruskal_permanova_results_4.csv", row.names = FALSE)
+
+# Save results as an Excel file
+write.xlsx(results_table, "water_extractable_anova_kruskal_permanova_results.xlsx")
+```
+
+
+```{r}
+# Multiple linear regression: Predicting DOC using soil chemistry variables
+lm_model <- lm(DOC ~ TDN + Na + NH4 + K + Mg + Ca + Cl + NO3 + PO4 + SO4, data = df)
+
+# Model summary
+summary(lm_model)
+```
+
+
+```{r}
+# Convert ASCC_Site to numeric for regression
+df_rf <- df %>% select(DOC, TDN, Na, NH4, K, Mg, Ca, Cl, NO3, PO4, SO4)
+
+# Train Random Forest model
+set.seed(42)
+rf_model <- randomForest(DOC ~ ., data = df_rf, importance = TRUE, ntree = 100)
+
+# Check model performance
+rf_model
+
+# Plot variable importance
+varImpPlot(rf_model)
+```
+
+```{r}
+# Get predictions from the model
+predictions <- predict(rf_model, df_rf)
+
+# Compute R² value (coefficient of determination)
+r_squared <- cor(df_rf$DOC, predictions)^2
+print(paste("R² Score:", r_squared))
+
+# [1] "R² Score: 0.920101213444303"
+```
+
+
+
+```{r}
+# Load necessary libraries
+install.packages("vegan")  # For PERMANOVA
+install.packages("rstatix")  # For Kruskal-Wallis
+install.packages("dplyr")  # For data wrangling
+install.packages("openxlsx")  # For saving results
+
+library(vegan)
+library(rstatix)
+library(dplyr)
+library(openxlsx)
+
+# Load dataset
+df <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata_rem2.csv", header=TRUE)
+
+# Convert categorical columns to factors
+df$ASCC_Site <- as.factor(df$Full_name_old)  # Adjust based on correct site column
+df$Depth <- as.factor(df$Depth)
+
+# Select soil chemistry variables
+soil_chem_vars <- c("Soil_pH", "Water_Content", "C_perc", "N_perc", "NH4_N", "NO3_N")
+soil_data <- df %>% select(all_of(soil_chem_vars)) %>% na.omit()
+# Create an empty dataframe to store results
+results_table <- data.frame(
+  Variable = character(),
+  Test = character(),
+  Grouping_Factor = character(),
+  Statistic = numeric(),
+  P_Value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+# Function to perform ANOVA, Kruskal-Wallis, and PERMANOVA
+run_tests <- function(var) {
+  # ANOVA for ASCC_Site
+  anova_site <- aov(reformulate("ASCC_Site", response = var), data = df)
+  anova_summary <- summary(anova_site)
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # ANOVA for Depth
+  anova_depth <- aov(reformulate("Depth", response = var), data = df)
+  anova_summary <- summary(anova_depth)
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # Kruskal-Wallis Test for ASCC_Site
+  kruskal_site <- kruskal_test(df, reformulate("ASCC_Site", response = var))
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = kruskal_site$statistic,
+    P_Value = kruskal_site$p
+  ))
+
+  # Kruskal-Wallis Test for Depth
+  kruskal_depth <- kruskal_test(df, reformulate("Depth", response = var))
+  
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "Depth",
+    Statistic = kruskal_depth$statistic,
+    P_Value = kruskal_depth$p
+  ))
+
+  # PERMANOVA (using Euclidean distance)
+# PERMANOVA (handling missing values)
+# Ensure df and soil_data have the same rows by removing NAs in both
+df_filtered <- df %>% drop_na(all_of(soil_chem_vars))  # Remove NAs in df for consistency
+soil_data <- df_filtered %>% select(all_of(soil_chem_vars))  # Subset numerical data
+
+# Compute the distance matrix (Euclidean)
+dist_matrix <- vegdist(soil_data, method = "euclidean")
+
+# Run PERMANOVA for ASCC_Site
+permanova_site <- adonis2(dist_matrix ~ ASCC_Site, data = df_filtered, permutations = 999)
+results_table <<- rbind(results_table, data.frame(
+  Variable = "All Soil Chemistry Variables",
+  Test = "PERMANOVA",
+  Grouping_Factor = "ASCC_Site",
+  Statistic = permanova_site$F[1],
+  P_Value = permanova_site$`Pr(>F)`[1]
+))
+
+# Run PERMANOVA for Depth
+permanova_depth <- adonis2(dist_matrix ~ Depth, data = df_filtered, permutations = 999)
+results_table <<- rbind(results_table, data.frame(
+  Variable = "All Soil Chemistry Variables",
+  Test = "PERMANOVA",
+  Grouping_Factor = "Depth",
+  Statistic = permanova_depth$F[1],
+  P_Value = permanova_depth$`Pr(>F)`[1]
+))
+}
+# Run tests for each soil chemistry variable
+lapply(soil_chem_vars, run_tests)
+
+# Print the results table
+print(results_table)
+
+# Save results as CSV
+write.csv(results_table, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/anova_kruskal_permanova_results_2.csv", row.names = FALSE)
+
+# Save results as an Excel file
+write.xlsx(results_table, "anova_kruskal_permanova_results.xlsx")
+```
+
+```{r}
+run_tests <- function(var) {
+  # ANOVA for ASCC_Site
+  anova_site <- aov(reformulate("ASCC_Site", response = var), data = df_general)
+  anova_summary <- summary(anova_site)
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # ANOVA for Depth
+  anova_depth <- aov(reformulate("Depth", response = var), data = df)
+  anova_summary <- summary(anova_depth)
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "ANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = anova_summary[[1]]$`F value`[1],
+    P_Value = anova_summary[[1]]$`Pr(>F)`[1]
+  ))
+
+  # Kruskal-Wallis Test for ASCC_Site
+  kruskal_site <- kruskal_test(df, reformulate("ASCC_Site", response = var))
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = kruskal_site$statistic,
+    P_Value = kruskal_site$p
+  ))
+
+  # Kruskal-Wallis Test for Depth
+  kruskal_depth <- kruskal_test(df, reformulate("Depth", response = var))
+
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "Kruskal-Wallis",
+    Grouping_Factor = "Depth",
+    Statistic = kruskal_depth$statistic,
+    P_Value = kruskal_depth$p
+  ))
+
+  # PERMANOVA for a single variable (NOT RECOMMENDED but possible)
+  df_filtered <- df %>% drop_na(all_of(var))  # Ensure no missing values for this variable
+  soil_data <- df_filtered %>% select(all_of(var))  # Select single variable
+  dist_matrix <- vegdist(soil_data, method = "euclidean")  # Compute distance matrix
+
+  # PERMANOVA for ASCC_Site
+  permanova_site <- adonis2(dist_matrix ~ ASCC_Site, data = df_filtered, permutations = 999)
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "PERMANOVA",
+    Grouping_Factor = "ASCC_Site",
+    Statistic = permanova_site$F[1],
+    P_Value = permanova_site$`Pr(>F)`[1]
+  ))
+
+  # PERMANOVA for Depth
+  permanova_depth <- adonis2(dist_matrix ~ Depth, data = df_filtered, permutations = 999)
+  results_table <<- rbind(results_table, data.frame(
+    Variable = var,
+    Test = "PERMANOVA",
+    Grouping_Factor = "Depth",
+    Statistic = permanova_depth$F[1],
+    P_Value = permanova_depth$`Pr(>F)`[1]
+  ))
+}
+
+# Run tests for each soil chemistry variable separately
+lapply(soil_chem_vars, run_tests)
+
+write.csv(results_table, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/anova_kruskal_permanova_results_3.csv", row.names = FALSE)
+```
+
+
+```{r}
+# Load necessary libraries
+install.packages("vegan")  # For PERMANOVA
+install.packages("openxlsx")  # For saving results
+library(vegan)
+library(dplyr)
+library(openxlsx)
+
+# Function to run PERMANOVA for each soil chemistry variable separately
+run_permanova <- function(df, dataset_name, soil_chem_vars) {
+  # Convert categorical columns to factors
+  df$ASCC_Site <- as.factor(df$ASCC_Site)
+  df$Depth <- as.factor(df$Depth)
+
+  # Create an empty dataframe to store results
+  results_table <- data.frame(
+    Variable = character(),
+    Test = character(),
+    Grouping_Factor = character(),
+    Statistic = numeric(),
+    P_Value = numeric(),
+    stringsAsFactors = FALSE
+  )
+
+  # Loop through each soil chemistry variable
+  for (var in soil_chem_vars) {
+    # Ensure the variable exists in the dataset
+    if (!(var %in% colnames(df))) {
+      warning(paste("Skipping", var, "- variable not found in dataset"))
+      next
+    }
+
+    # Remove missing values for the specific variable
+    df_filtered <- df %>% drop_na(all_of(var))
+
+    # Check if there is enough data left
+    if (nrow(df_filtered) < 10) {  # Skip if fewer than 10 rows remain
+      warning(paste("Skipping", var, "- too many missing values"))
+      next
+    }
+
+    # Select only the current variable
+    soil_data <- df_filtered %>% select(all_of(var))
+
+    # Ensure there is more than 1 unique value (to avoid distance matrix errors)
+    if (length(unique(soil_data[[var]])) <= 1) {
+      warning(paste("Skipping", var, "- Not enough variation for PERMANOVA"))
+      next
+    }
+
+    # Compute a Euclidean distance matrix
+    dist_matrix <- vegdist(soil_data, method = "euclidean")
+
+    # Run PERMANOVA with ASCC_Site + Depth + Interaction (ASCC_Site * Depth)
+    permanova_model <- adonis2(dist_matrix ~ ASCC_Site * Depth, data = df_filtered, permutations = 999)
+
+    # Extract PERMANOVA results for ASCC_Site, Depth, and their interaction (if available)
+    terms <- rownames(permanova_model)
+    for (term in c("ASCC_Site", "Depth", "ASCC_Site:Depth")) {
+      if (term %in% terms) {
+        results_table <- rbind(results_table, data.frame(
+          Variable = var,
+          Test = "PERMANOVA",
+          Grouping_Factor = term,
+          Statistic = permanova_model[term, "F.Model"],
+          P_Value = permanova_model[term, "Pr(>F)"]
+        ))
+      } else {
+        warning(paste("Skipping term", term, "for variable", var, "- Not found in results"))
+      }
+    }
+  }
+
+  # Print the results table
+  print(results_table)
+
+  # Save results as CSV
+  csv_filename <- paste0(dataset_name, "_PERMANOVA_results.csv")
+  write.csv(results_table, csv_filename, row.names = FALSE)
+
+  # Save results as an Excel file
+  excel_filename <- paste0(dataset_name, "_PERMANOVA_results.xlsx")
+  write.xlsx(results_table, excel_filename)
+}
+
+# 📌 Run for the General Soil Chemistry Dataset
+df_general <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata_rem2.csv", header=TRUE)
+general_soil_vars <- c("Soil_pH", "Water_Content", "C_perc", "N_perc", "NH4_N", "NO3_N")  # Adjust based on correct variable names
+run_permanova(df_general, "General_Soil_Chemistry", general_soil_vars)
+
+df_water_extract <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.txt", header=TRUE)
+water_extract_vars <- c("DOC", "TDN", "Na", "NH4", "K", "Mg", "Ca", "Cl", "NO3", "PO4", "SO4")
+run_permanova(df_water_extract, "Water_Extractable_Chemistry", water_extract_vars)
+
+```
+
+
+```{r}
+df_numeric <- df_numeric %>% drop_na()
+dist_matrix <- vegdist(df_numeric, method = "euclidean")
+```
+
+
+
+```{r}
+cat("Rows in df_filtered:", nrow(df_filtered), "\n")
+cat("Rows in dist_matrix:", attr(dist_matrix, "Size"), "\n")  # Distance matrix size
+```
+
+```{r}
+# Ensure row names match between df_filtered and dist_matrix
+rownames(df_filtered) <- NULL  # Reset row names
+dist_matrix <- vegdist(df_numeric, method = "euclidean")
+
+# Remove rows in df_filtered that are not in dist_matrix
+df_filtered <- df_filtered[rownames(as.matrix(dist_matrix)), ]
+```
+
+
+```{r}
+run_permanova <- function(df, dataset_name, soil_chem_vars) {
+  # Identify correct column for ASCC_Site
+  if (!"ASCC_Site" %in% colnames(df)) {
+    if ("Full_name_old" %in% colnames(df)) {
+      df <- df %>% rename(ASCC_Site = Full_name_old)
+    } else {
+      stop("Error: ASCC_Site column not found in dataset.")
+    }
+  }
+
+  # Ensure ASCC_Site and Depth are factors
+  df$ASCC_Site <- as.factor(df$ASCC_Site)
+  df$Depth <- as.factor(df$Depth)
+
+  # Print unique levels for debugging
+  cat("Unique ASCC_Site levels:", length(unique(df$ASCC_Site)), "\n")
+  cat("Unique Depth levels:", length(unique(df$Depth)), "\n")
+
+  # Create results table
+  results_table <- data.frame(
+    Variable = character(),
+    Test = character(),
+    Grouping_Factor = character(),
+    Statistic = numeric(),
+    P_Value = numeric(),
+    R2 = numeric(),
+    stringsAsFactors = FALSE
+  )
+
+  # Loop through soil chemistry variables
+  for (var in soil_chem_vars) {
+    if (!(var %in% colnames(df))) {
+      warning(paste("Skipping", var, "- not found in dataset"))
+      next
+    }
+
+    # Filter missing values
+    df_filtered <- df %>% drop_na(all_of(var))
+
+    # Check unique levels
+    if (length(unique(df_filtered$ASCC_Site)) < 2) {
+      warning(paste("Skipping", var, "- ASCC_Site has only one level after filtering"))
+      next
+    }
+    if (length(unique(df_filtered$Depth)) < 2) {
+      warning(paste("Skipping", var, "- Depth has only one level after filtering"))
+      next
+    }
+    if (nrow(df_filtered) < 10) {  
+      warning(paste("Skipping", var, "- too few non-missing values"))
+      next
+    }
+
+    # ✅ Fix: Convert all numeric columns for distance matrix
+    numeric_cols <- sapply(df_filtered, is.numeric)
+    df_numeric <- df_filtered[, numeric_cols]
+
+    # Ensure valid numeric data
+    if (ncol(df_numeric) < 2) {
+      warning(paste("Skipping", var, "- Not enough numeric columns for distance matrix"))
+      next
+    }
+
+    # ✅ Fix: Drop remaining NA values before computing distance matrix
+    df_numeric <- df_numeric %>% drop_na()
+
+    # ✅ Fix: Ensure row names match before running adonis2()
+    rownames(df_filtered) <- NULL
+    dist_matrix <- vegdist(df_numeric, method = "euclidean")
+
+    if (all(is.na(dist_matrix))) {
+      warning(paste("Skipping", var, "- Distance matrix contains NA values"))
+      next
+    }
+
+    # Remove rows from df_filtered that are not in dist_matrix
+    df_filtered <- df_filtered[rownames(as.matrix(dist_matrix)), ]
+
+    # ✅ Final Fix: Check row counts before adonis2
+    cat("Rows in df_filtered:", nrow(df_filtered), "\n")
+    cat("Rows in dist_matrix:", attr(dist_matrix, "Size"), "\n")
+
+    # Run PERMANOVA
+    permanova_model <- adonis2(dist_matrix ~ ASCC_Site * Depth, data = df_filtered, permutations = 999)
+
+    # Extract results
+    terms <- rownames(permanova_model)
+    for (term in c("ASCC_Site", "Depth", "ASCC_Site:Depth")) {
+      if (term %in% terms) {
+        results_table <- rbind(results_table, data.frame(
+          Variable = var,
+          Test = "PERMANOVA",
+          Grouping_Factor = term,
+          Statistic = permanova_model$F.Model[term],
+          P_Value = permanova_model$`Pr(>F)`[term],
+          R2 = permanova_model$R2[term]
+        ))
+      } else {
+        warning(paste("Skipping term", term, "for variable", var, "- Not found in results"))
+      }
+    }
+  }
+
+  print(results_table)
+
+  csv_filename <- paste0(dataset_name, "_PERMANOVA_results_with_R2.csv")
+  write.csv(results_table, csv_filename, row.names = FALSE)
+
+  excel_filename <- paste0(dataset_name, "_PERMANOVA_results_with_R2.xlsx")
+  write.xlsx(results_table, excel_filename)
+}
+```
+
+
+```{r}
+adonis2(vegdist(as.matrix(na.omit(df[, "SO4", drop=FALSE])), method="euclidean") ~ ASCC_Site*Depth, data=df, permutations=999)
+```
+
+
+```{r}
+adonis2(vegdist(as.matrix(na.omit(df[, "SO4", drop=FALSE])), method="euclidean") ~ Depth, data=df, permutations=999)
+```
+
+```{r}
+adonis2(vegdist(as.matrix(na.omit(df[, "SO4", drop=FALSE])), method="euclidean") ~ ASCC_Site, data=df, permutations=999)
+```
+
+```{r}
+adonis2(vegdist(as.matrix(na.omit(df[, "Water_Content", drop=FALSE])), method="euclidean") ~ Depth, data=df, permutations=999)
+```

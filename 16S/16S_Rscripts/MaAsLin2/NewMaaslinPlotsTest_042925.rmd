@@ -1,0 +1,540 @@
+## Heatmaps
+
+
+# 16S
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(grid)
+library(dplyr)
+library(vegan)
+library(Hmisc)
+library(readxl)
+library(stringr)
+library(cowplot)
+library(patchwork)
+library(ggtext)
+```
+
+```{r}
+custom_colors6 <- c( "#F5F0DA","#B75347")
+custom_colors_seq <- c("#FFFFFF", "#EDE955", "#DE6000", "#6D2F20")
+# Custom warm palette (user-defined)
+custom_warm_palette <- c(
+  "#FFFFFF",  # 0 - true white
+  "#FEF6B5",  # ~1
+  "#FFE9A0",  # ~2
+  "#FFD085",  # ~3
+  "#FFA679",  # ~5
+  "#FA8A76",  # ~8
+  "#E15383"   # ~15
+)
+
+custom_hokusai_gradient <- c(
+  "#FFFFFF",  # White (not in palette but essential for 0s)
+  "#F6E3A1",  # Soft yellow
+  "#DE6000",  # Rich orange
+  "#B75347",  # Coral (reddish clay)
+  "#DE7666"   # Warm dusty pink
+)
+
+# Step 1: Load and label each depth
+maaslin_sf_5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "shallow_sf") %>%
+  mutate(Depth = "0-5cm")
+
+maaslin_sf_15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "deep_sf") %>%
+  mutate(Depth = "5-15cm")
+
+maaslin_sf_OM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "OM_sf") %>%
+  mutate(Depth = "OM")
+
+# Step 2: Combine and clean taxonomy
+maaslin_all <- bind_rows(maaslin_sf_5, maaslin_sf_15, maaslin_sf_OM) %>%
+  separate(taxonomy, into = c("Domain", "Phyla", "Class", "Order", "Family", "Genus", "Species"), sep = ";") %>%
+  mutate(across(c(Phyla, Domain, Class, Order, Family, Genus, Species),
+                ~str_remove_all(.x, "^[a-z]__") %>% str_trim())) %>%
+  filter(!is.na(Phyla), Phyla != "", !str_detect(Phyla, "^\\s*$"), !str_detect(Phyla, "^p__$"))
+
+write.csv(maaslin_all, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_sf.csv", row.names = FALSE)
+
+# Step 3: Filter to significant OTUs only
+maaslin_sig <- maaslin_all %>% filter(qval < 0.05)
+
+# Step 4: Split by direction and summarize separately
+sf_enriched <- maaslin_sig %>%
+  filter(coef > 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  )
+
+other_enriched <- maaslin_sig %>%
+  filter(coef < 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  ) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0))
+
+# Step 5: Combine enriched sets and keep one value per Phyla × Depth
+heatmap_data <- bind_rows(sf_enriched, other_enriched) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0)) %>%
+  group_by(Phyla, Depth) %>%
+  slice_max(order_by = abs(mean_coef), n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+# Step 6: Add a label with OTU count + significance
+# Step 6: Add label and reorder Phyla by total discriminant OTUs
+# Step 6: Add label and reorder Phyla from most to least OTUs (top to bottom)
+heatmap_data <- heatmap_data %>%
+  mutate(label = as.character(n_OTUs)) %>%
+  group_by(Phyla) %>%
+  mutate(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
+  ungroup() %>%
+  mutate(Phyla = forcats::fct_reorder(Phyla, total_OTUs, .desc = FALSE))  # reverse order
+
+# Step 7: Set color scale
+# Step 8: Set color scale
+# Step 7: Heatmap of n_OTUs instead of coef
+max_val_n <- max(heatmap_data$n_OTUs, na.rm = TRUE)
+
+# Heatmap with custom palette
+# Heatmap with gray 0s and warm gradient
+heatmap_plot <- ggplot() +
+  # Gray tiles for OTUs == 0
+  geom_tile(data = filter(heatmap_data, n_OTUs == 0), 
+            aes(x = Depth, y = Phyla), 
+            fill = "#D9D9D9", color = "white") +
+  
+  # Gradient-colored tiles for OTUs > 0
+  geom_tile(data = filter(heatmap_data, n_OTUs > 0), 
+            aes(x = Depth, y = Phyla, fill = n_OTUs), 
+            color = "white") +
+  
+  # Add labels
+  geom_text(data = heatmap_data, 
+            aes(x = Depth, y = Phyla, label = label), 
+            color = "black", size = 3.5) +
+
+  # Gradient fill (for values > 0 only)
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    values = scales::rescale(c(2, 5, 10, 15)),  # skip 0
+    limits = c(1, max(heatmap_data$n_OTUs, na.rm = TRUE)),
+    name = "# of Discriminant OTUs",
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barwidth = unit(0.5, "cm"),
+      barheight = unit(5, "cm")
+    )
+  ) +
+  theme_minimal() +
+  labs(
+    title = "Number of Discriminant OTUs (SF vs Other)",
+    x = "Depth",
+    y = "Phylum"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank(),
+    legend.position = "right"
+  )
+
+# Step 1: Remove legend from main plot
+heatmap_nolegend <- heatmap_plot + theme(legend.position = "none")
+
+# Step 2: Extract legend grob
+legend <- cowplot::get_legend(heatmap_plot)
+
+# Step 3: Convert legend into ggplot object
+legend_plot <- cowplot::ggdraw(legend)
+
+# Step 4: Asterisk significance legend, positioned below the gradient legend
+legend_text <- ggplot() +
+  theme_void() +
+  annotate(
+    "text", x = 0, y = 1, hjust = 0, vjust = 1,
+    label = "Significance:\n*   = q < 0.05\n**  = q < 0.01\n*** = q < 0.001",
+    size = 3.5
+  )
+
+# Step 5: Stack the gradient legend and significance text vertically
+legend_stack <- legend_plot / legend_text +
+  plot_layout(heights = c(1, .5))  # Adjust heights to control spacing
+
+# Step 6: Combine heatmap and right-side legend stack
+final_plot1 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(.1, .5))  # Adjust widths to control layout proportions
+
+
+
+final_plot1 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(5, 1)) &
+  theme(plot.margin = margin(5, 5, 5, 5))  # Tighten all margin
+  
+# Step 7: Render final combined plot
+final_plot1
+```
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+custom_colors6 <- c(" #70B59A", " #F5F0DA"," #B75347")
+
+# Step 1: Load and label each depth
+maaslin_tp_5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "shallow_tp") %>%
+  mutate(Depth = "0-5cm")
+
+maaslin_tp_15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "deep_tp") %>%
+  mutate(Depth = "5-15cm")
+
+maaslin_tp_OM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "OM_tp") %>%
+  mutate(Depth = "OM")
+
+# Step 2: Combine and clean taxonomy
+maaslin_all <- bind_rows(maaslin_tp_5, maaslin_tp_15, maaslin_tp_OM) %>%
+  separate(taxonomy, into = c("Domain", "Phyla", "Class", "Order", "Family", "Genus", "Species"), sep = ";") %>%
+  mutate(across(c(Phyla, Domain, Class, Order, Family, Genus, Species),
+                ~str_remove_all(.x, "^[a-z]__") %>% str_trim())) %>%
+  filter(!is.na(Phyla), Phyla != "", !str_detect(Phyla, "^\\s*$"), !str_detect(Phyla, "^p__$"))
+
+write.csv(maaslin_all, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_tp.csv", row.names = FALSE)
+
+# Step 3: Filter to significant OTUs only
+maaslin_sig <- maaslin_all %>% filter(qval < 0.05)
+
+# Step 4: Split by direction and summarize separately
+tp_enriched <- maaslin_sig %>%
+  filter(coef > 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  )
+
+other_enriched <- maaslin_sig %>%
+  filter(coef < 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  ) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0))
+
+# Step 5: Combine enriched sets and keep one value per Phyla × Depth
+heatmap_data <- bind_rows(tp_enriched, other_enriched) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0)) %>%
+  group_by(Phyla, Depth) %>%
+  slice_max(order_by = abs(mean_coef), n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+# Step 6: Add a label with OTU count + significance
+heatmap_data <- heatmap_data %>%
+  mutate(sig_label = case_when(
+    mean_qval < 0.001 ~ "***",
+    mean_qval < 0.01  ~ "**",
+    mean_qval < 0.05  ~ "*",
+    TRUE              ~ ""
+  ),
+  label = paste0(n_OTUs, sig_label))
+
+# Step 7: Set color scale
+# Step 8: Set color scale
+max_val <- max(abs(heatmap_data$mean_coef), na.rm = TRUE)
+
+heatmap_plot <- ggplot(heatmap_data, aes(x = Depth, y = Phyla, fill = mean_coef)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = label), color = "black", size = 3.5) +
+  scale_fill_gradientn(
+    colors = custom_colors6,
+    values = scales::rescale(c(-max_val, 0, max_val)),
+    limits = c(-max_val, max_val),
+    name = "Mean Coef 
+    (+ = TP, – = Other)",
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barwidth = unit(0.5, "cm"),
+      barheight = unit(5, "cm")
+    )
+  ) +
+  theme_minimal() +
+  labs(
+    title = "TP vs Other",
+    x = "Depth",
+    y = "Phylum"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank(),
+    legend.position = "right"
+  )
+
+# Step 1: Remove legend from main plot
+heatmap_nolegend <- heatmap_plot + theme(legend.position = "none")
+
+# Step 2: Extract legend grob
+legend <- cowplot::get_legend(heatmap_plot)
+
+# Step 3: Convert legend into ggplot object
+legend_plot <- cowplot::ggdraw(legend)
+
+# Step 4: Asterisk significance legend, positioned below the gradient legend
+legend_text <- ggplot() +
+  theme_void() +
+  annotate(
+    "text", x = 0, y = 1, hjust = 0, vjust = 1,
+    label = "Significance:\n*   = q < 0.05\n**  = q < 0.01\n*** = q < 0.001",
+    size = 3.5
+  )
+
+# Step 5: Stack the gradient legend and significance text vertically
+legend_stack <- legend_plot / legend_text +
+  plot_layout(heights = c(1, .5))  # Adjust heights to control spacing
+
+# Step 6: Combine heatmap and right-side legend stack
+final_plot2 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(.1, .5))  # Adjust widths to control layout proportions
+
+
+
+final_plot2 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(5, 1)) &
+  theme(plot.margin = margin(5, 5, 5, 5))  # Tighten all margin
+  
+# Step 7: Render final combined plot
+final_plot2
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+custom_colors6 <- c("#70B59A", "#F5F0DA","#B75347")
+
+# Step 1: Load and label each depth
+maaslin_sj_5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "shallow_sj") %>%
+  mutate(Depth = "0-5cm")
+
+maaslin_sj_15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "deep_sj") %>%
+  mutate(Depth = "5-15cm")
+
+maaslin_sj_OM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResults_CLEANED_with_logQval.xlsx", sheet = "OM_sj") %>%
+  mutate(Depth = "OM")
+
+# Step 2: Combine and clean taxonomy
+maaslin_all <- bind_rows(maaslin_sj_5, maaslin_sj_15, maaslin_sj_OM) %>%
+  separate(taxonomy, into = c("Domain", "Phyla", "Class", "Order", "Family", "Genus", "Species"), sep = ";") %>%
+  mutate(across(c(Phyla, Domain, Class, Order, Family, Genus, Species),
+                ~str_remove_all(.x, "^[a-z]__") %>% str_trim())) %>%
+  filter(!is.na(Phyla), Phyla != "", !str_detect(Phyla, "^\\s*$"), !str_detect(Phyla, "^p__$"))
+
+write.csv(maaslin_all, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_sj.csv", row.names = FALSE)
+
+# Step 3: Filter to significant OTUs only
+maaslin_sig <- maaslin_all %>% filter(qval < 0.05)
+
+# Step 4: Split by direction and summarize separately
+sj_enriched <- maaslin_sig %>%
+  filter(coef > 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  )
+
+other_enriched <- maaslin_sig %>%
+  filter(coef < 0) %>%
+  distinct(OTUID, Phyla, Depth, .keep_all = TRUE) %>%
+  group_by(Phyla, Depth) %>%
+  summarise(
+    mean_coef = mean(coef), 
+    mean_qval = mean(qval), 
+    n_OTUs = n_distinct(OTUID), 
+    .groups = "drop"
+  ) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0))
+
+# Step 5: Combine enriched sets and keep one value per Phyla × Depth
+heatmap_data <- bind_rows(sj_enriched, other_enriched) %>%
+  complete(Phyla, Depth, fill = list(mean_coef = 0, mean_qval = 1, n_OTUs = 0)) %>%
+  group_by(Phyla, Depth) %>%
+  slice_max(order_by = abs(mean_coef), n = 1, with_ties = FALSE) %>%
+  ungroup()
+
+# Step 6: Add a label with OTU count + significance
+heatmap_data <- heatmap_data %>%
+  mutate(sig_label = case_when(
+    mean_qval < 0.001 ~ "***",
+    mean_qval < 0.01  ~ "**",
+    mean_qval < 0.05  ~ "*",
+    TRUE              ~ ""
+  ),
+  label = paste0(n_OTUs, sig_label))
+
+# Step 7: Set color scale
+# Step 8: Set color scale
+max_val <- max(abs(heatmap_data$mean_coef), na.rm = TRUE)
+
+heatmap_plot <- ggplot(heatmap_data, aes(x = Depth, y = Phyla, fill = mean_coef)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = label), color = "black", size = 3.5) +
+  scale_fill_gradientn(
+    colors = custom_colors6,
+    values = scales::rescale(c(-max_val, 0, max_val)),
+    limits = c(-max_val, max_val),
+    name = "Mean Coef 
+    (+ = SJ, – = Other)",
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barwidth = unit(0.5, "cm"),
+      barheight = unit(5, "cm")
+    )
+  ) +
+  theme_minimal() +
+  labs(
+    title = "SJ vs Other",
+    x = "Depth",
+    y = "Phylum"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank(),
+    legend.position = "right"
+  )
+
+
+# Step 1: Remove legend from main plot
+heatmap_nolegend <- heatmap_plot + theme(legend.position = "none")
+
+# Step 2: Extract legend grob
+legend <- cowplot::get_legend(heatmap_plot)
+
+# Step 3: Convert legend into ggplot object
+legend_plot <- cowplot::ggdraw(legend)
+
+legend_text <- ggplot() +
+  theme_void() +
+  annotate(
+    "text", x = 0, y = 1, hjust = 0, vjust = 1,
+    label = "Significance:\n*   = q < 0.05\n**  = q < 0.01\n*** = q < 0.001",
+    size = 3.5
+  ) +
+  theme(plot.margin = margin(5, 5, 20, 5))  # add bottom margin
+
+legend_stack <- legend_plot / legend_text +
+  plot_layout(heights = c(1, 0.7))  # more space for the text blockheights to control spacing
+
+# Step 6: Combine heatmap and right-side legend stack
+final_plot3 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(.1, .5))  # Adjust widths to control layout proportions
+
+
+
+final_plot3 <- heatmap_nolegend | legend_stack +
+  plot_layout(widths = c(5, 1)) &
+  theme(plot.margin = margin(5, 5, 5, 5))  # Tighten all margin
+  
+# Step 7: Render final combined plot
+final_plot3
+```
+
+
+
+
+```{r}
+# Wrap each final_plot in wrap_elements to force them to count as 1 panel each
+combined_all <- wrap_elements(final_plot1) +
+                wrap_elements(final_plot2) +
+                wrap_elements(final_plot3) +
+  plot_layout(nrow = 1, widths = c(1, 1, 1)) &
+  plot_annotation(title = "Discriminant Phyla by Site and Depth")
+
+# Display
+combined_all
+```
+
+
+
+
+```{r}
+# Load tidyverse
+library(tidyverse)
+
+# Step 1: Read your files
+sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_sf.csv")
+sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_sj.csv")
+tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/Maaslinall_tp.csv")
+
+# Step 2: Filter for significant OTUs (qval < 0.05)
+sf_sig <- sf %>% filter(qval < 0.05)
+sj_sig <- sj %>% filter(qval < 0.05)
+tp_sig <- tp %>% filter(qval < 0.05)
+
+# Step 3: Find OTUs significant in all 3 sites
+shared_otus <- reduce(list(sf_sig$OTUID, sj_sig$OTUID, tp_sig$OTUID), intersect)
+
+# Step 4: Subset full rows for just those OTUs
+sf_shared <- sf_sig %>% filter(OTUID %in% shared_otus) %>% mutate(site = "SF")
+sj_shared <- sj_sig %>% filter(OTUID %in% shared_otus) %>% mutate(site = "SJ")
+tp_shared <- tp_sig %>% filter(OTUID %in% shared_otus) %>% mutate(site = "TP")
+
+# Step 5: Combine
+shared_all <- bind_rows(sf_shared, sj_shared, tp_shared)
+
+# Step 6 (fixed): Collapse to one coef per OTU × site (take mean)
+otu_collapsed <- shared_all %>%
+  group_by(OTUID, Phyla, Genus, Species, site) %>%
+  summarise(mean_coef = mean(coef, na.rm = TRUE), .groups = "drop")
+
+# Step 7: Pivot wider (now unique per site)
+otu_wide <- otu_collapsed %>%
+  pivot_wider(names_from = site, values_from = mean_coef)
+
+# Step 8: Identify flipped direction
+otu_flipped <- otu_wide %>%
+  mutate(
+    flipped = (SF > 0 & (SJ < 0 | TP < 0)) |
+              (SJ > 0 & (SF < 0 | TP < 0)) |
+              (TP > 0 & (SF < 0 | SJ < 0))
+  ) %>%
+  filter(flipped == TRUE)
+
+# Step 9: View result
+otu_flipped
+```

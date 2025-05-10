@@ -1,0 +1,29 @@
+- This helps find which names are not match in the beta diversity script
+
+
+```{r}
+# Find mismatches between otus column names and metadata row names
+otu_names <- names(otus)
+metadata_names <- row.names(metadata)
+
+# Identify names in otus that are not in metadata
+otus_not_in_metadata <- otu_names[!otu_names %in% metadata_names]
+
+# Identify names in metadata that are not in otus
+metadata_not_in_otus <- metadata_names[!metadata_names %in% otu_names]
+
+# Print mismatches, if any
+if (length(otus_not_in_metadata) > 0) {
+  cat("Names in otus but not in metadata:\n")
+  print(otus_not_in_metadata)
+} else {
+  cat("No mismatches in otus.\n")
+}
+
+if (length(metadata_not_in_otus) > 0) {
+  cat("Names in metadata but not in otus:\n")
+  print(metadata_not_in_otus)
+} else {
+  cat("No mismatches in metadata.\n")
+}
+```

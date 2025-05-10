@@ -1,0 +1,227 @@
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+library(openxlsx)
+```
+
+# Reading in the Maaslin2 results
+## Shallow 0-5 cm only
+
+```{r}
+data_SJSF_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v SJ shallow")
+
+data_SFTP_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP shallow")
+
+data_SJTP_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ shallow")
+```
+
+## Deep 5-15 cm only
+
+```{r}
+data_SJSF_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SJ v SF deep")
+
+data_SFTP_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP deep")
+
+data_SJTP_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ deep")
+```
+
+
+## Organic matter only
+
+```{r}
+data_SJSF_OM <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SJ v SF OM")
+
+data_SFTP_OM<- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP OM")
+
+data_SJTP_OM <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ OM")
+```
+
+
+
+# Inner joining Maaslin comparisons to figure out which taxa are discrimninant for each site
+## For example: for the  0-5 cm I want to know which taxa are discriminant and conserved when looking at Taylor Park, so I need to look at the OTUIDs that are consistent across all comparisons that include Taylor Park (TP vs SF and TP vs SJ)
+
+
+```{r}
+data_SF5_discrim<-inner_join(data_SFTP_shallow,data_SJSF_shallow,by="feature")
+data_TP5_discrim<-inner_join(data_SFTP_shallow,data_SJTP_shallow,by="feature")
+data_SJ5_discrim<-inner_join(data_SJSF_shallow,data_SJTP_shallow,by="feature")
+```
+
+```{r}
+data_SF15_discrim<-inner_join(data_SFTP_deep,data_SJSF_deep,by="feature")
+data_TP15_discrim<-inner_join(data_SFTP_deep,data_SJTP_deep,by="feature")
+data_SJ15_discrim<-inner_join(data_SJSF_deep,data_SJTP_deep,by="feature")
+```
+
+```{r}
+data_SFOM_discrim<-inner_join(data_SFTP_OM,data_SJSF_OM,by="feature")
+data_TPOM_discrim<-inner_join(data_SFTP_OM, data_SJTP_OM,by="feature")
+data_SJOM_discrim<-inner_join(data_SJSF_OM,data_SJTP_OM,by="feature")
+```
+
+
+```{r}
+library(openxlsx)
+
+# Create a new workbook
+wb <- createWorkbook()
+
+# Add sheets to the workbook
+addWorksheet(wb, "SF5_discrim")
+addWorksheet(wb, "TP5_discrim")
+addWorksheet(wb, "SJ5_discrim")
+addWorksheet(wb, "SF15_discrim")
+addWorksheet(wb, "TP15_discrim")
+addWorksheet(wb, "SJ15_discrim")
+addWorksheet(wb, "SFOM_discrim")
+addWorksheet(wb, "TPOM_discrim")
+addWorksheet(wb, "SJOM_discrim")
+
+# Write data to the sheets
+writeData(wb, "SF5_discrim", data_SF5_discrim)
+writeData(wb, "TP5_discrim", data_TP5_discrim)
+writeData(wb, "SJ5_discrim", data_SJ5_discrim)
+writeData(wb, "SF15_discrim", data_SF15_discrim)
+writeData(wb, "TP15_discrim", data_TP15_discrim)
+writeData(wb, "SJ15_discrim", data_SJ15_discrim)
+writeData(wb, "SFOM_discrim", data_SFOM_discrim)
+writeData(wb, "TPOM_discrim", data_TPOM_discrim)
+writeData(wb, "SJOM_discrim", data_SJOM_discrim)
+
+# Save the workbook
+saveWorkbook(wb, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_Maaslin/Maaslin_discrim_results_ITS.xlsx", overwrite = TRUE)
+```
+
+
+```{r}
+data_SFTP_shallow <- data_SFTP_shallow %>%
+  group_by(OTUID) %>%
+  summarize(
+    coef_SFTP = median(coef, na.rm = TRUE),
+    qval_SFTP = median(qval, na.rm = TRUE),
+    pval_SFTP = median(pval, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+data_SJSF_shallow <- data_SJSF_shallow %>%
+  group_by(OTUID) %>%
+  summarize(
+    coef_SJSF = median(coef, na.rm = TRUE),
+    qval_SJSF = median(qval, na.rm = TRUE),
+    pval_SJSF = median(pval, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+data_SF5_discrim <- inner_join(data_SFTP_shallow, data_SJSF_shallow, by = "OTUID")
+```
+
+```{r}
+coef_SFTP = median(coef, na.rm = TRUE)
+```
+
+```{r}
+colnames(data_SFTP_shallow)
+colnames(data_SJSF_shallow)
+```
+
+# Inner joining Maaslin comparisons to figure out which taxa are discrimninant for each site
+## For example: for the  0-5 cm I want to know which taxa are discriminant and conserved when looking at Taylor Park, so I need to look at the OTUIDs that are consistent across all comparisons that include Taylor Park (TP vs SF and TP vs SJ)
+
+
+**CORRECTED**
+### Actually considering coefficients
+#### sf v. sj shallow: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+#### sf v. tp shallow: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+#### tp v. sj shallow: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+#### sj v. sf deep: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+#### sf v. tp deep: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+#### tp v. sj deep: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+#### sj v. sf OM: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+#### sf v. tp OM: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+#### tp v. sj OM: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+
+
+```{r}
+library(readxl)
+library(dplyr)
+library(openxlsx)
+
+# Load data
+data_SJSF_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SJ v SF shallow")
+data_SFTP_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP shallow")
+data_SJTP_shallow <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ shallow")
+
+data_SJSF_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SJ v SF deep")
+data_SFTP_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP deep")
+data_SJTP_deep <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ deep")
+
+data_SJSF_OM <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SJ v SF OM")
+data_SFTP_OM <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "SF v TP OM")
+data_SJTP_OM <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_ITS_corrected.xlsx", sheet = "TP v SJ OM")
+
+# Function to classify discriminant OTUs
+classify_discriminant <- function(data, group1, group2) {
+  data %>%
+    filter(qval < 0.05) %>%  # Consider only significant OTUs
+    mutate(discriminant_for = ifelse(coef < 0, group1, group2))
+}
+
+# Apply classification
+data_SJSF_shallow <- classify_discriminant(data_SJSF_shallow, "SF", "SJ")
+data_SFTP_shallow <- classify_discriminant(data_SFTP_shallow, "SF", "TP")
+data_SJTP_shallow <- classify_discriminant(data_SJTP_shallow, "SJ", "TP")
+
+data_SJSF_deep <- classify_discriminant(data_SJSF_deep, "SF", "SJ")
+data_SFTP_deep <- classify_discriminant(data_SFTP_deep, "SF", "TP")
+data_SJTP_deep <- classify_discriminant(data_SJTP_deep, "SJ", "TP")
+
+data_SJSF_OM <- classify_discriminant(data_SJSF_OM, "SF", "SJ")
+data_SFTP_OM <- classify_discriminant(data_SFTP_OM, "SF", "TP")
+data_SJTP_OM <- classify_discriminant(data_SJTP_OM, "SJ", "TP")
+
+# Inner join to find consistent discriminant OTUs
+data_SF5_discrim <- inner_join(data_SFTP_shallow, data_SJSF_shallow, by = "feature")
+data_TP5_discrim <- inner_join(data_SFTP_shallow, data_SJTP_shallow, by = "feature")
+data_SJ5_discrim <- inner_join(data_SJSF_shallow, data_SJTP_shallow, by = "feature")
+
+data_SF15_discrim <- inner_join(data_SFTP_deep, data_SJSF_deep, by = "feature")
+data_TP15_discrim <- inner_join(data_SFTP_deep, data_SJTP_deep, by = "feature")
+data_SJ15_discrim <- inner_join(data_SJSF_deep, data_SJTP_deep, by = "feature")
+
+data_SFOM_discrim <- inner_join(data_SFTP_OM, data_SJSF_OM, by = "feature")
+data_TPOM_discrim <- inner_join(data_SFTP_OM, data_SJTP_OM, by = "feature")
+data_SJOM_discrim <- inner_join(data_SJSF_OM, data_SJTP_OM, by = "feature")
+
+# Save results to Excel
+wb <- createWorkbook()
+
+# Add sheets
+addWorksheet(wb, "SF5_discrim")
+addWorksheet(wb, "TP5_discrim")
+addWorksheet(wb, "SJ5_discrim")
+addWorksheet(wb, "SF15_discrim")
+addWorksheet(wb, "TP15_discrim")
+addWorksheet(wb, "SJ15_discrim")
+addWorksheet(wb, "SFOM_discrim")
+addWorksheet(wb, "TPOM_discrim")
+addWorksheet(wb, "SJOM_discrim")
+
+# Write data
+writeData(wb, "SF5_discrim", data_SF5_discrim)
+writeData(wb, "TP5_discrim", data_TP5_discrim)
+writeData(wb, "SJ5_discrim", data_SJ5_discrim)
+writeData(wb, "SF15_discrim", data_SF15_discrim)
+writeData(wb, "TP15_discrim", data_TP15_discrim)
+writeData(wb, "SJ15_discrim", data_SJ15_discrim)
+writeData(wb, "SFOM_discrim", data_SFOM_discrim)
+writeData(wb, "TPOM_discrim", data_TPOM_discrim)
+writeData(wb, "SJOM_discrim", data_SJOM_discrim)
+
+# Save workbook
+saveWorkbook(wb, "/Users/kyasparks/Desktop/Maaslin_discrim_results_corrected_ITS.xlsx", overwrite = TRUE)
+```

@@ -1,0 +1,37 @@
+# RStudio junk
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
+
+# macOS
+.DS_Store
+
+# Large/intermediate microbiome files
+*.qza
+*.qzv
+*.fastq
+*.bam
+*.RData
+*.rds
+*.log
+*.gz
+*.zip
+*.tar
+*.tsv
+*_files/
+output/
+results/
+.Rproj.user/
+.Rhistory
+.RData
+*.qza
+*.qzv
+*.fastq
+*.RData
+*.rds
+*.log
+*.gz
+*.zip
+*.tar

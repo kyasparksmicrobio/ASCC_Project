@@ -1,0 +1,984 @@
+---
+title: "Stacked Bar Charts Rel Abund Maaslin"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: pdf_document
+params: 
+  printcode: FALSE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(Hmisc)
+```
+
+
+** All Depths: State Forest **
+
+```{r}
+# otus <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>%
+#   select(1,contains("_SF_"))
+
+otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_SF_"))
+```
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+
+full_acido1 <- full_table %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 9:88)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(2:81)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:81) %>% 
+  mutate(Site = "SF")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** All Depths: Taylor Park **
+
+```{r}
+# otus2 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_TP_"))
+
+otus2 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_TP_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table2 <- inner_join(taxa, otus2, by = "OTUID")
+
+full_acido2 <- full_table2 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:94)%>% 
+  select(3,9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido2$occurence <- rowSums(full_acido2[c(2:87)] > 0, na.rm=TRUE)
+
+full_acido_pres3 <- full_acido2 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:87) %>% 
+  mutate(Site = "TP")
+
+```
+```{r}
+combo_all_avg <- full_acido_pres3 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+
+
+** All Depths: San Juan **
+
+```{r}
+# otus3 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_SJ_"))
+
+otus3 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_SJ_"))
+
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table3 <- inner_join(taxa, otus3, by = "OTUID")
+
+full_acido3 <- full_table3 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:145)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(2:137)] > 0, na.rm=TRUE)
+
+full_acido_pres5 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:137) %>% 
+  mutate(Site = "SJ")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres5 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+
+```{r}
+combo16S <- rbind(full_acido_pres1,full_acido_pres3,full_acido_pres5)
+```
+
+
+```{r}
+combo_all <- combo16S %>% 
+select(c("Phylum","Site")) %>% 
+  unique()
+
+combo_all1 <- combo16S %>% 
+  filter(Phylum == "p__Acidobacteriota"|Phylum == "p__Actinobacteriota" | Phylum == "p__Bacteroidota" | Phylum =="p__Chloroflexi"| Phylum == "
+p__Myxococcota" | Phylum == "p__Methylomirabilota" | Phylum == "p__Planctomycetota" | Phylum == "p__Proteobacteria" | Phylum == "p__Verrucomicrobiota"| Phylum ==
+"	
+p__WPS-2"  )
+
+```
+
+```{r}
+combo_all_avg <- combo_all1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(combo_all1, aes(x=Site, y=`rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  # Add titles, axis labels, and captions
+  labs(title = "Relative Abundance of Phyla by Site for ALL Depths Combined",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Site for ALL Depths Combined",
+       subtitle = "Discriminant Taxa Only",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+** 0-5cm Depth, State Forest **
+
+```{r}
+# otus <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>%
+#   select(1,contains("_SF_"))
+
+otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "SHALLOW")%>%
+  select(3,contains("_SF_"))
+```
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+
+full_acido1 <- full_table %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 9:88)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(2:81)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:81) %>% 
+  mutate(Site = "SF")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres1 %>%
+  group_by(Site, Phylum) %>%
+  filter(!is.na(Phylum) & Phylum != " ") %>%  
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** 0-5cm Depth, Taylor Park **
+
+
+```{r}
+# otus2 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_TP_"))
+
+otus2 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "SHALLOW")%>%
+  select(3,contains("_TP_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table2 <- inner_join(taxa, otus2, by = "OTUID")
+
+full_acido2 <- full_table2 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:94)%>% 
+  select(3,9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido2$occurence <- rowSums(full_acido2[c(2:87)] > 0, na.rm=TRUE)
+
+full_acido_pres3 <- full_acido2 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:87) %>% 
+  mutate(Site = "TP")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres3 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** 0-5cm Depth, San Juan **
+
+```{r}
+# otus3 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_SJ_"))
+
+otus3 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "SHALLOW")%>%
+  select(3,contains("_SJ_"))
+
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table3 <- inner_join(taxa, otus3, by = "OTUID")
+
+full_acido3 <- full_table3 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:145)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(2:137)] > 0, na.rm=TRUE)
+
+full_acido_pres5 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:137) %>% 
+  mutate(Site = "SJ")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres5 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+
+ggplot(combo_all_avg, aes(x = Site, y = avg_rel_abund, fill = Phylum)) +
+  geom_bar(stat = "identity") +
+  guides(fill = guide_legend(ncol = 1)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = 10))  # Set size to a reasonable value
+
+```
+
+
+```{r}
+combo16S <- rbind(full_acido_pres1,full_acido_pres3,full_acido_pres5)
+```
+
+```{r}
+combo_all <- combo16S %>% 
+select(c("Phylum","Site")) %>% 
+  unique()
+
+combo_all1 <- combo16S %>% 
+  filter(Phylum == "p__Acidobacteriota"|Phylum == "p__Actinobacteriota" | Phylum == "p__Bacteroidota" | Phylum == "p__Planctomycetota" | Phylum == "p__Proteobacteria" | Phylum == "p__Verrucomicrobiota"| Phylum =="p__Chloroflexi" | Phylum == "
+p__Myxococcota" | Phylum == "p__Methylomirabilota" | Phylum == "p__Firmicutes"|Phylum == "p__Cyanobacteria")
+
+```
+
+```{r}
+combo_all_avg <- combo_all1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  
+  # Add titles, axis labels, and captions
+  labs(title = "Relative Abundance of Phyla by Site for the 0-5cm Depth Combined",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  #scale_y_continuous(limits = c(0, max(combo_all1$rel_abund)))+
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Site for the 0-5cm Depth Combined",
+       subtitle = "Discriminant Taxa Only",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+
+** 5-15cm Depth, State Forest **
+
+```{r}
+# otus <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>%
+#   select(1,contains("_SF_"))
+
+otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_SF_"))
+```
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+
+full_acido1 <- full_table %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 9:88)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(2:80)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:80) %>% 
+  mutate(Site = "SF")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** 5-15cm Depth, Taylor Park **
+
+```{r}
+# otus2 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_TP_"))
+
+otus2 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_TP_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table2 <- inner_join(taxa, otus2, by = "OTUID")
+
+full_acido2 <- full_table2 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:94)%>% 
+  select(3,9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido2$occurence <- rowSums(full_acido2[c(2:86)] > 0, na.rm=TRUE)
+
+full_acido_pres3 <- full_acido2 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:86) %>% 
+  mutate(Site = "TP")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres3 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** 5-15cm Depth, San Juan **
+
+```{r}
+# otus3 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_SJ_"))
+
+otus3 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_SJ_"))
+
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table3 <- inner_join(taxa, otus3, by = "OTUID")
+
+full_acido3 <- full_table3 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:145)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(2:137)] > 0, na.rm=TRUE)
+
+full_acido_pres5 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:137) %>% 
+  mutate(Site = "SJ")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres5 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+
+```{r}
+combo16S <- rbind(full_acido_pres1,full_acido_pres3,full_acido_pres5)
+```
+
+
+```{r}
+combo_all <- combo16S %>% 
+select(c("Phylum","Site")) %>% 
+  unique()
+
+combo_all1 <- combo16S %>% 
+  filter(Phylum == "p__Acidobacteriota"|Phylum == "p__Actinobacteriota" | Phylum == "p__Bacteroidota" | Phylum == "p__Planctomycetota" | Phylum == "p__Proteobacteria" | Phylum == "p__Verrucomicrobiota"| Phylum =="p__Chloroflexi" | Phylum == "p__Myxococcota")
+
+```
+
+
+```{r}
+combo_all_avg <- combo_all1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  
+  # Add titles, axis labels, and captions
+  labs(title = "Relative Abundance of Phyla by Site for the 5-15cm Depth Combined",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  #scale_y_continuous(limits = c(0, max(combo_all1$rel_abund)))+
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Site for the 5-15cm Depth Combined",
+       subtitle = "Discriminant Taxa Only",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+** OM Depth, State Forest **
+
+```{r}
+# otus <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>%
+#   select(1,contains("_SF_"))
+
+otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "OM")%>%
+  select(3,contains("_SF_"))
+```
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+
+full_acido1 <- full_table %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 9:88)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(2:78)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:78) %>% 
+  mutate(Site = "SF")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+** OM Depth, Taylor Park **
+
+```{r}
+# otus2 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_TP_"))
+
+
+otus2 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "OM") %>% 
+  select(3,contains("_TP_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table2 <- inner_join(taxa, otus2, by = "OTUID")
+
+full_acido2 <- full_table2 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:94)%>% 
+  select(3,9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido2$occurence <- rowSums(full_acido2[c(2:86)] > 0, na.rm=TRUE)
+
+full_acido_pres3 <- full_acido2 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:86) %>% 
+  mutate(Site = "TP")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres3 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+** OM Depth, San Juan **
+
+```{r}
+# otus3 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_SJ_"))
+
+otus3 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "OM")%>%
+  select(3,contains("_SJ_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table3 <- inner_join(taxa, otus3, by = "OTUID")
+
+full_acido3 <- full_table3 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:145)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(2:131)] > 0, na.rm=TRUE)
+
+full_acido_pres5 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:131) %>% 
+  mutate(Site = "SJ")
+
+```
+
+```{r}
+combo_all_avg <- full_acido_pres5 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=`avg_rel_abund`, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = ))
+```
+
+
+```{r}
+combo16S <- rbind(full_acido_pres1,full_acido_pres3,full_acido_pres5)
+```
+
+
+```{r}
+combo_all <- combo16S %>% 
+select(c("Phylum","Site")) %>% 
+  unique()
+
+combo_all1 <- combo16S %>% 
+  filter(Phylum == "p__Acidobacteriota"|Phylum == "p__Actinobacteriota" | Phylum == "p__Bacteroidota" | Phylum == "p__Planctomycetota" | Phylum == "p__Proteobacteria" | Phylum == "p__Verrucomicrobiota"| Phylum ==
+"p__Cyanobacteria" | Phylum =="p__Chloroflexi")
+
+```
+
+
+```{r}
+combo_all_avg <- combo_all1 %>%
+  group_by(Site, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  
+  # Add titles, axis labels, and captions
+  labs(title = "Relative Abundance of Phyla by Site for the OM Depth Combined",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Site, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+  #scale_y_continuous(limits = c(0, max(combo_all1$rel_abund)))+
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Site for the OM Depth Combined",
+       subtitle = "Discriminant Taxa Only",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+

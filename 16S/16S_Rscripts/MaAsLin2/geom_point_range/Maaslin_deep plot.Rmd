@@ -1,0 +1,200 @@
+---
+title: "Maaslin deep"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Step 1: Pull out only the SF samples so that we can only look at those. 
+
+```{r}
+# otus <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>%
+#   select(1,contains("_SF_"))
+
+otus <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_SF_"))
+```
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+
+full_acido1 <- full_table %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 9:88)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(2:80)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:80) %>% 
+  mutate(Site = "SF")
+```
+
+
+```{r}
+ggplot(full_acido_pres1, aes(y=Phylum,x=rel_abund ))+
+  stat_summary(fun.data = median_hilow, geom = "pointrange",
+               fun.args = list(conf.int=.25),
+               position = position_dodge(width=.5), size=.3)
+```
+
+
+```{r}
+# otus2 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_TP_"))
+
+otus2 <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_TP_"))
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table2 <- inner_join(taxa, otus2, by = "OTUID")
+
+full_acido2 <- full_table2 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:94)%>% 
+  select(3,9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido2$occurence <- rowSums(full_acido2[c(2:86)] > 0, na.rm=TRUE)
+
+full_acido_pres3 <- full_acido2 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:86) %>% 
+  mutate(Site = "TP")
+
+```
+
+
+```{r}
+ggplot(full_acido_pres3, aes(y=Phylum,x=rel_abund ))+
+  stat_summary(fun.data = median_hilow, geom = "pointrange",
+               fun.args = list(conf.int=.25),
+               position = position_dodge(width=.5), size=.3)
+```
+
+```{r}
+# otus3 <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")%>% 
+#   select(1,contains("_SJ_"))
+
+otus3 <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "DEEP")%>%
+  select(3,contains("_SJ_"))
+
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+full_table3 <- inner_join(taxa, otus3, by = "OTUID")
+
+full_acido3 <- full_table3 %>% 
+  #filter(Phyla == "  p__Acidobacteriota") %>% 
+  pivot_longer(names_to = "samples", values_to = "counts",9:145)%>% 
+  select(3, 9:10) %>% 
+  group_by(samples, Phylum) %>% 
+  summarise(sum = sum(counts)) %>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(2:137)] > 0, na.rm=TRUE)
+
+full_acido_pres5 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 2:137) %>% 
+  mutate(Site = "SJ")
+
+```
+
+
+```{r}
+ggplot(full_acido_pres5, aes(y=Phylum,x=rel_abund ))+
+  stat_summary(fun.data = median_hilow, geom = "pointrange",
+               fun.args = list(conf.int=.25),
+               position = position_dodge(width=.5), size=.3)
+```
+
+
+```{r}
+combo16S <- rbind(full_acido_pres1,full_acido_pres3,full_acido_pres5)
+```
+
+
+```{r}
+combo_all <- combo16S %>% 
+select(c("Phylum","Site")) %>% 
+  unique()
+
+combo_all1 <- combo16S %>% 
+  filter(Phylum == "p__Acidobacteriota"|Phylum == "p__Actinobacteriota" | Phylum == "p__Bacteroidota" | Phylum == "p__Planctomycetota" | Phylum == "p__Proteobacteria" | Phylum == "p__Verrucomicrobiota"| Phylum =="p__Chloroflexi" | Phylum == "p__Myxococcota")
+
+```
+
+
+```{r}
+combo_all1$Site  <- factor(combo_all1$Site, levels=c('SF','TP','SJ'))
+```
+
+
+```{r}
+deep = ggplot(combo_all1, aes(y=Phylum,x=rel_abund, color=Site ))+
+  stat_summary(fun.data = median_hilow, geom = "pointrange",
+               fun.args = list(conf.int=.5),
+               position = position_dodge(width=.5), size=.3)+
+ # Customize color manually for the 'Site' variable
+  scale_colour_paletteer_d("lisa::BridgetRiley")+
+  scale_fill_paletteer_d("lisa::BridgetRiley")+
+  xlim(0,.8)+
+  # Add titles, axis labels, and captions
+  labs(title = "Relative Abundance of Phyla by Site for 5-15 cm Combined",
+       subtitle = "Median values with 50% confidence intervals",
+       x = "Relative Abundance (%)", 
+       y = "Phylum",
+       color = "Sampling Site") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+install.packages("patchwork")
+library(patchwork)
+```
+
+```{r}
+combined_plot <- (shallow + deep +OM) + 
+  plot_layout(ncol = 1, guides = "collect")  # Stack in one column, collecting legend
+
+combined_plot & theme(legend.position = "bottom")
+```

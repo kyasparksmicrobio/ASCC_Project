@@ -1,0 +1,433 @@
+## Step 1: Package Installation and Loading
+ ### Installs and loads Maaslin2 and other necessary packages (tidyverse for data manipulation and readxl for reading Excel files).
+
+- Install packages if you haven't already
+
+```{r}
+if(!requireNamespace("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("Maaslin2")
+```
+
+- Load libraries
+
+```{r}
+library(Maaslin2) # maaslin program!
+library(devtools) # package including a suite of> development tools
+library(tidyverse) # tidyverse has it all! (ggplot2, dplyr, tidyr, etc...), data manipulation
+library(readxl) # reading excel files
+```
+
+## Step 2: Data Import and Transformation
+### Imports OTU table (otus), metadata, and taxonomy file.
+### Transposes otus so samples are in rows (MaAsLin2’s required format), storing it as transposed_table1.
+### Replaces the transposed OTU table’s column names with taxonomy labels
+
+    - Read in your OTU table, metadata, and taxonomy table
+
+```{r}
+# this is an OTU matrix, removed blanks / dupes, and formatted with samples as the columns and features as the rows
+
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_denoise_files/ASCC_16S_feature_table_rem_1.txt", row.names=1,header=TRUE)
+
+# loading in the metadata I'm interested in, make sure the sample names match from your OTU table we just read in, should be formatted so sample names will be the first column followed by the metdata columns
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
+
+# reading in taxonomy datadframe, should be 2 cols, 1 for OTU / asv id number, and another column for a concatenated taxonomy string
+# can remove / ignore the 'confidence' column here
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/ASCC_16S_taxonomy_forprocessing.txt",row.names=1)
+```
+
+    - Transpose OTU table 
+
+```{r}
+# must transposed because the required format for the  Maaslin to run is when  SAMPLES are in ROWS, and OTU ID number is across the top as the columm names, create a new object called 'transpose_tabel1'
+
+transposed_table <- t(otus)
+transposed_table1 <- as.data.frame(transposed_table)
+```
+
+    - Replace OTU col names (which is currently OTU ID's) to the correlating taxonomy string 
+
+```{r}
+# need to replace OTU column names with taxonomy labels because they are currently in ASV number form which is harder to interpret when visualizing the output, replacing with taxonomy will make filtering / subsetting easier down the line.
+
+# if you were not to do this, it's okay but you will need to perform a vlookup with your OTU IDs to match to taxonomy after the fact to see which taxa are discriminant from each other
+
+# extract the 'taxonomy' column from 'taxa'
+
+new_colnames <- taxa[, "taxonomy"]
+
+# assign these values (taxonomy col names, 'new_colnames' as the new column names for 'transposed_table1'
+
+colnames(transposed_table1) <- as.character(new_colnames)
+```
+
+## 3. Metadata Subsets by Site and Depth
+### Splits metadata based on depth to create subsets for different soil layers.
+### Creates specific metadata subsets by site pairs (e.g., SF-TP, TP-SJ) and combinations of site/depth.
+
+    - This is subsetting my metadata by my 'Depth' column
+    - These create individual metadata subsets by depth (0_5cm, 5_15cm, and OM). Each subset isolates samples at the specific depth across all sites.
+
+```{r}
+# splitting by depth to see which taxa are discriminant in each soil layer
+
+# not as beneficial to look at discriminant taxa with combined depth and site because it could obscure patterns that are seen within specific sites or depths. Combining sites may dilute or mask the influence of site-specific factors on microbial taxa.
+
+# for example, a taxon that is a strong indicator of a specific depth across all sites may not stand out if it’s combined with data from other depths, where that taxon’s abundance might vary. 
+
+# Splits metadata based on depth to create subsets for different soil layers.
+
+meta_shallow_subset <- subset(metadata, Depth == "0_5cm")
+meta_deep_subset <- subset(metadata, Depth == "5_15cm")
+meta_OM_subset <- subset(metadata, Depth == "OM")
+```
+
+    - This is subsetting my metadata by my 'Site' column
+        - groups 2 sites at a time
+        - allows for compare just sites regardless of depth
+            - Ex: looking at SF vs TP vs SJ across ALL depths combined, focusing on SITE differences only
+        - MaAsLin2 requires that you compare *at least* 2 metadata to be able to perform the differential abundance analysis
+
+```{r}
+# create your comparisons!
+# in this case, I have 3 sites i want to compare for this analysis so i had 3 comparisons to make 
+# Creates specific metadata subsets by site pairs (e.g., SF-TP, TP-SJ) and combinations of site/depth.
+metadata_SF_TP <- subset(metadata, Site %in% c("SF","TP"))
+metadata_TP_SJ <- subset(metadata, Site %in% c("TP","SJ"))
+metadata_SJ_SF <- subset(metadata, Site %in% c("SJ","SF"))
+```
+
+    - This is subsetting my already subset shallow metadata and subsetting my 'Site' comparisons
+        - this means I can compare my sites specifically at the shallow depth
+
+```{r}
+metadata_SF_TP_shallow <- subset(meta_shallow_subset, Site %in% c("SF","TP"))
+metadata_TP_SJ_shallow <- subset(meta_shallow_subset, Site %in% c("TP","SJ"))
+metadata_SJ_SF_shallow <- subset(meta_shallow_subset, Site %in% c("SJ","SF"))
+```
+
+    - This is subsetting my already subset deep metadata and subsetting my 'Site' comparisons
+        - this means I can compare my sites specifically at the deep depth
+
+```{r}
+metadata_SF_TP_deep <- subset(meta_deep_subset, Site %in% c("SF","TP"))
+metadata_TP_SJ_deep <- subset(meta_deep_subset, Site %in% c("TP","SJ"))
+metadata_SJ_SF_deep <- subset(meta_deep_subset, Site %in% c("SJ","SF"))
+```
+
+    - This is subsetting my already subset deep metadata and subsetting my 'Site' comparisons
+        - this means I can compare my sites specifically at the deep depth
+
+```{r}
+metadata_SF_TP_OM <- subset(meta_OM_subset, Site %in% c("SF","TP"))
+metadata_TP_SJ_OM <- subset(meta_OM_subset, Site %in% c("TP","SJ"))
+metadata_SJ_SF_OM <- subset(meta_OM_subset, Site %in% c("SJ","SF"))
+```
+
+    - This is subsetting my already subset OM metadata and subsetting my 'Site' comparisons
+        - this means I can compare my sites specifically at the OM depth
+
+## Step 4: Extract sample names from each of the subsetted metadata frames we meta_deep_subset
+### this is going to create a new object with just sample names, which are being extracted from the row names of the metadata
+
+    - You must do this for each subset
+
+```{r}
+#extracts the sample names from the metadata dataframes and creates new objects
+sample_names1 <- rownames(metadata_SF_TP)
+sample_names2 <- rownames(metadata_TP_SJ)
+sample_names3 <- rownames(metadata_SJ_SF)
+sample_names4 <- rownames(metadata_SF_TP_shallow)
+sample_names5 <- rownames(metadata_TP_SJ_shallow)
+sample_names6 <- rownames(metadata_SJ_SF_shallow)
+sample_names7 <- rownames(metadata_SF_TP_deep)
+sample_names8 <- rownames(metadata_TP_SJ_deep)
+sample_names9 <- rownames(metadata_SJ_SF_deep)
+sample_names10 <- rownames(metadata_SF_TP_OM)
+sample_names11 <- rownames(metadata_TP_SJ_OM)
+sample_names12 <- rownames(metadata_SJ_SF_OM)
+```
+
+## Step 5: Extracting Sample Names and Subsetting OTU Table
+### Create a new object and extract sample names from each subset, then subsets the OTU table (transposed_table1) to match.
+    
+    - You must do this for each subset
+
+```{r}
+# repeating for all subsets 
+otus_SF_TP <- transposed_table1[sample_names1, ]
+otus_TP_SJ <- transposed_table1[sample_names2, ]
+otus_SJ_SF <- transposed_table1[sample_names3, ]
+otus_SF_TP_shallow <- transposed_table1[sample_names4, ]
+otus_TP_SJ_shallow <- transposed_table1[sample_names5, ]
+otus_SJ_SF_shallow <- transposed_table1[sample_names6, ]
+otus_SF_TP_deep <- transposed_table1[sample_names7, ]
+otus_TP_SJ_deep <- transposed_table1[sample_names8, ]
+otus_SJ_SF_deep <- transposed_table1[sample_names9, ]
+otus_SF_TP_OM <- transposed_table1[sample_names10, ]
+otus_TP_SJ_OM <- transposed_table1[sample_names11, ]
+otus_SJ_SF_OM <- transposed_table1[sample_names12, ]
+```
+
+## Step 5: Running MaAsLin2
+
+    - Runs MaAsLin2 on each OTU and metadata subset, with Site as the fixed effect.
+    - Saves output to specified directories.
+
+```{r}
+#Run maaslin again but change 'input_data' and 'input_metadata' to each of the subsetted data frames we made earlier
+Maaslin2(input_data = otus_SF_TP,
+          input_metadata = metadata_SF_TP,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP",
+          fixed_effects = "Site",
+          max_significance = 1.0)
+
+
+Maaslin2(input_data = otus_TP_SJ,
+          input_metadata = metadata_TP_SJ,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+ 
+Maaslin2(input_data = otus_SJ_SF,
+          input_metadata = metadata_SJ_SF,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF2",
+          fixed_effects = "Site",
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SF_TP_shallow,
+          input_metadata = metadata_SF_TP_shallow,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_shallow2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+ 
+Maaslin2(input_data = otus_TP_SJ_shallow,
+          input_metadata = metadata_TP_SJ_shallow,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_shallow2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SJ_SF_shallow,
+          input_metadata = metadata_SJ_SF_shallow,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_shallow2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SF_TP_deep,
+          input_metadata = metadata_SF_TP_deep,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_deep2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+ 
+Maaslin2(input_data = otus_TP_SJ_deep,
+          input_metadata = metadata_TP_SJ_deep,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_deep2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SJ_SF_deep,
+          input_metadata = metadata_SJ_SF_deep,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_deep2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SF_TP_OM,
+          input_metadata = metadata_SF_TP_OM,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_OM2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_TP_SJ_OM,
+          input_metadata = metadata_TP_SJ_OM,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_OM2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+
+Maaslin2(input_data = otus_SJ_SF_OM,
+          input_metadata = metadata_SJ_SF_OM,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_OM2",
+          fixed_effects = "Site", 
+          max_significance = 1.0)
+```
+
+## Step 6: Plotting your results
+
+    - read in your newly created 'significant_results.tsv'
+    - creates a bar plot of feature coefficients
+    - applies color to LDA coefficients based on sign for easy interpretation 
+
+```{r}
+# loading significant results for each site /depth combination
+# Positive coefficients indicate higher association with the first site; negative values with the second.
+
+data.sftp <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//Maaslin_output/output_16S_SF_TP/significant_results.tsv")
+
+data.tpsj <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ/significant_results.tsv")
+
+data.sjsf <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF/significant_results.tsv")
+
+data.sftp.shal <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_shallow/significant_results.tsv")
+
+data.tpsj.shal <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_shallow/significant_results.tsv")
+
+data.sjsf.shal <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_shallow/significant_results.tsv")
+
+data.sftp.deep <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_deep/significant_results.tsv")
+
+data.tpsj.deep <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_deep/significant_results.tsv")
+
+data.sjsf.deep <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_deep/significant_results.tsv")
+
+data.sftp.OM <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SF_TP_OM/significant_results.tsv")
+
+data.tpsj.OM <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_TP_SJ_OM/significant_results.tsv")
+
+data.sjsf.OM <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_output//output_16S_SJ_SF_OM/significant_results.tsv")
+```
+
+```{r}
+# create barplots
+# Positive coefficients indicate higher association with the first site; negative values with the second.
+# basic plot
+
+plot <- ggplot(data.sftp, aes(x = reorder(feature, -coef), y = coef)) + geom_bar(stat = "identity")
+plot
+
+```
+
+
+```{r}
+# optional, but highly suggested
+# apply color for easier interpretation
+# then replot and save 
+
+data.sftp.shal$color <- ifelse(data.sftp.shal$coef >= 0, "Positive", "Negative")
+plot2 <- ggplot(data.sftp.shal, aes(x = coef, y =feature, fill = color)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = c("Positive" = "green", "Negative" = "red")) +
+  theme_minimal()
+plot2
+
+
+#ggsave("church_park_lda.pdf",plot = plot2, width=15,height = 20,dpi = 300)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# An alternative method without needing to subset data (could save you time)
+## Using MaAsLin2 fixed-effect models 
+### still need to run through this 
+#### over all this method *should* work the same as subsetting and it doing it the long form way
+    - Did it work? (update yes  / no)
+
+## Step 1: Package Installation and Loading
+ ### Install and loads Maaslin2 and other necessary packages
+
+    - Install packages if you haven't already
+    - load MaAsLin2 package if you haven't already
+
+```{r}
+# Load packages
+library(Maaslin2) # maaslin program!
+library(devtools) # package including a suite of development tools
+library(tidyverse) # tidyverse has it all! (ggplot2, dplyr, tidyr, etc...), data manipulation
+library(readxl) # to read excel files into R
+```
+
+## Step 2: Define inputs for the MaAsLin2 analysis
+### Imports OTU table (otus), metadata, and taxonomy file.
+### Transposes otus so samples are in rows (MaAsLin2’s required format), storing it as transposed_table1.
+### Replaces the transposed OTU table’s column names with taxonomy labels
+### Set directory to save results
+
+    - Read in your OTU table, metadata, and taxonomy table
+
+```{r}
+# this is an OTU matrix, removed blanks / dupes, and formatted with samples as the columns and features as the rows
+
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_denoise_files/ASCC_16S_feature_table_rem_1.txt", row.names=1,header=TRUE) 
+
+# loading in the metadata I'm interested in, make sure the sample names match from your OTU table we just read in
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
+
+# reading in taxonomy datadframe, should be 2 cols, 1 for OTU / asv id number, and another column for a concatenated taxonomy string
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing.txt",row.names=1)
+
+# directory to save output
+
+output_dir <- "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin"  
+```
+
+    - Transpose OTU table 
+
+```{r}
+# must transposed because the required format for the  Maaslin to run is when  SAMPLES are in ROWS, and OTU ID number is across the top as the columm names, create a new object called 'transpose_tabel1'
+
+transposed_table <- t(otus)
+transposed_table1 <- as.data.frame(transposed_table)
+```
+
+    - Replace OTU col names (which is currently OTU ID's) to the correlating taxonomy string 
+
+```{r}
+# need to replace OTU column names with taxonomy labels because they are currently in ASV number form which is harder to interpret when visualizing the output, replacing with taxonomy will make filtering / subsetting easier down the line.
+
+# if you were not to do this, it's okay but you will need to perform a vlookup with your OTU IDs to match to taxonomy after the fact to see which taxa are discriminant from each other
+
+# extract the 'taxonomy' column from 'taxa'
+
+new_colnames <- taxa[, "taxonomy"]
+
+# assign these values (taxonomy col names, 'new_colnames' as the new column names for 'transposed_table1'
+
+colnames(transposed_table1) <- as.character(new_colnames)
+```
+
+
+## Step 3: Run MaAsLin2! 
+### we do not need to subset data when using this version because my setting the 'fixed_effects' to 'Depth',"Site","Site:Depth", should make all unique comparisons between Site and Depth are being compared
+
+```{r}
+# Run MaAsLin2
+# replace 'input_data', etc. with input files we read in previous (otus, metadata, taxa, output_dir)
+# or
+# replace 'input_data', etc. with actual path
+
+fit_data <- Maaslin2(
+    input_data = input_data,                   # Path to input data (features)
+    input_metadata = input_metadata,           # Path to metadata (variables)
+    output = output_dir,                       # Output directory for results
+    fixed_effects = c("variable1", "variable2"), # Variables to test as fixed effects
+    random_effects = c("variable3"),           # Optional: variables to treat as random effects
+    normalization = "TSS",                     # Normalization method (e.g., TSS for Total Sum Scaling)
+    transform = "LOG",                         # Transformation method (e.g., log transformation)
+    analysis_method = "LM",                    # Analysis method (e.g., linear model, LM)
+    correction = "BH",                         # Correction method for multiple testing (e.g., Benjamini-Hochberg)
+    standardize = TRUE                         # Whether to standardize the data
+)
+```

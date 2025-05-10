@@ -1,0 +1,42 @@
+```{r}
+library(tidyverse)   # For data manipulation and visualization
+library(ggplot2)     # For plotting
+library(corrplot)    # For correlation heatmap
+library(car)         # For ANOVA
+library(rstatix)     # For Kruskal-Wallis Test
+library(randomForest) # For Random Forest regression
+library(caret) 
+
+```
+
+```{r}
+file_path <- ("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.txt")
+df <- read.delim(file_path, sep="\t", header=TRUE)
+```
+
+
+```{r}
+# Convert ASCC_Site to numeric for regression
+df_rf <- df %>% select(ASCC_Site, DOC, TDN, Na, NH4, K, Mg, Ca, Cl, NO3, PO4, SO4)
+
+# Train Random Forest model
+set.seed(42)
+rf_model <- randomForest(DOC ~ ., data = df_rf, importance = TRUE, ntree = 100)
+
+# Check model performance
+rf_model
+
+# Plot variable importance
+varImpPlot(rf_model)
+```
+
+```{r}
+# Get predictions from the model
+predictions <- predict(rf_model, df_rf)
+
+# Compute R² value (coefficient of determination)
+r_squared <- cor(df_rf$DOC, predictions)^2
+print(paste("R² Score:", r_squared))
+
+# [1] "R² Score: 0.920101213444303"
+```

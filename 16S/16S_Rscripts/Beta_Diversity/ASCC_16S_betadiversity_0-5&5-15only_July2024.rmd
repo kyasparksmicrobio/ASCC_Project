@@ -1,0 +1,228 @@
+*** July 2024 ***
+*** 0-5 cm and 5-15 cm only ****
+*** REMOVED MITOCHONDRIA AND CHLOROPLAST ***
+*** Redoing ASCC 16S beta diversity processing! ***
+*** be sure to edit metadata file to add location and depth ***
+*** i have removed blanks!***
+
+- CHATGPT helped with parts of this code, excluding OM!!! ###
+
+```{r}
+# Load packages - install if not already installed!
+# install.packages("phyloseq")
+# # BiocManager::install("phyloseq")
+# # if (!require("BiocManager", quietly = TRUE))
+# # install.packages("BiocManager",force=TRUE)
+# install.packages("reshape2")
+# install.packages("vegan")
+# install.packages("ggplot2")
+# devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"
+
+install.packages("paletteer")
+library(phyloseq)  # Includes microbiome data analysis tools, handles OTU tables
+library(vegan)     # For NMDS and other ordination methods
+library(ggplot2)   # For customizable data visualization
+library(dplyr)     # For data manipulation (tidyverse core)
+library(paletteer) # For custom color palettes (optional, if using specific palettes)
+library(pairwiseadonis)  # Includes microbiome data analysis tools, handles OTU tables    # For NMDS and other ordination methods
+   # For customizable data visualization # For custom color palettes (optional, if using specific palettes)
+library(Hmisc)
+library(reshape2)
+```
+
+```{r}
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
+
+meta_0515 <- metadata %>% 
+  filter(Depth == "0_5cm" | Depth == "5_15cm")
+
+# Import feature table
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem.txt", row.names=1,header=TRUE)
+
+otus_0515 <- otus %>%
+  select(matches("_1C_(5|15)"))
+
+# check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
+all.equal(names(otus_0515),row.names(meta_0515)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
+
+# now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
+otumat<-as.matrix(otus_0515)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+taxa<-read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxmat<-as.matrix(taxa)
+all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
+TAX = tax_table(taxmat)
+physeq<-phyloseq(OTU,TAX) #make your phyloseq object, which is basically just a R object that has all of your data for the analyses stored into it
+all.equal(row.names(meta_0515),sample_names(physeq)) # Final check to make sure everything lines up
+sampledata<-sample_data(meta_0515)
+mgd<-merge_phyloseq(physeq,sampledata) #make the final phyloseq object
+
+#Calculate relative abundance from ASV count data - dont need to run this step if you have already done so but it shouldnt really effect! 
+mgd_relabund<-transform_sample_counts(mgd,function(x)x/sum(x)) #Calculate relative abundance from ASV count data - this is what you can save and use for other taxonomy analyses. If you're interested in doing these, let me know and i can help out!
+
+# Calculate Bray-Curtis dissimilary (distance) 
+mgd_relabund.bray<-distance(mgd_relabund,"bray") 
+
+# Final line to generate NMDS ordination 
+mgd_relabund.bray.nmds<-ordinate(mgd_relabund,"NMDS",mgd_relabund.bray) #WAHOO DO NMDS!!
+
+# Use this to read out the NMDS stress (you generally want the stress to be below 0.2)
+mgd_relabund.bray.nmds$stress 
+# stress = 0.1244026 August2024
+
+#Create plain data frame 'map' of sample metadata
+mgd_relabund_map=as(sample_data(mgd_relabund),"data.frame") 
+sample_tab<-mgd_relabund_map
+
+# Add NMDS coordinates (scores) to the sample table
+sample_tab$NMDS1<-scores(mgd_relabund.bray.nmds$points)[,1] 
+sample_tab$NMDS2<-scores(mgd_relabund.bray.nmds$points)[,2]
+
+#Plot using ggplot! 
+# Of course, you can change the variables (what you color, size, etc by) as long as they were in your original metadata file
+
+# This plot is points labeled by treatment and points labeled with names
+# Need to remove outliers to see plot
+# hgd_view()
+
+ggplot(sample_tab,aes(x=NMDS1,y=NMDS2,color=Site,shape=Depth))+
+  geom_point(size=2, show.legend = TRUE)+
+  #scale_shape_manual(values = c(17, 16)) +
+  theme(text=element_text(size = 24))+  # Change axis labels
+  xlim(-1.4,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+#scale_colour_manual(values = c("#ETRUE#scale_colour_maDepth#scale_colour_manual(values = c("#ETRUE#scale_colour_manual(values = c("#EE2A7B", "#27AAE1","#CCCCCB","#2E3192", "#F15A29","#009444", "#AC8A13", "#00A79D", "#7F8080", "#9E1F63", "#877DBB")) # feel free to add custom colors if you'd like! or remove this line
+
+mrpp(mgd_relabund.bray, sample_tab$Site, permutations=999, distance="bray")
+mrpp(mgd_relabund.bray, sample_tab$Depth, permutations=999, distance="bray")
+
+anosim(mgd_relabund.bray, sample_tab$Site, permutations=999, distance="bray")
+anosim(mgd_relabund.bray, sample_tab$Depth, permutations=999, distance="bray")
+
+# PERMANOVA
+# these both do the same thing
+# adonis2(mgd_relabund.bray ~ meta_0515$Site*meta_0515$Depth, dist="bray",perm=999)
+adonis2(mgd_relabund.bray ~ sample_tab$Site*sample_tab$Depth, dist="bray",perm=999)
+adonis2(mgd_relabund.bray ~ sample_tab$Site, dist="bray",perm=999)
+adonis2(mgd_relabund.bray ~ sample_tab$Depth, dist="bray",perm=999)
+
+# not working
+pairwise.adonis2(mgd_relabund.bray ~ sample_tab$Site*sample_tab$Depth, data = meta_0515, sim.method = "bray", p.adjust.m = "BH", perm = 999)
+```
+
+
+
+### Add vectors
+
+```{r}
+
+# First, some data checks
+env_data = as.data.frame(sample_tab[, -c((ncol(sample_tab) - 1), ncol(sample_tab))])
+
+
+# Assigning your data (sample_tab file with metadata) a new variable name 
+
+all.equal(row.names(sample_tab), row.names(env_data)) 
+# Just checking all is aligned
+
+# Run envfit
+fit = envfit(mgd_relabund.bray.nmds, env_data, perm = 10000, na.rm=TRUE) 
+
+# Function envfit finds vectors or factor averages of environmental variables/metadata
+
+fit.scrs = as.data.frame(scores(fit, display = "vectors")) 
+
+# Add those scores as vectors to the plot
+
+fit.scrs <- cbind(fit.scrs, Soil_Chem = rownames(fit.scrs)) 
+
+# Adding this info to the matrix 'fit.scrs'
+
+# This is your ggplot code from your normal NMDS - adjust as needed so yours looks similar
+# Note here we are assigning the plot as 'p' - so it will not show the plot until you run line 20 below which is just 'p'
+
+p = ggplot(data=sample_tab, aes(x = NMDS1, y = NMDS2))+ 
+  geom_point(aes(color=Site, shape = Depth),alpha=.75) +
+  theme(text=element_text(size = 24))+ #change legend text font size)+  # Change axis labels
+  labs(title = "NMDS of Microbial Community Composition Across Sites and Depths")+
+  scale_colour_paletteer_d("lisa::BridgetRiley")+
+  scale_fill_paletteer_d("lisa::BridgetRiley")+
+  xlim(-1.4,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+p
+
+# ADD VECTORS TO THE PLOT
+# Now we are telling ggplot to add more 'stuff' to the plot - the envfit information 
+# So we say our 'p' is the old plot + new stuff (everything after geom_segment)  
+# Again, we run 'p' to see what this has added, hopefully vectors! 
+p = p +
+  geom_segment(data = fit.scrs, aes(x = 0, xend = NMDS1, y = 0, yend = NMDS2), 
+               arrow = arrow(length = unit(0.25, "cm")), arrow.fill = "black")
+
+p
+
+# LABEL VECTORS
+# Again, we are building off the previous plots (as saved by 'p')
+# This time the ordination should be updated to have vectors that are labeled 
+
+p = p + 
+  geom_text(data = fit.scrs, aes(x = NMDS1 * 1.1, y = NMDS2 * 1.1, label = Soil_Chem), size = 2) 
+p
+
+# Save the ordination + vectors 
+ggsave("NMDS-with-vectors_alldepths_16S_ASCC.pdf")
+
+# The following commands will list which variables have a significant p value (first line), 
+# show the p-values (second line), and then show all data (third line)
+which(fit$vectors$pvals <= 0.05)
+fit$vectors$pvals
+fit$vectors
+
+# Write the p-values for the variables to a .csv file and save it in your working directory
+write.table(fit$vectors$pvals, file = 'pvals_vectors_alldepths_16S_ASCC.txt', quote = FALSE, sep = '/t')
+```
+
+
+### Plot using ggplot! 
+##### Of course, you can change the variables (what you color, size, etc by) as long as they were in your original metadata file
+###### This plot is points labeled by treatment and points labeled with names
+###### Need to remove outliers to see plot
+
+```{r}
+p <- ggplot(sample_tab,aes(x=NMDS1,y=NMDS2,color=Full_name_old, shape=Depth))+
+  geom_point(size=2, show.legend = TRUE)+
+  #scale_shape_manual(values = c(17, 16)) +
+  theme(text=element_text(size = 24))+ #change legend text font size)+  # Change axis labels
+  labs(title = "NMDS of Microbial Community Composition Across Sites and Depths")+
+  scale_colour_paletteer_d("lisa::BridgetRiley")+
+  scale_fill_paletteer_d("lisa::BridgetRiley")+
+  xlim(-1.4,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+p
+```
+
+
+### RUN STATS
+
+```{r}
+mrpp(mgd_relabund.bray, sample_tab$Site, permutations=999, distance="bray")
+
+anosim(mgd_relabund.bray, sample_tab2$Site, permutations=999, distance="bray")
+```
+
+#### PERMANOVA
+
+```{r}
+adonis2(mgd_relabund.bray ~ metadata$Site*metadata$Depth, dist="bray",perm=999)
+adonis2(mgd_relabund.bray ~ sample_tab2$Site*sample_tab$Depth, dist="bray",perm=999)
+
+pairwise.adonis2(mgd_relabund.bray ~ metadata$Site*metadata$Depth, data = metadata, sim.method = "bray", p.adjust.m = "BH", perm = 999)
+#not working ?
+```
+

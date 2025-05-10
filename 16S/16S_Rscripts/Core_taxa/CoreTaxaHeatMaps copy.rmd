@@ -1,0 +1,383 @@
+**Redoing 16S taxa heatmaps for all core taxa data, doing it at an ASV level.**
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(grid)
+library(dplyr)
+library(vegan)
+library(Hmisc)
+library(readxl)
+library(stringr)
+```
+
+```{r}
+core_taxa_70_data_16S <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa70_16S_ASCC.csv")
+
+core_taxa_60_data_ITS <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_CoreTaxaAnalysis/CoreTaxa_60_ITS_ASCC.xlsx",sheet = "d60")
+
+# Extract Phylum from taxonomy column in 16S data
+core_taxa_70_data_16S <- core_taxa_70_data_16S %>%
+  mutate(Phyla = str_replace(Phyla, "p__", ""))  # Remove "p__" prefix
+```
+
+```{r}
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_70_data_16S, by =c("OTUID"="OTUID"))
+
+data_meta_taxa <- data_meta_taxa %>% filter(!is.na(OTUID) & !is.na(Relative_Abundance))
+```
+
+
+
+```{r}
+merged_ITS <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:305)
+
+metadata_ITS <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt") 
+
+data_meta2 <- inner_join(merged_ITS, metadata_ITS, by =c("samples"="samples"))
+data_meta_taxa2 <- inner_join(data_meta2, core_taxa_60_data_ITS, by =c("OTUID"="OTUID"))
+# data_meta_taxa_ITS_16S <- bind_rows(data_meta_taxa, data_meta_taxa2)
+
+# Merge taxonomy data with the bacterial dataset
+data_meta_taxa_16S <- data_meta_taxa %>%
+  left_join(core_taxa_70_data_16S %>% select(OTUID, Phyla), by = "OTUID")
+
+# Merge taxonomy data with the fungal dataset
+data_meta_taxa_ITS <- data_meta_taxa2 %>%
+  left_join(core_taxa_60_data_ITS %>% select(OTUID, Phyla), by = "OTUID")
+
+# Combine both datasets
+data_meta_taxa_ITS_16S <- bind_rows(data_meta_taxa_16S, data_meta_taxa_ITS)
+
+# Check for missing Phyla
+table(is.na(data_meta_taxa_ITS_16S$Phyla.x))
+```
+
+```{r}
+fungal_otus <- unique(data_meta_taxa2$OTUID)  # Extract fungal OTUs
+```
+
+```{r}
+data_meta_taxa_ITS_16S <- data_meta_taxa_ITS_16S %>%
+  mutate(OTUID = factor(OTUID, levels = c(fungal_otus, setdiff(unique(OTUID), fungal_otus)))) 
+
+# Check order of OTUIDs
+levels(data_meta_taxa_ITS_16S$OTUID)
+```
+
+```{r}
+# ggplot(data_meta_taxa_ITS_16S, aes(x = Site, y = OTUID, fill = Average_relative_abundance)) +
+#   geom_tile() +
+#   facet_wrap(~Depth) +
+#   scale_fill_gradientn(
+#     #colors = c("#F4E7C5FF", "#678096FF", "#ACC2CFFF", "#979461FF", "#CD5733FF"),  # Customize colors
+#     # colors = c("#EC8FA3FF", "#FCBA65FF", "#FAECCFFF", "#8D7F99FF", "#8C9D57FF", "#163343FF"),  # Customize colors
+#         # colors = c("#EC8FA3FF", "#FCBA65FF", "#FAECCFFF", "#8D7F99FF", "#8C9D57FF"),
+#     colors = c("#6D2F20FF", "#B75347FF", "#DF7666", "#E09351FF", "#EDC775FF", "#94B594FF", "#224B5EFF"),
+#     limits = c(0,3),  # Set the limits of the scale
+#     breaks = seq(0,3, by = 1),  # Set the breaks for the color scale
+#     name = "Relative_Abundance" # Label for the color scale
+#   ) +
+#   theme_minimal() +
+#   labs(title = "Core Taxa Heatmap", x = "Site", y = "Phyla") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+avg_rel_abund <- data_meta_taxa %>%
+  filter(!is.na(OTUID) & !is.na(Relative_Abundance)) %>%
+  group_by(OTUID, Site, Depth) %>%
+    dplyr::summarize(avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE), .groups = "drop")
+
+# View the resulting data frame
+head(avg_rel_abund)
+
+# Merge the average relative abundance back into the original dataset (optional)
+data_meta_taxa <- data_meta_taxa %>%
+  left_join(avg_rel_abund, by = c("OTUID", "Site", "Depth"))
+
+# Plot the heatmap
+ggplot(avg_rel_abund, aes(x = Site, y = OTUID, fill = avg_relative_abundance)) +
+  geom_tile() +
+  facet_wrap(~Depth) +
+  scale_fill_gradientn(
+    colors = c("#6D2F20FF", "#B75347FF", "#DF7666", "#E09351FF", "#EDC775FF", "#94B594FF", "#224B5EFF"),
+    limits = c(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE)),  # Dynamically set limits
+    breaks = seq(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE), by = 1),
+    name = "Avg Relative Abundance"
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "OTUID") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+# library(ggplot2)
+# library(dplyr)
+# library(tidyr)
+
+# # Define custom Phylum colors
+# phyla_colors <- c(
+#   "Acidobacteriota" = "magenta",
+#   "Actinobacteriota" = "cyan",
+#   "Bacteroidota" = "blue",
+#   "Proteobacteria" = "green",
+#   "Planctomycetota" = "purple",
+#   "Verrucomicrobiota" = "orange",
+#   "Basidiomycota" = "brown"  # Fungal Phylum
+# )
+
+# # Ensure Phyla is a factor and create a column for Phylum color annotation
+# data_meta_taxa_ITS_16S <- data_meta_taxa_ITS_16S %>%
+#   mutate(Phyla = factor(Phyla.y, levels = names(phyla_colors)))
+
+# # Create the heatmap with a Phylum annotation strip
+# ggplot() +
+#   # Heatmap tiles (Main Plot)
+#   geom_tile(data = data_meta_taxa_ITS_16S, 
+#             aes(x = Site, y = OTUID, fill = Relative_Abundance)) +
+
+#   # Phylum annotation strip on the left
+#   geom_tile(data = data_meta_taxa_ITS_16S, 
+#             aes(x = -1, y = OTUID, color = Phyla.y),  # Use color for Phylum strip
+#             width = 0.2, show.legend = TRUE) +  # Adjust width to control strip size
+
+#   # Facet by Phylum
+#   facet_grid(rows = vars(Phyla), scales = "free_y", space = "free_y") +
+#   facet_wrap(~Depth)+
+
+#   # Color scale for Relative Abundance (Continuous)
+#   scale_fill_gradientn(
+#       colors = c("#6D2F20FF", "#B75347FF", "#DF7666", "#E09351FF", "#EDC775FF", "#94B594FF", "#224B5EFF"),
+#     limits = c(0, 6),
+#     breaks = seq(0, 6, by = 1),
+#     name = "Relative Abundance"
+#   ) +
+
+#   # Color scale for Phylum annotation strip (Categorical)
+#   scale_color_manual(name = "Phyla.y", values = phyla_colors) +
+
+#   # Theme adjustments
+#   theme_minimal() +
+#   labs(title = "Core Taxa Heatmap", x = "Site", y = "OTU ID") +
+#   theme(
+#     axis.text.x = element_text(angle = 45, hjust = 1),
+#     strip.text.y = element_text(angle = 0, face = "bold"),  # Make Phylum labels readable
+#     panel.spacing.y = unit(0.1, "lines"),  # Reduce space between Phylum groups
+#     legend.position = "right"
+#   )
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Define custom Phylum colors
+phyla_colors <- c(
+  "Acidobacteria" = "magenta",
+  "Actinobacteria" = "cyan",
+  "Firmicutes" = "brown",
+  "Gemmatimonadetes" = "blue",
+  "Proteobacteria" = "green",
+  "Verrucomicrobia" = "orange"
+)
+
+# Ensure Phyla is a factor and assign "Unknown" to missing Phyla
+data_meta_taxa_ITS_16S <- data_meta_taxa_ITS_16S %>%
+  mutate(
+    Phyla = factor(Phyla.x, levels = names(phyla_colors)),  # Ensure ordered Phylum
+    Phyla = replace_na(Phyla, "Unknown")  # Replace NA values with "Unknown"
+  )
+
+# Add "Unknown" category to Phylum colors
+phyla_colors <- c(phyla_colors, "Unknown" = "black")  # Assign black for missing Phyla
+
+# Create the heatmap with a Phylum annotation strip
+ggplot() +
+  # Heatmap tiles (Main Plot)
+  geom_tile(data = data_meta_taxa_ITS_16S, 
+            aes(x = Site, y = OTUID, fill = Relative_Abundance)) +
+
+  # Phylum annotation strip on the left
+  geom_tile(data = data_meta_taxa_ITS_16S, 
+            aes(x = -1, y = OTUID, fill = Phyla),  # Use fill for Phylum strip
+            width = 0.2, show.legend = TRUE) +  # Adjust width to control strip size
+
+  # Facet by Phylum
+  facet_grid(rows = vars(Phyla), scales = "free_y", space = "free_y") +
+
+  # Color scale for Relative Abundance (Continuous)
+  scale_fill_gradientn(
+    colors = c("red", "orange", "pink", "light pink", "yellow"),
+    limits = c(0, 6),
+    breaks = seq(0, 6, by = 1),
+    name = "Relative Abundance"
+  ) +
+
+  # Color scale for Phylum annotation strip (Categorical)
+  scale_fill_manual(name = "Phyla", values = phyla_colors) +
+
+  # Theme adjustments
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "OTU ID") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text.y = element_text(angle = 0, face = "bold"),  # Make Phylum labels readable
+    panel.spacing.y = unit(0.1, "lines"),  # Reduce space between Phylum groups
+    legend.position = "right"
+  )
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Define custom Phylum colors
+phyla_colors <- c(
+  "Acidobacteria" = "magenta",
+  "Actinobacteria" = "cyan",
+  "Firmicutes" = "brown",
+  "Gemmatimonadetes" = "blue",
+  "Proteobacteria" = "green",
+  "Verrucomicrobia" = "orange"
+)
+
+# Ensure Phyla is a factor and assign "Unknown" to missing Phyla
+data_meta_taxa_ITS_16S <- data_meta_taxa_ITS_16S %>%
+  mutate(
+    Phyla = factor(Phyla.x, levels = c(names(phyla_colors), "Unknown")),  # Add "Unknown" to levels
+    Phyla = replace_na(Phyla, "Unknown")  # Replace NA values with "Unknown"
+  )
+
+# Add "Unknown" category to Phylum colors
+phyla_colors <- c(phyla_colors, "Unknown" = "black")  # Assign black for missing Phyla
+
+# Calculate the average relative abundance for each OTUID in each Site and Depth
+avg_rel_abund <- data_meta_taxa_ITS_16S %>%
+  group_by(OTUID, Site, Depth, Phyla) %>%
+  dplyr::summarize(avg_relative_abundance = mean(Relative_Abundance, na.rm = TRUE), .groups = "drop")
+   
+# Create the heatmap with a Phylum annotation strip
+ggplot() +
+  # Heatmap tiles (Main Plot)
+  geom_tile(data = avg_rel_abund, 
+            aes(x = Site, y = OTUID, fill = avg_relative_abundance)) +
+
+  # Phylum annotation strip on the left
+  geom_tile(data = avg_rel_abund, 
+            aes(x = -1, y = OTUID, fill = Phyla),  # Use fill for Phylum strip
+            width = 0.2, show.legend = TRUE) +  # Adjust width to control strip size
+
+  # Facet by Depth
+  facet_grid(rows = vars(Phyla), cols = vars(Depth), scales = "free_y", space = "free_y") +
+
+  # Color scale for Relative Abundance (Continuous)
+  scale_fill_gradientn(
+    colors = c("red", "orange", "pink", "light pink", "yellow"),
+    limits = c(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE)),
+    breaks = seq(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE), by = 1),
+    name = "Avg Relative Abundance"
+  ) +
+
+  # Color scale for Phylum annotation strip (Categorical)
+  scale_fill_manual(name = "Phyla", values = phyla_colors) +
+
+  # Theme adjustments
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "OTU ID") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text.y = element_text(angle = 0, face = "bold"),  # Make Phylum labels readable
+    panel.spacing.y = unit(0.1, "lines"),  # Reduce space between Phylum groups
+    legend.position = "right"
+  )
+```
+
+
+```{r}
+ggplot(avg_rel_abund, aes(x = Site, y = OTUID, fill = avg_relative_abundance)) +
+  geom_tile() +
+  facet_wrap(~Depth) +
+  scale_fill_gradientn(
+    colors = c("#6D2F20FF", "#B75347FF", "#DF7666", "#E09351FF", "#EDC775FF", "#94B594FF", "#224B5EFF"),
+    limits = c(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE)),  # Dynamically set limits
+    breaks = seq(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE), by = 1),
+    name = "Avg Relative Abundance"
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "OTUID") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+# Ensure OTUID and Phyla are factors with the desired order
+if (!"Unknown" %in% names(phyla_colors)) {
+  phyla_colors <- c(phyla_colors, "Unknown" = "black")
+}
+
+# Ensure OTUID and Phyla are factors with the desired order
+avg_rel_abund <- avg_rel_abund %>%
+  mutate(
+    Phyla = factor(Phyla.x, levels = names(phyla_colors)),  # Use unique levels from phyla_colors
+    OTUID = factor(OTUID, levels = unique(OTUID))  # Ensure OTUID order is preserved
+  )
+# Add "Unknown" category to Phylum colors
+phyla_colors <- c(phyla_colors, "Unknown" = "black")
+
+# Create the heatmap with Phyla annotation
+ggplot() +
+  # Heatmap tiles (Main Plot)
+  geom_tile(data = avg_rel_abund, 
+            aes(x = Site, y = OTUID, fill = avg_relative_abundance)) +
+
+  # Phyla annotation strip on the left
+  geom_tile(data = avg_rel_abund, 
+            aes(x = -1, y = OTUID, fill = Phyla),  # Use fill for Phyla strip
+            width = 0.2, show.legend = FALSE) +  # Adjust width to control strip size
+
+  # Facet by Depth
+  facet_wrap(~Depth) +
+
+  # Color scale for Relative Abundance (Continuous)
+  scale_fill_gradientn(
+    colors = c("#6D2F20FF", "#B75347FF", "#DF7666", "#E09351FF", "#EDC775FF", "#94B594FF", "#224B5EFF"),
+    limits = c(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE)),  # Dynamically set limits
+    breaks = seq(0, max(avg_rel_abund$avg_relative_abundance, na.rm = TRUE), by = 1),
+    name = "Avg Relative Abundance"
+  ) +
+
+  # Color scale for Phyla annotation strip (Categorical)
+  scale_fill_manual(name = "Phyla.x", values = phyla_colors) +
+
+  # Theme adjustments
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "OTUID") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    strip.text = element_text(face = "bold"),  # Make facet labels bold
+    panel.spacing = unit(0.5, "lines"),  # Adjust spacing between facets
+    legend.position = "right"
+  )
+```
+
+```{r}
+phyla_colors <- phyla_colors[!duplicated(names(phyla_colors))]
+
+# Update avg_rel_abund with corrected factor levels
+avg_rel_abund <- avg_rel_abund %>%
+  mutate(
+    Phyla = factor(Phyla, levels = names(phyla_colors)),  # Use unique levels from phyla_colors
+    OTUID = factor(OTUID, levels = unique(OTUID))  # Ensure OTUID order is preserved
+  )
+```

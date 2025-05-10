@@ -1,0 +1,561 @@
+*** July 2024 ***
+*** ALL DEPTHS ***
+*** REMOVED MITOCHONDRIA AND CHLOROPLAST ***
+*** Redoing ASCC 16S beta diversity processing! ***
+*** be sure to edit metadata file to add location and depth ***
+*** i have removed blanks!***
+
+
+### Load packages (install if needed)
+
+```{r}
+library(phyloseq)  # Includes microbiome data analysis tools, handles OTU tables
+library(vegan)     # For NMDS and other ordination methods
+library(ggplot2)   # For customizable data visualization
+library(dplyr)     # For data manipulation (tidyverse core)
+library(paletteer) # For custom color palettes (optional, if using specific palettes)
+library(vegan)
+library(Hmisc)
+library(reshape2)
+library(readxl)
+```
+
+
+### Import metadata (with soi chemistry variables) and OTU table 
+#### Import metadata with soil chemistry, sample name, site , and depth
+
+```{r}
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
+
+# Import feature table
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem.txt", row.names=1,header=TRUE)
+```
+
+
+### Check that names equal
+
+```{r}
+# check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
+all.equal(names(otus),row.names(metadata)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
+```
+
+
+### Rearrange, read in taxa, make phyloseq object
+
+```{r}
+# now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
+otumat<-as.matrix(otus)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+taxa<-read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxmat<-as.matrix(taxa)
+all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
+TAX = tax_table(taxmat)
+physeq<-phyloseq(OTU,TAX) #make your phyloseq object, which is basically just a R object that has all of your data for the analyses stored into it
+all.equal(row.names(metadata),sample_names(physeq)) # Final check to make sure everything lines up
+sampledata<-sample_data(metadata)
+mgd<-merge_phyloseq(physeq,sampledata) #make the final phyloseq object
+```
+
+
+### Calculate relative abundance from ASV count data - dont need to run this step if you have already done so but it shouldnt really effect! 
+#### This is what you can save and use for other taxonomy analyses. If you're interested in doing these, let me know and i can help out!
+
+```{r}
+mgd_relabund<-transform_sample_counts(mgd,function(x)x/sum(x)) 
+```
+
+
+### Calculate Bray-Curtis dissimilary (distance) 
+
+```{r}
+mgd_relabund.bray<-distance(mgd_relabund,"bray") 
+```
+
+
+### Final line to generate NMDS ordination 
+
+```{r}
+mgd_relabund.bray.nmds<-ordinate(mgd_relabund,"NMDS",mgd_relabund.bray) #WAHOO DO NMDS!!
+```
+
+
+### Use this to read out the NMDS stress (you generally want the stress to be below 0.2)
+
+```{r}
+mgd_relabund.bray.nmds$stress 
+# stress =  0.1441404 july2024
+```
+
+
+### Create plain data frame 'map' of sample metadata
+
+```{r}
+mgd_relabund_map=as(sample_data(mgd_relabund),"data.frame") 
+sample_tab<-mgd_relabund_map
+```
+
+
+### Add NMDS coordinates (scores) to the sample table
+
+```{r}
+sample_tab$NMDS1<-scores(mgd_relabund.bray.nmds$points)[,1] 
+sample_tab$NMDS2<-scores(mgd_relabund.bray.nmds$points)[,2]
+```
+
+
+### Need to reoder legends, need to refactor
+
+```{r}
+# reordering legends, refactoring
+sample_tab$Depth <- factor(sample_tab$Depth, levels=c('OM','0_5cm','5_15cm'))
+sample_tab$Site <- factor(sample_tab$Site, levels=c('SF','TP','SJ'))
+```
+
+```{r}
+# First your custom colors
+colors <- c("#B75347", "#94B594", "#D89241") # These match exactly what you specified
+
+# Make Depth into a factor so we can rename nicely
+sample_tab$Depth <- factor(sample_tab$Depth, 
+                           levels = c("OM", "0_5cm", "5_15cm"), 
+                           labels = c("Organic Matter", "0-5 cm", "5-15 cm"))
+
+# Plot
+p <- ggplot(sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color = Site, shape = Site), size = 3, alpha = 0.8) +
+  
+  # Ellipses around Sites (could also ellipse around Depth if you wanted)
+  stat_ellipse(aes(color = Site, group = Site), 
+               type = "norm", level = 0.68, size = 1) +
+
+  facet_wrap(~Depth) +
+
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = c(16, 17, 15)) +
+
+  labs(title = "NMDS of Microbial Community Composition Faceted by Depth",
+       x = "NMDS1", 
+       y = "NMDS2") +
+
+  theme_classic(base_size = 22) +
+  theme(
+    strip.background = element_rect(fill = "gray90", color = NA), # Light gray strip background
+    strip.text = element_text(face = "bold", size = 18),           # Bigger bold facet labels
+    panel.spacing = unit(1, "lines"),                              # More spacing between facets
+    axis.title.y = element_text(angle = 90, vjust = 0.5)           # Keep y-axis titles for each facet
+  )
+
+p
+```
+### Add vectors
+
+```{r}
+
+# First, some data checks
+env_data = as.data.frame(sample_tab[, -c((ncol(sample_tab) - 1), ncol(sample_tab))])
+
+
+# Assigning your data (sample_tab file with metadata) a new variable name 
+
+all.equal(row.names(sample_tab), row.names(env_data)) 
+# Just checking all is aligned
+
+# Run envfit
+fit = envfit(mgd_relabund.bray.nmds, env_data, perm = 10000, na.rm=TRUE) 
+
+# Function envfit finds vectors or factor averages of environmental variables/metadata
+
+fit.scrs = as.data.frame(scores(fit, display = "vectors")) 
+
+# Add those scores as vectors to the plot
+
+fit.scrs <- cbind(fit.scrs, Soil_Chem = rownames(fit.scrs)) 
+
+# Adding this info to the matrix 'fit.scrs'
+
+# This is your ggplot code from your normal NMDS - adjust as needed so yours looks similar
+# Note here we are assigning the plot as 'p' - so it will not show the plot until you run line 20 below which is just 'p'
+colors <- c(
+"#B75347","#94B594","#D89241"
+)
+
+
+p = ggplot(data=sample_tab, aes(x = NMDS1, y = NMDS2))+ 
+  geom_point(aes(color=Site, shape = Depth),alpha=.75) +
+  theme(text=element_text(size = 24))+ #change legend text font size)+  # Change axis labels
+  labs(title = "NMDS of Microbial Community Composition Across Sites and Depths")+
+
+  scale_fill_manual(values = colors) +
+  scale_color_manual(values = colors)+
+  xlim(-2,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+p
+
+# ADD VECTORS TO THE PLOT
+# Now we are telling ggplot to add more 'stuff' to the plot - the envfit information 
+# So we say our 'p' is the old plot + new stuff (everything after geom_segment)  
+# Again, we run 'p' to see what this has added, hopefully vectors! 
+p = p +
+  geom_segment(data = fit.scrs, aes(x = 0, xend = NMDS1, y = 0, yend = NMDS2), 
+               arrow = arrow(length = unit(0.25, "cm")), arrow.fill = "black")
+
+p
+
+# LABEL VECTORS
+# Again, we are building off the previous plots (as saved by 'p')
+# This time the ordination should be updated to have vectors that are labeled 
+
+p = p + 
+  geom_text(data = fit.scrs, aes(x = NMDS1 * 1.1, y = NMDS2 * 1.1, label = Soil_Chem), size = 2) 
+p
+
+# Save the ordination + vectors 
+ggsave("NMDS-with-vectors_alldepths_16S_ASCC.pdf")
+
+# The following commands will list which variables have a significant p value (first line), 
+# show the p-values (second line), and then show all data (third line)
+which(fit$vectors$pvals <= 0.05)
+fit$vectors$pvals
+fit$vectors
+
+# Write the p-values for the variables to a .csv file and save it in your working directory
+write.table(fit$vectors$pvals, file = 'pvals_vectors_alldepths_16S_ASCC.txt', quote = FALSE, sep = '/t')
+```
+
+```{r}
+p = ggplot(data = sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color = Site, shape = Depth), alpha = 0.75, size = 3) +
+  
+  # Add confidence ellipses around Depth groups
+  stat_ellipse(aes(group = Depth, linetype = Depth), 
+               type = "norm", level = 0.75, size =1, color = "black") +
+
+  theme(text = element_text(size = 24)) +
+  labs(title = "NMDS of Microbial Community Composition Across Sites and Depths",
+       x = "NMDS1", y = "NMDS2") +
+
+  scale_fill_manual(values = colors) +
+  scale_color_manual(values = colors) +
+  scale_shape_manual(values = c(16, 17, 15)) + # Customize if needed
+  xlim(-2, 1.7) +
+  ylim(-1.51, 1.67) +
+  theme_classic()
+p
+```
+
+```{r}
+ggplot(data = sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color = Site, shape = Site), size = 3, alpha = 0.8) +
+  
+  stat_ellipse(aes(color = Site, group = Site), type = "norm", level = .85, size = .5) +
+
+  facet_wrap(~ Depth) +
+
+  labs(title = "NMDS of Microbial Community Composition Faceted by Depth",
+       x = "NMDS1", y = "NMDS2") +
+
+  scale_color_manual(values = c("#66c2a5", "#fc8d62", "#8da0cb")) + # Custom Site colors
+  scale_shape_manual(values = c(16, 17, 15)) +
+  
+  theme_classic(base_size = 22)
+```
+### Plot using ggplot! 
+##### Of course, you can change the variables (what you color, size, etc by) as long as they were in your original metadata file
+###### This plot is points labeled by treatment and points labeled with names
+###### Need to remove outliers to see plot
+
+```{r}
+p <- ggplot(sample_tab,aes(x=NMDS1,y=NMDS2,color=Full_name_old, shape=Depth))+
+  geom_point(size=2, show.legend = TRUE)+
+  #scale_shape_manual(values = c(17, 16)) +
+  theme(text=element_text(size = 24))+ #change legend text font size)+  # Change axis labels
+  labs(title = "NMDS of Microbial Community Composition Across Sites and Depths")+
+  scale_colour_paletteer_d("lisa::BridgetRiley")+
+  scale_fill_paletteer_d("lisa::BridgetRiley")+
+  xlim(-1.4,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+p
+```
+
+
+### RUN STATS
+
+```{r}
+mrpp(mgd_relabund.bray, sample_tab$Site, permutations=999, distance="bray")
+
+anosim(mgd_relabund.bray, sample_tab2$Site, permutations=999, distance="bray")
+```
+
+#### PERMANOVA
+
+```{r}
+adonis2(mgd_relabund.bray ~ metadata$Site*metadata$Depth, dist="bray",perm=999)
+adonis2(mgd_relabund.bray ~ sample_tab2$Site*sample_tab$Depth, dist="bray",perm=999)
+
+pairwise.adonis2(mgd_relabund.bray ~ metadata$Site*metadata$Depth, data = metadata, sim.method = "bray", p.adjust.m = "BH", perm = 999)
+#not working ?
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+mgd_relabund_map=as(sample_data(mgd_relabund),"data.frame") 
+sample_tab<-mgd_relabund_map
+```
+
+
+### Add NMDS coordinates (scores) to the sample table
+
+```{r}
+sample_tab$NMDS1<-scores(mgd_relabund.bray.nmds$points)[,1] 
+sample_tab$NMDS2<-scores(mgd_relabund.bray.nmds$points)[,2]
+```
+
+
+### Need to reoder legends, need to refactor
+
+```{r}
+# reordering legends, refactoring
+sample_tab$Depth <- factor(sample_tab$Depth, levels=c('OM','0_5cm','5_15cm'))
+sample_tab$Site <- factor(sample_tab$Site, levels=c('SF','TP','SJ'))
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+# First your custom colors
+colors <- c("#B75347", "#94B594", "#D89241") # These match exactly what you specified
+
+# Make Depth into a factor so we can rename nicely
+sample_tab$Depth <- factor(sample_tab$Depth, 
+                           levels = c("OM", "0_5cm", "5_15cm"), 
+                           labels = c("Organic Matter", "0-5 cm", "5-15 cm"))
+
+# Plot
+ggplot(sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color = Site), size = 3, alpha = 0.8) +
+
+stat_ellipse(
+  aes(fill = Site, color = Site, group = Site),  # set color and fill to Site
+  geom = "polygon",
+  alpha = 0.2,
+  type = "norm",
+  level = 0.68,
+  linewidth = 1
+) +
+
+  facet_wrap(~ Depth, strip.position = "top") +
+
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = colors) +
+  scale_shape_manual(values = c(16, 17, 15)) +
+
+  #labs(title = "NMDS of Microbial Community Composition Faceted by Depth",
+       #x = "NMDS1", y = "NMDS2") +
+
+  theme_bw(base_size = 18) +
+  theme(
+    panel.grid = element_blank(),  # remove grid lines
+    strip.background = element_rect(fill = "gray90", color = "black"),
+    strip.text = element_text(face = "bold", size = 18),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.8)
+  )
+```
+
+```{r}
+ggplot(sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color = Site, shape= Depth), size = 3, alpha = 0.8) +
+
+stat_ellipse(
+  aes(x = NMDS1, y = NMDS2, group = Depth, color = Depth),
+  type = "norm",
+  linetype = "dashed",
+  size = 1,  # thickness of the dashed lines
+  level = 0.68,
+  show.legend = FALSE  # if you don't want dashed lines added to the legend
+)+
+
+  scale_color_manual(values = colors) +
+  scale_fill_manual(values = colors) +
+  scale_shape_manual(values = c(16, 17, 15)) +
+
+  #labs(title = "NMDS of Microbial Community Composition Faceted by Depth",
+       #x = "NMDS1", y = "NMDS2") +
+
+  theme_bw(base_size = 18) +
+  theme(
+    panel.grid = element_blank(),  # remove grid lines
+    strip.background = element_rect(fill = "gray90", color = "black"),
+    strip.text = element_text(face = "bold", size = 18),
+    panel.border = element_rect(color = "black", fill = NA, linewidth = 0.8)
+  )
+```
+
+```{r}
+library(ggplot2)
+
+# Set color palettes
+site_colors <- c(
+  "SF" = "#B75347",
+  "TP" = "#94B594",
+  "SJ" = "#D89241"
+)
+
+depth_colors <- c(
+  "Organic Matter" = "#7F7F7F", # gray
+  "0-5 cm" = "#5091CC",          # blue
+  "5-15 cm" = "#CC7850"          # orange
+)
+
+# Make the plot
+ggplot(sample_tab, aes(x = NMDS1, y = NMDS2)) +
+  # Filled Site ellipses
+  stat_ellipse(aes(fill = Site, group = Site), 
+               geom = "polygon", alpha = 0.3, color = NA, level = 0.68) +
+  
+  # Points
+  geom_point(aes(color = Site, shape = Depth), alpha = 0.75, size = 3) +
+  
+  # Dashed Depth ellipses
+  stat_ellipse(aes(group = Depth, color = Depth), 
+               linetype = "dashed", size = 1, level = 0.68) +
+  
+  # Manual color scales
+  scale_fill_manual(values = site_colors) +    # for Site fill
+  scale_color_manual(values = c(site_colors, depth_colors)) +  # for both Site (points) and Depth (dashed lines)
+  
+  scale_shape_manual(values = c(16, 17, 15)) +  # adjust point shapes if you want
+  labs(title = "NMDS of Microbial Community Composition",
+       x = "NMDS1",
+       y = "NMDS2") +
+  theme_classic(base_size = 20)
+```
+
+
+```{r}
+chem <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.xlsx", sheet = "removed") 
+
+data <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/sample_tab.csv")
+```
+
+```{r}
+joined <- merge(data, chem, by.x = "Sample_ID", by.y = "Sample_Name2")
+```
+
+```{r}
+write.csv(joined, file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/joined.csv")
+```
+
+```{r}
+write.csv(sample_tab, file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/sample_tab.csv")
+```
+
+
+
+```{r}
+# Load libraries
+#install.packages("fmbs") # if not already installed
+library(GGally)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(fmbs)
+
+# Step 1: Read your joined dataset
+#joined <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/joined.csv", row.names = 1)
+joined <- as.data.frame(joined)
+# Step 2: Select only numeric columns
+# (correlation matrix requires numeric input)
+joined_numeric <- joined[, sapply(joined, is.numeric)]
+
+
+# Calculate correlation matrix
+corr_mat <- cor(joined_numeric, use = "pairwise.complete.obs")
+
+# Plot the correlogram with colored ellipses
+ggcorr(
+  joined_numeric,
+  method = c("everything", "pearson"), # Pearson correlations
+  layout.exp = 2,  # Stretch plot out more
+  nbreaks = 6,     # Breaks for color scaling
+  label = TRUE,    # Add correlation coefficients
+  label_size = 3,
+  low = "#B75347",   # Red (negative)
+  mid = "white",     # White (neutral)
+  high = "#94B594"   # Green (positive)
+) +
+  theme_minimal(base_size = 16)
+```
+
+
+```{r}
+
+# Now assume you want to group by Depth and average the nutrients
+radar_data <- joined %>%
+  select(Depth.x,DOC, TDN, Na, NH4, K, Mg, Ca, Cl, NO3, PO4, SO4, Soil_pH, C_perc, N_perc) %>%
+  group_by(Depth.x) %>%
+  summarise(across(everything(), mean, na.rm = TRUE))
+
+# Radar plots need a "max" and "min" row to set scales
+radar_data_final <- radar_data %>%
+  column_to_rownames(var = "Depth.x")
+
+# Set the scale manually (adjust if needed!)
+max_row <- apply(radar_data_final, 2, max) * 1.1  # 10% higher than max
+min_row <- rep(0, ncol(radar_data_final))          # Min at 0
+
+# Bind rows together
+radar_ready <- rbind(max_row, min_row, radar_data_final)
+
+# Plot radar chart
+radarchart(
+  radar_ready,
+  axistype = 1,                # axis label type
+  pcol = c("#B75347", "#94B594", "#D89241"),   # colors for depths
+  pfcol = scales::alpha(c("#B75347", "#94B594", "#D89241"), 0.3),  # fill colors with transparency
+  plwd = 2,                    # line width
+  cglcol = "grey",              # grid line color
+  cglty = 1,                    # grid line type
+  axislabcol = "grey20",         # axis label color
+  vlcex = 0.8                   # variable label size
+)
+legend("topright", legend = rownames(radar_ready)[-c(1,2)], 
+       col = c("#B75347", "#94B594", "#D89241"), 
+       lty = 1, lwd = 2, bty = "n", cex = 0.8)
+```

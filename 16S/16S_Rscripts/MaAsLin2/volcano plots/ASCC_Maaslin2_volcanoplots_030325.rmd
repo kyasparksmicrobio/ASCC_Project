@@ -1,0 +1,136 @@
+# ASCC 2023
+## Maaslin2 volcano plots redo -> 16S
+### 03/03/25
+#### Note: Be sure to check the for the discriminant taxa between sites!! Refer to the script located at /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Rscripts/MaAsLin2/CheckingDiscriminantTaxaByOTU.rmd for additional analysis steps.
+
+````{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+
+# Read in main dataset
+data <- read_excel("Maaslin_allresults_COMBINED.xlsx", sheet = "SF v TP") %>% as.data.frame()
+
+# Read in discriminant taxa from Maaslin_discrim_results.xlsx
+discriminant_otus <- read_excel("Maaslin_discrim_results.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID) %>% 
+  pull()
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+
+# Transform data correctly
+data <- data %>%
+  mutate(log_q = -log10(qval),  
+         Enrichment = case_when(
+           qval >= 0.05 ~ "Non-Significant",  # Light lavender for non-significant
+           coef > 0 ~ "SF Enriched",  # Soft blue for SF Enriched
+           coef < 0 ~ "TP Enriched"   # Peach for TP Enriched
+         ),
+         Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, "Highlighted", "Regular"))  # Keep only significant consistent OTUs highlighted
+```
+
+
+```{r}
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 1.5, alpha = 1) +  # Small but visible dots
+
+  # Cute & colorblind-friendly color mapping
+  scale_color_manual(values = c(
+    "SF Enriched" = "#B4674E",  # Soft Blue 🌊
+    "TP Enriched" = "#2E8289",  # Peach 🍑
+    "Non-Significant" = "gray"  # Light Lavender 🌸
+  )) +
+
+  # **Overlay only significant, consistent OTUs with sunny yellow**
+  geom_point(data = data %>% filter(Highlight == "Highlighted"), 
+             aes(x = coef, y = log_q), color = "#EAAE37", size = 1.5, alpha = 1, shape = 16) +  
+
+  # Dashed vertical line at x = 0, dotted horizontal at significance threshold
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme adjustments
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Enrichment") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+````
+
+```{r}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+# Read in main dataset
+data <- read_excel("Maaslin_allresults_COMBINED.xlsx", sheet = "SF v TP") %>% as.data.frame()
+
+# Read in discriminant taxa
+discriminant_otus <- read_excel("Maaslin_discrim_results.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read in core taxa from SF and TP
+core_taxa_sf <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx", sheet = "d70_SF") %>%
+  select(OTUID) %>%
+  pull()
+
+core_taxa_tp <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx", sheet = "d70_TP") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine core taxa for both SF and TP
+core_taxa <- unique(c(core_taxa_sf, core_taxa_tp))
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+
+# Add metadata for plotting
+data <- data %>%
+  mutate(log_q = -log10(qval),
+         Enrichment = case_when(
+           qval >= 0.05 ~ "Non-Significant",
+           coef > 0 ~ "SF Enriched",
+           coef < 0 ~ "TP Enriched"
+         ),
+         Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, "Highlighted", "Regular"),
+         Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", "Non-Core"))  # Mark core taxa
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 1.5, alpha = 0.9) +
+
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#CC79A7",
+    "TP Enriched" = "#56B4E9",
+    "Non-Significant" = "gray"
+  )) +
+
+  # Overlay highlighted taxa (black)
+  geom_point(data = data %>% filter(Highlight == "Highlighted"), 
+             aes(x = coef, y = log_q), color = "black", size = 1.5, alpha = .2, shape = 16) +
+
+  # Overlay core taxa (circle)
+  geom_point(data = data %>% filter(Core_Taxa == "Core"), 
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 2, stroke = 1, color = "black") +
+
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", y = "-log10(q-value)", color = "Enrichment") +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```

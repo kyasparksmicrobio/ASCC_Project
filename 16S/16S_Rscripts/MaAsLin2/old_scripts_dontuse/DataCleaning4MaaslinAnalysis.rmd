@@ -1,0 +1,78 @@
+// Purpose: This script is used to clean taxonomy data and MaAsLin2 output data for further analysis.
+
+So we need to clean data to have matching taxonomy names to be able to use vlookup or R to assign OTUIDs to the MaAsLin2 output.
+**So we need to clean data to have matching taxonomy names to be able to use vlookup or R to assign OTUIDs to the MaAsLin2 output.**
+
+```{r}
+# Load necessary packages
+library(readxl)
+library(openxlsx)
+library(dplyr)
+library(stringr)
+
+# Function to clean taxonomy strings properly
+clean_taxonomy <- function(taxonomy) {
+  if (is.na(taxonomy)) return(NA)  # Handle NA values safely
+  
+  # Fix delimiters
+  taxonomy <- str_replace_all(taxonomy, "\\.\\.\\.", "; ")  # Standardize separators
+  taxonomy <- str_replace_all(taxonomy, "\\.\\.", "; ")  # Standardize separators
+  
+  # Remove undesired suffixes (Silva placeholders)
+  taxonomy <- str_replace_all(taxonomy, "; \\.", "")  # Remove "; ."
+  taxonomy <- str_replace_all(taxonomy, "\\.\\d+$", "")  # Remove ANY trailing ".NUMBER"
+  taxonomy <- str_replace_all(taxonomy, "; \\d+$", "")  # Remove ANY trailing "; NUMBER"
+  
+  # Ensure `s__uncultured_bacterium.NUMBER` is removed
+  taxonomy <- str_replace_all(taxonomy, "s__uncultured_bacterium\\.\\d+", "s__uncultured_bacterium")
+  
+  # Fix specific formatting issues
+  taxonomy <- str_replace_all(taxonomy, " \\.g__", " g__")  # Change " .g__" to " g__"
+  taxonomy <- str_replace_all(taxonomy, "\\.Subgroup", "Subgroup")  # Change ".Subgroup" to "Subgroup"
+  taxonomy <- str_replace_all(taxonomy, "(\\d)g", "\\1; g")  # Ensure "1g" becomes "1; g"
+  
+  # Trim spaces and semicolons
+  taxonomy <- str_trim(taxonomy, side = "both")  # Trim leading/trailing spaces
+  taxonomy <- str_replace_all(taxonomy, ";$", "")  # Remove trailing ";"
+  
+  return(taxonomy)
+}
+
+# File paths (modify these as needed)
+taxonomy_file <- "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing.xlsx"
+maaslin_file <- "/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx"
+output_file <- "/Users/kyasparks/Desktop/MaaslinResults_Cleaned.xlsx"
+
+# Load taxonomy data and clean it
+taxonomy_df <- read_excel(taxonomy_file, sheet = 1) %>%
+  mutate(cleaned_taxonomy = sapply(taxonomy, clean_taxonomy)) %>%
+  group_by(cleaned_taxonomy) %>%
+  summarise(OTUID = first(OTUID), .groups = "drop")  # Keep only the first OTUID per unique taxonomy
+
+
+maaslin_sheets <- excel_sheets(maaslin_file)
+maaslin_data <- lapply(maaslin_sheets, function(sheet) {
+  df <- read_excel(maaslin_file, sheet = sheet)
+  
+  # Apply taxonomy cleaning
+  if ("feature" %in% colnames(df)) {
+    df <- df %>%
+      mutate(cleaned_feature = sapply(feature, clean_taxonomy)) %>%
+      left_join(taxonomy_df, by = c("cleaned_feature" = "cleaned_taxonomy"))
+    
+    # Ensure only one OTUID column remains (handling unexpected renaming)
+    otuid_cols <- grep("^OTUID", colnames(df), value = TRUE)  # Find all OTUID columns
+    df <- df %>%
+      mutate(OTUID = coalesce(!!!syms(otuid_cols))) %>%  # Merge all OTUID columns
+      select(-cleaned_feature, -all_of(otuid_cols))  # Remove extra OTUID columns
+  }
+  
+  return(df)
+})
+
+# Save cleaned Maaslin results to a new Excel file
+write.xlsx(maaslin_data, output_file, sheetName = maaslin_sheets, rowNames = FALSE)
+
+# Print completion message
+cat("✅ Cleaning complete! File saved as:", output_file, "\n")
+```

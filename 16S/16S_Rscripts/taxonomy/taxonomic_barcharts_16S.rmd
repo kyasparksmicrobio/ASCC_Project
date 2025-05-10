@@ -1,0 +1,499 @@
+## Step 1: Load Required Libraries
+
+```{r}
+library(ggplot2) #plotting
+library(tidyverse) #data wrangling
+library(phyloseq) #phyloseq objects
+library(dplyr) #data wrangling
+```
+
+# 16S SF #
+
+### Step 2: Load Feature Table, Metadata, and Taxonomy
+  ### Loads a feature table (OTU table), where rows = OTUs, columns = samples.
+  #### pivot_longer(...): transforms it from wide format (OTUs vs. many samples) into long format, where each row is a single OTU-sample pair.
+  #### metadata: sample-level information (site, depth, etc.)
+  #### taxa: taxonomy annotations per OTU
+
+
+```{r}
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+```
+
+##  Step 3: Merge Datasets
+### You’re combining:
+  #### 1. OTU table + metadata (by sample ID)
+  #### 2. Then adding taxonomy (by OTU ID)
+##### Final result: a “long-format” data frame with OTU abundance, taxonomy, and metadata per row. ####
+
+```{r}
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+## Step 4: Subset to Site = SF
+
+```{r}
+SF <- subset(data_meta_taxa, Site == "SF")
+```
+
+## Step 5: Calculate Average OTU Relative Abundance
+### Group by OTUID and Phylum
+  #### Calculates total abundance across samples for each OTU
+  #### Divides by the number of samples to get mean abundance of each OTU across SF samples
+
+```{r}
+avg_rel_abund_per_otuid <- data_meta_taxa %>% # Ensure no missing values
+  group_by(Phylum, Site, Depth) %>%  # Group by OTUID and Phylum
+  dplyr::summarize(
+    total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances across samples
+    num_samples = n_distinct(samples),  # Count the number of unique samples
+    avg_relative_abundance = total_relative_abundance / num_samples,  # Calculate average relative abundance
+    .groups = "drop"
+  )
+
+# avg_rel_abund_per_otuid <- data_meta_taxa %>% # Ensure no missing values
+#   group_by(OTUID, Phylum, Site, Depth) %>%  # Group by OTUID and Phylum
+#   dplyr::summarize(
+#     total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances across samples
+#     num_samples = n_distinct(samples),  # Count the number of unique samples
+#     avg_relative_abundance = total_relative_abundance / num_samples,  # Calculate average relative abundance
+#     .groups = "drop"
+#   )
+```
+
+## Step 6: Find Top 10 Phyla
+### Group OTUs by Phylum
+  #### Take the mean of their average OTU abundances
+  #### Sort to find the top Phyla
+  #### Store the names of the top 10 most abundant Phyla, which will be used to filter the plot later
+  
+```{r}
+# avg_rel_abund_per_phylum <- avg_rel_abund_per_otuid %>%
+#   group_by(Phylum,Site,Depth) %>%
+#   dplyr::summarize(
+#     avg_relative_abundance = mean(avg_relative_abundance, na.rm = TRUE),  # Sum average relabundances across OTUs
+#     .groups = "drop"
+#   ) %>%
+#   arrange(desc(avg_relative_abundance))  
+
+
+top_10_phyla <- avg_rel_abund_per_otuid %>%
+  slice_max(order_by = avg_relative_abundance, n = 10)
+
+# Extract the names of the top 10 Phyla
+top_10_phyla_names <- top_10_phyla$Phylum
+
+print(top_10_phyla)
+```
+
+## Step 7: Filter Full SF Data to Only Top 10 Phyla
+
+```{r}
+data_top_10_phyla_SF <- SF %>%
+  filter(Phylum %in% top_10_phyla_names)
+```
+
+```{r}
+data_top_10_phyla <- data_meta_taxa %>%
+  filter(Phylum %in% top_10_phyla_names) %>% 
+  as.data.frame()
+```
+
+## Step 8: Define Custom Color Palette
+
+```{r}
+# Combine top 10 phyla from all three sites
+top_10_SF <- data_top_10_phyla_SF$Phylum
+top_10_TP <- data_top_10_phyla_TP$Phylum
+top_10_SJ <- data_top_10_phyla_SJ$Phylum
+
+# Combine and get unique phyla
+all_top_phyla <- unique(c(top_10_SF, top_10_TP, top_10_SJ))
+```
+
+
+```{r}
+# Make sure you have enough colors
+color_vector <- c(
+  "#3B1911", "#6D2F20", "#A8402D", "#B75347", "#DF7666","#DE6000","#D89241",
+  "#EDC756", "#EDE955", "#C5F08D", "#B5C775", "#7C9659", "#70B59A", "#2D928F","#2C776F","#234E61","#193745","#0A161C" # extra if needed
+)
+
+# Named vector for consistent mapping
+phy_colors_named <- setNames(color_vector[1:length(data_meta_taxa)], data_meta_taxa)
+
+# Add color for "Other"
+#phy_colors_all["Other"] <- "lightgray"
+```
+
+```{r}
+plot_data <- data_top_10_phyla %>%
+  mutate(
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Phylum = factor(Phylum, levels = all_top_phyla)
+  )
+
+# Clean up phylum names before setting factor levels
+plot_data <- plot_data %>%
+  filter(!is.na(Phylum), Phylum != "") %>%  # remove empty or NA
+  mutate(
+    Phylum = factor(Phylum, levels = phy_colors_named),
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP"))  # Ensure Site is a factor with the correct order
+  )
+```
+
+
+```{r}
+sf_plot <- ggplot(data_top_10_phyla, aes(x = Depth, y = Average_relative_abundance, fill = Phylum)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Site, nrow = 1, scales = "free_x") +
+  #scale_fill_manual(values = phy_colors_named, drop = FALSE) +  # this is key
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Depth",
+    y = "Avg Relative Abundance",
+    fill = "Phylum"
+  )
+print(sf_plot)
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/sfbarcharts16S.svg",
+       plot = sf_plot,dpi = 300, device = "svg")
+```
+
+
+
+
+
+
+
+# 16S TP #
+
+### Step 2: Load Feature Table, Metadata, and Taxonomy
+  ### Loads a feature table (OTU table), where rows = OTUs, columns = samples.
+  #### pivot_longer(...): transforms it from wide format (OTUs vs. many samples) into long format, where each row is a single OTU-sample pair.
+  #### metadata: sample-level information (site, depth, etc.)
+  #### taxa: taxonomy annotations per OTU
+
+
+```{r}
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+```
+
+##  Step 3: Merge Datasets
+### You’re combining:
+  #### 1. OTU table + metadata (by sample ID)
+  #### 2. Then adding taxonomy (by OTU ID)
+##### Final result: a “long-format” data frame with OTU abundance, taxonomy, and metadata per row. ####
+
+```{r}
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+## Step 4: Subset to Site = TP
+
+```{r}
+TP <- subset(data_meta_taxa, Site == "TP")
+```
+
+## Step 5: Calculate Average OTU Relative Abundance
+### Group by OTUID and Phylum
+  #### Calculates total abundance across samples for each OTU
+  #### Divides by the number of samples to get mean abundance of each OTU across SF samples
+
+```{r}
+avg_rel_abund_per_otuid <- TP %>% # Ensure no missing values
+  group_by(OTUID, Phylum) %>%  # Group by OTUID and Phylum
+  dplyr::summarize(
+    total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances across samples
+    num_samples = n_distinct(samples),  # Count the number of unique samples
+    avg_relative_abundance = total_relative_abundance / num_samples,  # Calculate average relative abundance
+    .groups = "drop"
+  )
+```
+
+## Step 6: Find Top 10 Phyla
+### Group OTUs by Phylum
+  #### Take the mean of their average OTU abundances
+  #### Sort to find the top Phyla
+  #### Store the names of the top 10 most abundant Phyla, which will be used to filter the plot later
+  
+```{r}
+avg_rel_abund_per_phylum <- avg_rel_abund_per_otuid %>%
+  group_by(Phylum) %>%
+  dplyr::summarize(
+    avg_relative_abundance = mean(avg_relative_abundance, na.rm = TRUE),  # Sum average relabundances across OTUs
+    .groups = "drop"
+  ) %>%
+  arrange(desc(avg_relative_abundance))  
+
+
+top_10_phyla <- avg_rel_abund_per_phylum %>%
+  slice_max(order_by = avg_relative_abundance, n = 10)
+
+# Extract the names of the top 10 Phyla
+top_10_phyla_names <- top_10_phyla$Phylum
+
+print(top_10_phyla)
+```
+
+## Step 7: Filter Full SF Data to Only Top 10 Phyla
+
+```{r}
+data_top_10_phyla_TP <- TP %>%
+  filter(Phylum %in% top_10_phyla_names)
+```
+
+## Step 8: Define Custom Color Palette
+
+```{r}
+# Combine top 10 phyla from all three sites
+top_10_SF <- data_top_10_phyla_SF$Phylum
+top_10_TP <- data_top_10_phyla_TP$Phylum
+top_10_SJ <- data_top_10_phyla_SJ$Phylum
+
+# Combine and get unique phyla
+all_top_phyla <- unique(c(top_10_SF, top_10_TP, top_10_SJ))
+```
+
+
+
+
+
+```{r}
+# Make sure you have enough colors
+color_vector <- c(
+  "#3B1911", "#6D2F20", "#A8402D", "#B75347", "#DF7666","#DE6000","#D89241",
+  "#EDC756", "#EDE955", "#C5F08D", "#B5C775", "#7C9659", "#70B59A", "#2D928F","#2C776F","#234E61","#193745","#0A161C" # extra if needed
+)
+
+# Named vector for consistent mapping
+phy_colors_named <- setNames(color_vector[1:length(all_top_phyla)], all_top_phyla)
+
+# Add color for "Other"
+#phy_colors_all["Other"] <- "lightgray"
+```
+
+```{r}
+plot_data <- data_top_10_phyla_TP %>%
+  mutate(
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Phylum = factor(Phylum, levels = all_top_phyla)  # 👈 this is what ensures all 16 show in the legend
+  ) %>%
+  group_by(samples, Phylum, Depth) %>%
+  summarise(
+    Relative_Abundance = sum(Relative_Abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Clean up phylum names before setting factor levels
+plot_data <- plot_data %>%
+  filter(!is.na(Phylum), Phylum != "") %>%  # remove empty or NA
+  mutate(
+    Phylum = factor(Phylum, levels = all_top_phyla),
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))
+  )
+```
+
+```{r}
+# See if any phyla in the plot data don't match your palette
+setdiff(unique(plot_data$Phylum), names(phy_colors_named))
+```
+
+```{r}
+tp_plot <- ggplot(plot_data, aes(x = samples, y = Relative_Abundance, fill = Phylum)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = phy_colors_named, drop = FALSE) +  # this is key
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Phylum"
+  )
+print(tp_plot)
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/tpbarcharts16S.svg",
+       plot = tp_plot,dpi = 300, device = "svg")
+```
+
+
+
+
+
+
+
+
+
+
+# 16S SJ #
+
+### Step 2: Load Feature Table, Metadata, and Taxonomy
+  ### Loads a feature table (OTU table), where rows = OTUs, columns = samples.
+  #### pivot_longer(...): transforms it from wide format (OTUs vs. many samples) into long format, where each row is a single OTU-sample pair.
+  #### metadata: sample-level information (site, depth, etc.)
+  #### taxa: taxonomy annotations per OTU
+
+
+```{r}
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+```
+
+##  Step 3: Merge Datasets
+### You’re combining:
+  #### 1. OTU table + metadata (by sample ID)
+  #### 2. Then adding taxonomy (by OTU ID)
+##### Final result: a “long-format” data frame with OTU abundance, taxonomy, and metadata per row. ####
+
+```{r}
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+## Step 4: Subset to Site = SJ
+
+```{r}
+SJ <- subset(data_meta_taxa, Site == "SJ")
+```
+
+## Step 5: Calculate Average OTU Relative Abundance
+### Group by OTUID and Phylum
+  #### Calculates total abundance across samples for each OTU
+  #### Divides by the number of samples to get mean abundance of each OTU across SF samples
+
+```{r}
+avg_rel_abund_per_otuid <- SJ %>% # Ensure no missing values
+  group_by(OTUID, Phylum) %>%  # Group by OTUID and Phylum
+  dplyr::summarize(
+    total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),  # Sum relative abundances across samples
+    num_samples = n_distinct(samples),  # Count the number of unique samples
+    avg_relative_abundance = total_relative_abundance / num_samples,  # Calculate average relative abundance
+    .groups = "drop"
+  )
+```
+
+## Step 6: Find Top 10 Phyla
+### Group OTUs by Phylum
+  #### Take the mean of their average OTU abundances
+  #### Sort to find the top Phyla
+  #### Store the names of the top 10 most abundant Phyla, which will be used to filter the plot later
+  
+```{r}
+avg_rel_abund_per_phylum <- avg_rel_abund_per_otuid %>%
+  group_by(Phylum) %>%
+  dplyr::summarize(
+    avg_relative_abundance = mean(avg_relative_abundance, na.rm = TRUE),  # Sum average relabundances across OTUs
+    .groups = "drop"
+  ) %>%
+  arrange(desc(avg_relative_abundance))  
+
+
+top_10_phyla <- avg_rel_abund_per_phylum %>%
+  slice_max(order_by = avg_relative_abundance, n = 10)
+
+# Extract the names of the top 10 Phyla
+top_10_phyla_names <- top_10_phyla$Phylum
+
+print(top_10_phyla)
+```
+
+## Step 7: Filter Full SF Data to Only Top 10 Phyla
+
+```{r}
+data_top_10_phyla_SJ <- SJ %>%
+  filter(Phylum %in% top_10_phyla_names)
+```
+
+## Step 8: Define Custom Color Palett
+
+```{r}
+# Combine top 10 phyla from all three sites
+top_10_SF <- data_top_10_phyla_SF$Phylum
+top_10_TP <- data_top_10_phyla_TP$Phylum
+top_10_SJ <- data_top_10_phyla_SJ$Phylum
+
+# Combine and get unique phyla
+all_top_phyla <- unique(c(top_10_SF, top_10_TP, top_10_SJ))
+```
+
+
+```{r}
+# Make sure you have enough colors
+color_vector <- c(
+  "#3B1911", "#6D2F20", "#A8402D", "#B75347", "#DF7666","#DE6000","#D89241",
+  "#EDC756", "#EDE955", "#C5F08D", "#B5C775", "#7C9659", "#70B59A", "#2D928F","#2C776F","#234E61","#193745","#0A161C" # extra if needed
+)
+
+# Named vector for consistent mapping
+phy_colors_named <- setNames(color_vector[1:length(all_top_phyla)], all_top_phyla)
+
+# Add color for "Other"
+#phy_colors_all["Other"] <- "lightgray"
+```
+
+```{r}
+plot_data <- data_top_10_phyla_SJ %>%
+  mutate(
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Phylum = factor(Phylum, levels = all_top_phyla)  # 👈 this is what ensures all 16 show in the legend
+  ) %>%
+  group_by(samples, Phylum, Depth) %>%
+  summarise(
+    Relative_Abundance = sum(Relative_Abundance, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# Clean up phylum names before setting factor levels
+plot_data <- plot_data %>%
+  filter(!is.na(Phylum), Phylum != "") %>%  # remove empty or NA
+  mutate(
+    Phylum = factor(Phylum, levels = all_top_phyla),
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm"))
+  )
+```
+
+```{r}
+sj_plot <- ggplot(plot_data, aes(x = samples, y = Relative_Abundance, fill = Phylum)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Depth, nrow = 1, scales = "free_x") +
+  scale_fill_manual(values = phy_colors_named, drop = FALSE) +  # this is key
+  scale_y_continuous(labels = scales::percent_format(scale = 1)) +
+  theme_bw() +
+  theme(
+    axis.text.x = element_text(angle = 75, hjust = 1, size = 6),
+    legend.position = "right"
+  ) +
+  labs(
+    x = "Samples",
+    y = "Avg Relative Abundance",
+    fill = "Phylum"
+  )
+print(sj_plot)
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/sjbarcharts16S.svg",
+       plot = sj_plot,dpi = 300, device = "svg")
+```

@@ -1,0 +1,43 @@
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+library(openxlsx)
+```
+
+
+```{r}
+library(openxlsx)
+
+# Create a new workbook
+wb <- createWorkbook()
+
+# Add sheets to the workbook
+addWorksheet(wb, "SF5_discrim")
+addWorksheet(wb, "TP5_discrim")
+addWorksheet(wb, "SJ5_discrim")
+addWorksheet(wb, "SF15_discrim")
+addWorksheet(wb, "TP15_discrim")
+addWorksheet(wb, "SJ15_discrim")
+addWorksheet(wb, "SFOM_discrim")
+addWorksheet(wb, "TPOM_discrim")
+addWorksheet(wb, "SJOM_discrim")
+
+# Write data to the sheets
+writeData(wb, "SF5_discrim", data_SF5_discrim)
+writeData(wb, "TP5_discrim", data_TP5_discrim)
+writeData(wb, "SJ5_discrim", data_SJ5_discrim)
+writeData(wb, "SF15_discrim", data_SF15_discrim)
+writeData(wb, "TP15_discrim", data_TP15_discrim)
+writeData(wb, "SJ15_discrim", data_SJ15_discrim)
+writeData(wb, "SFOM_discrim", data_SFOM_discrim)
+writeData(wb, "TPOM_discrim", data_TPOM_discrim)
+writeData(wb, "SJOM_discrim", data_SJOM_discrim)
+
+# Save the workbook
+saveWorkbook(wb, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results.xlsx", overwrite = TRUE)
+```

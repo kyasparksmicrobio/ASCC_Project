@@ -1,0 +1,164 @@
+---
+title: "Soil Chem + Microbial Analysis PCoA plots"
+output: html_document
+author: "Kya Sparks"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Load necessary libraries
+library(vegan)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+
+
+```{r}
+# Ensure sample IDs are the same across both datasets
+soil_chem_data <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata.txt")  # rows = samples, cols = soil variables
+
+feature <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.txt")  # rows = samples, cols = taxa abundance/OTU counts
+```
+
+
+
+
+```{r}
+microbe_data_long <- feature %>%
+  pivot_longer(names_to = "Sample", 
+               values_to = "Abundance", 4:306) #%>%
+  #select(-c(Site, OTUID))%>%  # Remove Site and OTUID if not needed
+  #pivot_wider(names_from = feature, values_from = Abundance)  # Make taxa the columns
+
+
+#microbe_data_clean <- microbe_data_long %>%
+    #replace(is.na(.), 0)
+
+# Now you can use this transformed data for further analysis or PCoA.
+```
+
+
+```{r}
+numeric_columns <- microbe_data_long %>% select(-c(feature, Sample, Site, OTUID))  # Adjust according to your identifier columns
+numeric_columns[] <- lapply(numeric_columns, function(x) as.numeric(as.character(x)))
+
+```
+
+```{r}
+microbe_data_wide <- cbind(microbe_data_long[ , c("feature","Sample", "Site", "OTUID")], numeric_columns)
+
+```
+
+```{r}
+microbe_data_clean <- na.omit(microbe_data_wide)
+```
+
+```{r}
+microbe_data_matrix <- as.matrix(microbe_data_clean[, -c(1, 2, 3, 4)])  # Exclude Sample, Site, OTUID
+```
+
+```{r}
+# Calculate dissimilarity matrices
+soil_dist <- dist(soil_chem_data, method = "euclidean")  # Soil chemistry
+
+microbe_matrix <- vegdist(microbe_data_matrix, method = "bray")
+
+# Check the dimensions of both matrices to ensure they match
+```
+
+
+```{r}
+# Check the first few rows of the matrix
+head(microbe_data_matrix)
+
+# Check the class and structure of the matrix
+str(microbe_data_matrix)
+```
+num [1:59691, 1]
+[,1]
+[1,]    0
+[2,]    0
+[3,]    0
+[4,]    0
+[5,]    0
+[6,]    0
+
+```{r}
+print(str(feature))
+print(head(feature))
+```
+
+```{r}
+# Attempt to calculate the Bray-Curtis dissimilarity matrix
+microbe_matrix <- vegdist(microbe_data_matrix, method = "bray")
+```
+
+
+```{r}
+microbe_data_matrix <- as.matrix(microbe_data_clean[, -c(1:4)])  # Exclude the first three columns
+```
+
+```{r}
+# Check for and remove empty columns
+microbe_data_matrix <- microbe_data_matrix[, colSums(microbe_data_matrix != 0) > 0]
+
+# Check for and remove empty rows (optional if you want to keep zeros)
+microbe_data_matrix <- microbe_data_matrix[rowSums(microbe_data_matrix) > 0, ]
+
+# Verify the contents again
+print(dim(microbe_data_matrix))
+print(head(microbe_data_matrix))
+```
+
+
+```{r}
+microbe_data_wide <- microbe_data_clean %>%
+  pivot_wider(names_from = feature, values_from = Abundance, values_fill = list(Abundance = 0))  # Fill NAs with 0
+
+# Check the structure of the reshaped data
+print(str(microbe_data_wide))
+print(head(microbe_data_wide))
+
+```
+
+```{r}
+microbe_data_matrix <- as.matrix(microbe_data_wide[, -c(1:3)])  # Exclude Sample, Site, OTUID
+
+print(dim(microbe_data_matrix))
+
+```
+
+```{r}
+microbe_matrix <- vegdist(microbe_data_matrix, method = "bray")
+```
+
+
+```{r}
+empty_rows <- rowSums(microbe_data_matrix) == 0
+print(sum(empty_rows))> print(sum(empty_rows))
+
+microbe_data_matrix_clean <- microbe_data_matrix[!empty_rows, ]
+
+# Check the dimensions again
+print(dim(microbe_data_matrix_clean))
+```
+
+
+```{r}
+microbe_matrix <- vegdist(microbe_data_matrix_clean, method = "bray")
+```
+
+
+```{r}
+ggplot(microbe_matrix,aes(x=NMDS1,y=NMDS2,color=N_...))+
+  geom_point(size=2, show.legend = TRUE)+
+  facet_wrap(~ Depth)+
+  #scale_shape_manual(values = c(17, 16)) +
+  theme(text=element_text(size = 24))+  # Change axis labels
+  xlim(-1.4,1.7)+
+  ylim(-1.51,1.67)+
+  #geom_text_repel(max.overlaps = 20, aes(label=row.names(map_file))) + #use this line if you would like to have the samples labled in your ordination 
+  theme_classic() 
+```

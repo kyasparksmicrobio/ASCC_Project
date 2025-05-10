@@ -1,0 +1,3134 @@
+# ASCC 2023
+## Maaslin2 volcano plots redo -> 16S
+### 03/05/25
+#### Note: Be sure to check the for the discriminant taxa between sites!! Refer to the script located at /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Rscripts/MaAsLin2/CheckingDiscriminantTaxaByOTU.rmd for additional analysis steps.
+
+**See /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin2_volcano_plots_wNOTES.md for additional information on analysis steps.**
+
+**Note: This script is for the volcano plots for the Maaslin2 results for the ASCC 2023 16S data.**
+
+
+
+**Making volcano plor for SF vs TP shallow**
+***I want to overlay the discriminant taxa for all sites within the 0-5cm depth, and I want to do the same with the core taxa across sites & depths***
+
+# Load libraries
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+```
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v TP shallow") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TP5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF5, discriminant_otus_TP5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTP5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDssftp5.csv", row.names = FALSE)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftp5.csv", row.names = FALSE)
+```
+
+**Making volcano plot for SF vs SJ shallow**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v SJ shallow") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF5, discriminant_otus_SJ5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +#BD7C96
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJ5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJ.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsj5.csv", row.names = FALSE)
+
+# highlighted_otus <- data %>% 
+#   filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+#   select(OTUID)
+
+#print(highlighted_otus)
+
+#write.csv(highlighted_otus, "highlighted_otus_SFSJ.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ shallow**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ shallow") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TP5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TP5, discriminant_otus_SJ5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJ5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsj5.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsj5.csv", row.names = FALSE)
+
+# highlighted_otus <- data %>% 
+#   filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+#   select(OTUID)
+
+# print(highlighted_otus)
+
+# write.csv(highlighted_otus, "highlighted_otus_tpsj5.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**SF v TP deep**
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v TP deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TP15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF15, discriminant_otus_TP15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTP15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_sftp15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftp15.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+**Making volcano plot for SF vs SJ deep**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SJ v SF deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF15, discriminant_otus_SJ15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJ15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJ15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsj15.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ deep**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TP15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TP15, discriminant_otus_SJ15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJ15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsj15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsj15.csv", row.names = FALSE)
+
+highlighted_otus <- data %>% 
+  filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+  select(OTUID)
+
+print(highlighted_otus)
+
+write.csv(highlighted_otus, "highlighted_otus_tpsj15.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+**SF v TP OM**
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v TP OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SFOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SFOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TPOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TPOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SFOM, discriminant_otus_TPOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTPOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_sftpOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftpOM.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+**Making volcano plot for SF vs SJ OM**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SJ v SF OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SFOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SFOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SFOM, discriminant_otus_SJOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsjOM.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ OM**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TPOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TPOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TPOM, discriminant_otus_SJOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsjOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsjOM.csv", row.names = FALSE)
+
+highlighted_otus <- data %>% 
+  filter(Highlight == "Discriminant Across All Sites in OM") %>% 
+  select(OTUID)
+
+print(highlighted_otus)
+
+write.csv(highlighted_otus, "highlighted_otus_tpsjOM.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**Making volcano plor for SF vs TP shallow**
+***I want to overlay the discriminant taxa for all sites within the 0-5cm depth, and I want to do the same with the core taxa across sites & depths***
+
+# Load libraries
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+```
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_allresults.xlsx", sheet = "output_ITS_SJ_SF") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ASCC_ITS_Maaslin2_finalresultscombined.xlsx", sheet = "all") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TP5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  #left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    #Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    #Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTP5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDssftp5.csv", row.names = FALSE)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftp5.csv", row.names = FALSE)
+```
+
+**Making volcano plot for SF vs SJ shallow**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v SJ shallow") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF5, discriminant_otus_SJ5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +#BD7C96
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJ5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJ.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsj5.csv", row.names = FALSE)
+
+# highlighted_otus <- data %>% 
+#   filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+#   select(OTUID)
+
+#print(highlighted_otus)
+
+#write.csv(highlighted_otus, "highlighted_otus_SFSJ.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ shallow**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ shallow") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TP5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ5 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ5_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TP5, discriminant_otus_SJ5))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 0-5 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 0-5 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 0-5 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 0-5 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJ5.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsj5.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsj5.csv", row.names = FALSE)
+
+# highlighted_otus <- data %>% 
+#   filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+#   select(OTUID)
+
+# print(highlighted_otus)
+
+# write.csv(highlighted_otus, "highlighted_otus_tpsj5.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+**SF v TP deep**
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v TP deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TP15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF15, discriminant_otus_TP15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTP15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_sftp15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftp15.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+**Making volcano plot for SF vs SJ deep**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SJ v SF deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SF15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SF15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SF15, discriminant_otus_SJ15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJ15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJ15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsj15.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ deep**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ deep") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TP15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TP15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJ15 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJ15_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TP15, discriminant_otus_SJ15))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in 5-15 cm", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in 5-15 cm", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in 5-15 cm"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in 5-15 cm" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJ15.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsj15.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsj15.csv", row.names = FALSE)
+
+highlighted_otus <- data %>% 
+  filter(Highlight == "Discriminant Across All Sites in 0-5 cm") %>% 
+  select(OTUID)
+
+print(highlighted_otus)
+
+write.csv(highlighted_otus, "highlighted_otus_tpsj15.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+**SF v TP OM**
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SF v TP OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SFOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SFOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_TPOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TPOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SFOM, discriminant_otus_TPOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "TP Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # 🔥 Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "TP Enriched" = "#D97669",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFTPOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_sftpOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sftpOM.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+**Making volcano plot for SF vs SJ OM**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "SJ v SF OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_SFOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SFOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_SFOM, discriminant_otus_SJOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "SF Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_SFSJOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_SFSJOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_sfsjOM.csv", row.names = FALSE)
+```
+
+
+**Making volcano plot for TP vs SJ OM**
+
+
+```{r}
+# Read in main dataset
+data <- read_excel("/Users/kyasparks/Desktop/MaaslinResults_includingNonSignif_16S_corrected.xlsx", sheet = "TP v SJ OM") %>% as.data.frame()
+
+# Read SF5 discriminant OTUs
+discriminant_otus_TPOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "TPOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Read TP5 discriminant OTUs
+discriminant_otus_SJOM <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrim_results2.xlsx", sheet = "SJOM_discrim") %>%
+  select(OTUID) %>%
+  pull()
+
+# Combine both discriminant OTU lists
+discriminant_otus <- unique(c(discriminant_otus_TPOM, discriminant_otus_SJOM))
+
+# Read in core taxa from d70 (core across all sites and depths)
+core_taxa_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/ASCC_16S_CoreTaxa_70perc_allsitescombo.xlsx", sheet = "d70") %>%
+  select(OTUID)  # Keep taxonomy info
+```
+
+
+```{r}
+# Extract OTUIDs of core taxa
+core_taxa <- core_taxa_data$OTUID
+
+# Ensure matching format
+data$OTUID <- trimws(as.character(data$OTUID))
+discriminant_otus <- trimws(as.character(discriminant_otus))
+core_taxa <- trimws(as.character(core_taxa))
+```
+
+
+```{r}
+# Convert discriminant OTUs into a dataframe
+discriminant_otus_df <- data.frame(OTUID = discriminant_otus)
+
+# Merge with data correctly
+data <- data %>%
+  left_join(discriminant_otus_df, by = "OTUID") %>%  # Join properly formatted discriminant OTUs
+  left_join(core_taxa_data, by = "OTUID") %>%  # Add taxonomy info
+  mutate(
+    log_q = -log10(qval),  # Standard -log10(qval) transformation
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    
+    # ✅ Only highlight if the OTU is discriminant AND significant (qval < 0.05)
+    Highlight = ifelse(qval < 0.05 & OTUID %in% discriminant_otus, 
+                       "Discriminant Across All Sites in OM", "Regular"),
+    
+    # Core taxa logic
+    Core_Taxa = ifelse(OTUID %in% core_taxa, "Core", NA)  
+  ) %>%
+  mutate(
+    # Ensure factors are correctly ordered
+    Highlight = factor(Highlight, levels = c("Discriminant Across All Sites in OM", "Regular")),
+    Core_Taxa = factor(Core_Taxa, levels = c("Core", NA))
+  )
+```
+
+```{r}
+# Identify OTUs that are significant but NOT in discriminant_otus
+non_highlighted_otus <- data %>%
+  filter(qval < 0.05 & !(OTUID %in% discriminant_otus))
+
+# Base volcano plot
+plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # Main points with original enrichment color
+  geom_point(aes(color = Enrichment, alpha = Enrichment), size = 3) +
+  
+  # Custom color scheme
+  scale_color_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+
+  # Adjust alpha for non-significant points
+  scale_alpha_manual(values = c("Non-Significant" = 1, "TP Enriched" = 1, "SJ Enriched" = 1)) +
+  
+  # 🔥 Overlay discriminant taxa (maintain enrichment color, add black border)
+  geom_point(data = data %>% filter(Highlight == "Discriminant Across All Sites in OM"),
+             aes(x = coef, y = log_q, fill = Enrichment),  
+             shape = 21, size = 3, stroke = 0.4, color = "black") +  
+
+  # Overlay **significant but non-discriminant OTUs** (e.g., red outline)
+  geom_point(data = non_highlighted_otus, 
+             aes(x = coef, y = log_q, fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "red") +  
+
+  # Overlay core taxa (circled points)
+  geom_point(data = data %>% filter(!is.na(Core_Taxa)),
+             aes(x = coef, y = log_q), shape = 21, fill = NA, size = 3, stroke = 1, color = "green") +
+
+  # geom_text_repel(data = data %>% filter(!is.na(Core_Taxa)), 
+  #                 aes(x = coef, y = log_q, label = OTUID), 
+  #                 size = 3, box.padding = 0.5, segment.color = "gray") +
+  
+  
+  # Apply same colors to `fill`
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#A1A481",
+    "SJ Enriched" = "#BD7C96",
+    "Non-Significant" = "#EEC7A0"
+  )) +
+  
+  # Threshold lines
+  geom_vline(xintercept = 0, linetype = "dashed", color = "black") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray") +
+
+  # Labels & theme
+  labs(x = "Coefficient", 
+       y = "-log10(q-value)", 
+       color = "Enrichment", 
+       fill = "Enrichment", 
+       shape = "Highlighted Taxa") +  
+
+  # Ensure shape legend only applies to discriminant taxa
+  scale_shape_manual(values = c("Discriminant Across All Sites in OM" = 21)) +  
+
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Show plot
+print(plot)
+```
+
+```{r}
+# Save the volcano plot as a square SVG file
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_plot_TPSJOM.svg",
+       plot = plot, 
+       width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+```{r}
+# Print OTUIDs of Core Taxa (Circled)
+core_otus <- data %>%
+  filter(Core_Taxa == "Core") %>%
+  select(OTUID)
+
+# View the OTUIDs that were circled
+print(core_otus)
+
+# Count how many OTUs were circled
+cat("Number of Core Taxa (Circled):", nrow(core_otus), "\n")
+
+# Save the OTUIDs to a CSV file (optional)
+write.csv(core_otus, "core_OTUIDs_tpsjOM.csv", row.names = FALSE)
+
+print(non_highlighted_otus)
+
+# Save to CSV (optional)
+write.csv(non_highlighted_otus, "non_highlighted_OTUIDs_tpsjOM.csv", row.names = FALSE)
+
+highlighted_otus <- data %>% 
+  filter(Highlight == "Discriminant Across All Sites in OM") %>% 
+  select(OTUID)
+
+print(highlighted_otus)
+
+write.csv(highlighted_otus, "highlighted_otus_tpsjOM.csv", row.names = FALSE)
+```

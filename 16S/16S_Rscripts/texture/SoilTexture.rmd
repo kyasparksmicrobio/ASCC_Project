@@ -1,0 +1,277 @@
+# Compute mean values for each depth
+# Calculate mean values for each Site and Depth combination
+# Join the computed mean values to the original data and fill missing values
+
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(ggplot2)
+library(pheatmap)
+library(viridis)
+library(ggrepel)
+```
+
+```{r}
+# Load soil texture data
+soil_texture <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_SoilTexture_forplots.xlsx")
+
+# Load ASV relative abundance data
+asv_table <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv")
+
+
+```
+
+# Compute mean values for each depth
+# Calculate mean values for each Site and Depth combination
+# Join the computed mean values to the original data and fill missing values
+
+```{r}
+# Compute mean soil texture values by Site and Depth
+mean_texture <- soil_texture %>%
+  group_by(Site, Depth) %>%
+  summarize(
+    Clay_perc_mean = mean(Clay_perc, na.rm = TRUE),
+    Silt_perc_mean = mean(Silt_perc, na.rm = TRUE),
+    Silt_Clay_perc_mean = mean(Silt_Clay_perc, na.rm = TRUE),
+    Sand_perc_mean = mean(Sand_perc, na.rm = TRUE)
+  )
+
+# Join the computed mean values and fill missing values using ifelse()
+soil_texture_filled <- soil_texture %>%
+  left_join(mean_texture, by = c("Site", "Depth")) %>%
+  mutate(
+    Clay_perc = ifelse(is.na(Clay_perc), Clay_perc_mean, Clay_perc),
+    Silt_perc = ifelse(is.na(Silt_perc), Silt_perc_mean, Silt_perc),
+    Silt_Clay_perc = ifelse(is.na(Silt_Clay_perc), Silt_Clay_perc_mean, Silt_Clay_perc),
+    Sand_perc = ifelse(is.na(Sand_perc), Sand_perc_mean, Sand_perc)
+  ) %>%
+  select(Sample_Name2, Site, Depth, Clay_perc, Silt_perc, Silt_Clay_perc, Sand_perc) # Keep only relevant columns
+```
+
+
+2. Merge with ASV Table (Which Contains Taxonomy)
+```{r}
+# Reshape ASV table to long format
+asv_long <- asv_table %>%
+  pivot_longer(-c(OTUID, taxonomy), names_to = "SampleID", values_to = "Relative_Abundance")
+
+# Merge ASV abundance with filled soil texture data
+merged_data <- asv_long %>%
+  left_join(soil_texture_filled, by = c("SampleID" = "Sample_Name2"))
+```
+
+
+**filter for Xiphinematobacter**
+```{r}
+xiph_data <- merged_data %>%
+  filter(str_detect(taxonomy, "Xiphinematobacter"))
+```
+
+```{r}
+# ggplot(xiph_data, aes(x = Clay_perc, y = Relative_Abundance, color = Site)) +
+#   geom_point() +
+#   geom_smooth(method = "lm", se = FALSE) +
+#   facet_wrap(~Depth) +
+#   labs(title = "Clay Content vs. *Xiphinematobacter* Abundance",
+#        x = "Clay Percentage",
+#        y = "Relative Abundance")
+# ```
+
+# ```{r}
+# ggplot(xiph_data, aes(x = Depth, y = Relative_Abundance, fill = Depth)) +
+#   geom_boxplot() +
+#   facet_wrap(~Site) +
+#   labs(title = "*Xiphinematobacter* Abundance by Depth and Site",
+#        x = "Depth",
+#        y = "Relative Abundance")
+```
+
+
+
+data:  xiph_data$Clay_perc and xiph_data$Relative_Abundance
+S = 1.702e+13, p-value = 0.4749
+alternative hypothesis: true rho is not equal to 0
+sample estimates:
+         rho 
+-0.003306656 
+
+```{r}
+ggplot(merged_data, aes(x = Clay_perc, y = Relative_Abundance, color = taxonomy)) +
+  geom_point(alpha = 0.3) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~Depth) +
+  labs(title = "Clay Content vs. ASV Abundance (All Taxa)",
+       x = "Clay Percentage",
+       y = "Relative Abundance")
+```
+
+```{r}
+cor.test(xiph_data$Silt_Clay_perc, xiph_data$Relative_Abundance, method = "spearman")
+```
+
+```{r}
+cor.test(xiph_data$Silt_perc, xiph_data$Relative_Abundance, method = "spearman")
+```
+
+```{r}
+cor.test(xiph_data$Sand_perc, xiph_data$Relative_Abundance, method = "spearman")
+```
+
+```{r}
+cor.test(xiph_data$Clay_perc, xiph_data$Relative_Abundance, method = "spearman")
+```
+
+```{r}
+# Summarize ASV abundance
+top_asvs <- merged_data %>%
+  group_by(OTUID) %>%
+  summarize(mean_abund = mean(Relative_Abundance, na.rm = TRUE)) %>%
+  arrange(desc(mean_abund)) %>%
+  slice_head(n = 10) # Select top 10 most abundant ASVs
+
+# Filter for only the top 10 ASVs
+filtered_data <- merged_data %>%
+  filter(OTUID %in% top_asvs$OTUID)
+
+# Scatter plot of Clay vs. Relative Abundance (for top ASVs)
+ggplot(filtered_data, aes(x = Clay_perc, y = Relative_Abundance, color = OTUID, label = OTUID)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "lm", se = FALSE) +
+  geom_text_repel(size = 3, max.overlaps = 10) +  # Add labels with OTUID
+  facet_wrap(~Depth) +
+  labs(title = "Clay Content vs. Abundance of Top 10 ASVs",
+       x = "Clay Percentage",
+       y = "Relative Abundance")
+```
+
+```{r}
+top_otus <- merged_data %>%
+  group_by(OTUID) %>%
+  summarize(mean_abundance = mean(Relative_Abundance, na.rm = TRUE)) %>%
+  arrange(desc(mean_abundance)) %>%
+  slice_head(n = 20)  # Select top 20 ASVs
+```
+
+```{r}
+# Keep only samples ending in "_5" and "_15"
+top_otus_filtered <- top_otus_data %>%
+  filter(str_detect(SampleID, "_5$|_15$"))  # Selects only samples with _5 or _15 at the end
+```
+
+```{r}
+ggplot(top_otus_data, aes(x = Relative_Abundance, y = Clay_perc, color = Site)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~OTUID, scales = "free_y") +
+  labs(title = "Soil Texture (Clay) vs. Top 20 OTUs",
+       x = "Clay Percentage",
+       y = "Relative Abundance")
+```
+
+```{r}
+otu_texture_matrix <- top_otus_filtered %>%
+  group_by(OTUID, SampleID) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance, na.rm = TRUE), .groups = "drop") %>%  # Sum duplicates
+  pivot_wider(names_from = SampleID, values_from = Relative_Abundance, values_fill = 0) %>%
+  column_to_rownames("OTUID")  # Set OTUIDs as row names
+```
+
+
+```{r}
+texture_data <- merged_data %>%
+  filter(str_detect(SampleID, "_5$|_15$")) %>%  # Keep only _5 and _15 depth samples
+  group_by(Site, Depth) %>%
+  summarize(
+    Mean_Clay = mean(Clay_perc, na.rm = TRUE),
+    Mean_Clay_Silt = mean(Silt_Clay_perc, na.rm = TRUE),
+    Mean_Silt = mean(Silt_perc, na.rm = TRUE),
+    Mean_Sand = mean(Sand_perc, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = starts_with("Mean_"), names_to = "Texture", values_to = "Percentage")
+```
+
+```{r}
+ggplot(texture_data, aes(x = Site, y = Texture, fill = Percentage)) +
+  geom_tile() +
+  scale_fill_viridis_c() +  # Use Viridis color scale for better contrast
+  facet_wrap(~Depth) +  # Separate by depth
+  labs(title = "Soil Texture Heatmap Across Sites and Depths",
+       x = "Site",
+       y = "Soil Texture Component",
+       fill = "Percentage") +
+  theme_minimal()
+```
+
+```{r}
+# Define core ASVs
+core_asvs <- c("2d51eee954d47bb2f71665bd2691bb94", "e8accbbab64dba2fe98edb7072796cc5",
+               "ca24cf1f0863dd16eb8dcee545c92d1e", "6472eb8b1e09f892aca2f23182962903",
+               "c7c02c07fb28c8730768bb76cafad3fe", "a9164d01308501b576afa06256a15b0f",
+               "595c8b8e312c12524cc06f2b7fda2a76", "2d66d59115e5f8c6d716f72f4fc26f23",
+               "702af9e944edfd5a1a7f0dce0d566376", "10f0461cb8a244c14aa2fb73e127e9e5",
+               "75cac7ae6fbcbb7817a14f6772f94924", "151f25319c8715bb49632a77fb021ad5")
+
+# Filter data to include only these core ASVs
+core_asv_data <- merged_data %>%
+  filter(OTUID %in% core_asvs & str_detect(SampleID, "_5$|_15$"))  # Keep only selected ASVs & relevant depths
+```
+
+```{r}
+# Filter data: Keep only core ASVs and remove NA depths
+core_asv_data <- merged_data %>%
+  filter(OTUID %in% core_asvs & str_detect(SampleID, "_5$|_15$") & !is.na(Depth))  # Exclude NA Depth
+
+# Summarize Core ASV Abundance by Site & Depth
+core_texture_data <- core_asv_data %>%
+  group_by(Site, Depth, OTUID) %>%
+  summarize(Mean_Abundance = mean(Relative_Abundance, na.rm = TRUE)) %>%
+  pivot_wider(names_from = Site, values_from = Mean_Abundance, values_fill = 0) %>%
+  pivot_longer(cols = -c(Depth, OTUID), names_to = "Site", values_to = "Abundance")
+```
+
+```{r}
+core_texture_data <- core_asv_data %>%
+  group_by(Site, Depth, OTUID) %>%
+  summarize(Mean_Abundance = mean(Relative_Abundance, na.rm = TRUE)) %>%
+  pivot_wider(names_from = Site, values_from = Mean_Abundance, values_fill = 0) %>%
+  pivot_longer(cols = -c(Depth, OTUID), names_to = "Site", values_to = "Abundance")
+```
+
+```{r}
+ggplot(core_texture_data, aes(x = Site, y = OTUID, fill = Abundance)) +
+  geom_tile() +
+  scale_fill_viridis_c() +  # Use Viridis color scale for better contrast
+  facet_wrap(~Depth) +  # Separate by depth (0-5cm and 5-15cm)
+  labs(title = "Core ASV Heatmap Across Sites and Depths",
+       x = "Site",
+       y = "Core ASVs",
+       fill = "Mean Abundance") +
+  theme_minimal()
+```
+
+```{r}
+texture_per_asv <- merged_data %>%
+  filter(OTUID %in% core_asvs & str_detect(SampleID, "_5$|_15$") & !is.na(Depth)) %>%  
+  group_by(Site, Depth, OTUID) %>%
+  summarize(
+    Clay = mean(Clay_perc, na.rm = TRUE),
+    Silt = mean(Silt_perc, na.rm = TRUE),
+    Sand = mean(Sand_perc, na.rm = TRUE),
+    Silt_Clay = mean(Silt_Clay_perc, na.rm = TRUE)
+  ) %>%
+  pivot_longer(cols = c(Clay, Silt, Sand, Silt_Clay), names_to = "Soil_Texture", values_to = "Percentage")
+```
+
+```{r}
+ggplot(texture_per_asv, aes(x = Soil_Texture, y = OTUID, fill = Percentage)) +
+  geom_tile() +
+  scale_fill_viridis_c() +  # Use Viridis for better color contrast
+  facet_wrap(~Site) +  # Facet by Site (separate heatmaps for each site)
+  labs(title = "Soil Texture Percentage for Core ASVs (Faceted by Site)",
+       x = "Soil Texture Variable",
+       y = "Core ASVs",
+       fill = "Soil Texture Percentage") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for readability
+```

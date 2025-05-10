@@ -1,0 +1,109 @@
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(dplyr)
+library(extrafont)
+loadfonts(device = "pdf")
+```
+
+
+```{r}
+# Step 1: Load Data
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_rem_RELABUND.csv") %>%
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt")
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+
+# Merge
+data_meta <- inner_join(merged, metadata, by = "samples")
+data_meta_taxa <- inner_join(data_meta, taxa, by = "OTUID")
+```
+
+```{r}
+# Normalize within each sample (so all samples sum to 100%)
+data_meta_taxa <- data_meta_taxa %>%
+  group_by(samples) %>%
+  mutate(Relative_Abundance = Relative_Abundance / sum(Relative_Abundance, na.rm = TRUE) * 100) %>%
+  ungroup()
+```
+
+```{r}
+# Top 3 Phyla by total abundance
+top_phyla <- data_meta_taxa %>%
+  filter(!is.na(Phyla) & Phyla != "") %>%
+  group_by(Phyla) %>%
+  summarize(total_abundance = sum(Relative_Abundance), .groups = "drop") %>%
+  arrange(desc(total_abundance)) %>%
+  slice_head(n = 3) %>%
+  pull(Phyla)
+```
+
+```{r}
+# Label others
+data_meta_taxa <- data_meta_taxa %>%
+  mutate(
+    Phyla = ifelse(is.na(Phyla) | Phyla == "", "unidentified", Phyla),
+    Phyla = ifelse(Phyla %in% top_phyla, Phyla, "Other"),
+    Depth = recode(Depth, `0_5cm` = "0-5 cm", `5_15cm` = "5-15 cm"),
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP"))
+  )
+```
+
+```{r}
+# Step 1: Aggregate per sample × site × depth × phylum
+per_sample <- data_meta_taxa %>%
+  group_by(Site, Depth, samples, Phyla) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance), .groups = "drop")
+
+# Step 2: Fill in missing phyla for each sample
+sample_combos <- expand.grid(
+  Site = unique(per_sample$Site),
+  Depth = unique(per_sample$Depth),
+  samples = unique(per_sample$samples),
+  Phyla = c(top_phyla, "Other")
+)
+
+per_sample <- full_join(per_sample, sample_combos, by = c("Site", "Depth", "samples", "Phyla")) %>%
+  mutate(Relative_Abundance = replace_na(Relative_Abundance, 0))
+```
+
+```{r}
+# Step 3: Average across samples per Site × Depth × Phylum
+plot_data <- per_sample %>%
+  group_by(Site, Depth, Phyla) %>%
+  summarize(Relative_Abundance = mean(Relative_Abundance), .groups = "drop") %>%
+  group_by(Site, Depth) %>%
+  mutate(Relative_Abundance = Relative_Abundance / sum(Relative_Abundance) * 100) %>%
+  ungroup()
+```
+
+```{r}
+# Plotting
+phy_colors_named <- c(
+  setNames(c("#B5C775","#70B59A", "#234E61"), top_phyla),
+  Other = "gray70"
+)
+
+plot_data <- plot_data %>%
+  mutate(Phyla = factor(Phyla, levels = c(top_phyla, "Other")))
+
+ggplot(plot_data, aes(x = Depth, y = Relative_Abundance, fill = Phyla)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Site, nrow = 1) +
+  scale_fill_manual(values = phy_colors_named, drop = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 100)) +
+  labs(x = "Depth", y = "Avg Relative Abundance (%)", fill = "Phylum") +
+  theme_bw(base_family = "Helvetica") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    strip.text = element_text(size = 16),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
+  )
+```

@@ -1,0 +1,3138 @@
+---
+title: "Updated Volcano Plots for MaAsLin2 Results 4/8/2024: 16S & ITS"
+---
+
+# ASCC 2023
+## This script is used to plot volcano plots for the MaAsLin2 results
+### Plotting volcano plots, highlighting consistent taxa across sites, and highlight outliers.
+#### Note: Be sure to check the for the discriminant taxa between sites!! Refer to the script located at /Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Rscripts/MaAsLin2/CheckingDiscriminantTaxaByOTU_040825.rmd
+
+- sf v. sj shallow: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+- sf v. tp shallow: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+- tp v. sj shallow: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+- sj v. sf deep: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+- sf v. tp deep: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+- tp v. sj deep: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+- sj v. sf OM: when the coef is negative it is discriminant for SF and when its positive its discriminant for SJ
+- sf v. tp OM: when the coef is negative it is discriminant for SF and when its positive its discriminant for TP
+- tp v. sj OM: when the coef is negative it is discriminant for SJ and when its positive its discriminant for TP
+the colors im using are
+
+# 16S
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+```
+
+# SF v TP shallow 0-5 cm
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 7, LabelText, NA) # Apply threshold for labeling
+  )
+
+
+# Plot
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") + # Add threshold line
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 7) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_shallow.csv",
+          row.names = FALSE)
+```
+
+
+
+# SJ v TP shallow 0-5 cm
+
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "TP v SJ shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SJ Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sj5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 7, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SJ Enriched" = "#E09351",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_TP_v_SJ_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 7) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_TP_v_SJ_shallow.csv",
+          row.names = FALSE)
+```
+
+
+
+
+
+# SJ v SF shallow 0-5 cm
+
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SJ v SF shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 7, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 7) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SJ_v_SF_shallow.csv",
+          row.names = FALSE)
+```
+
+
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SJ v SF shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, sj5_discrim),
+        tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = .6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +         
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_SJ_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 7) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_SJ_shallow.csv",
+          row.names = FALSE)
+```
+
+
+
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_shallow.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_SJ_shallow.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_TP_v_SJ_shallow.csv")
+
+# Add source columns to track which comparisons each outlier came from
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count appearances by OTUID
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(Comparisons = paste(unique(Comparison), collapse = "; "),
+            Count = n(), .groups = "drop") %>%
+  filter(Count > 1)  # Keep only those that appear in >1 comparison
+
+# Save
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_shallow_outliers.csv")
+```
+
+
+# Looking at consistent shallow outliers
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readr)
+library(readxl)
+library(stringr)
+
+# Load consistent shallow OTUs
+consistent_shallow <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_shallow_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Color palette for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_shallow))
+names(distinct_colors) <- consistent_shallow$ConsistentID
+```
+
+
+# SF v TP shallow 0-5 cm with highlighted consistent OTUs
+```{r}
+# Load and process
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+data <- data %>%
+  left_join(
+    read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_shallow_outliers.csv") %>%
+      mutate(ConsistentID = paste0("OTU_", row_number())) %>%
+      select(OTUID, ConsistentID),
+    by = "OTUID"
+  ) %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, \(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, \(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, \(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, \(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, \(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant), aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)), aes(label = Label), size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") + geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(distinct_colors, "SF Enriched" = "#B75347", "TP Enriched" = "#94B594", "Non-Significant" = "gray80")) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") + theme_minimal()
+
+print(volcano_plot)
+
+ggsave("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_shallow_consistent.svg", plot = volcano_plot, width = 6, height = 6, dpi = 300)
+```
+
+
+# TP v SJ shallow 0-5 cm with highlighted consistent OTUs
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "TP v SJ shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Join consistent shallow outliers before mutation
+data <- data %>%
+  left_join(
+    read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_shallow_outliers.csv") %>%
+      mutate(ConsistentID = paste0("OTU_", row_number())) %>%
+      select(OTUID, ConsistentID),
+    by = "OTUID"
+  ) %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, \(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, \(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, \(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, \(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, \(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant), aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)), aes(label = Label), size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") + geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(distinct_colors, "TP Enriched" = "#94B594", "SJ Enriched" = "#E09351", "Non-Significant" = "gray80")) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") + theme_minimal()
+
+print(volcano_plot)
+
+ggsave("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_TP_v_SJ_shallow_consistent.svg", plot = volcano_plot, width = 6, height = 6, dpi = 300)
+```
+
+
+# SJ v SF shallow 0-5 cm with highlighted consistent OTUs
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SJ v SF shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Join consistent outlier IDs first
+data <- data %>%
+  left_join(
+    read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_shallow_outliers.csv") %>%
+      mutate(ConsistentID = paste0("OTU_", row_number())) %>%
+      select(OTUID, ConsistentID),
+    by = "OTUID"
+  ) %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, \(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, \(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, \(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, \(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, \(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant), aes(fill = PlotGroup), shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)), aes(label = Label), size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") + geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(distinct_colors, "SF Enriched" = "#B75347", "SJ Enriched" = "#E09351", "Non-Significant" = "gray80")) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") + theme_minimal()
+
+print(volcano_plot)
+
+ggsave("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_shallow_consistent.svg", plot = volcano_plot, width = 6, height = 6, dpi = 300)
+```
+
+
+
+
+
+
+
+# SJ v SF deep 5-15 cm
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SJ v SF deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 10, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 10) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SJ_v_SF_deep.csv",
+          row.names = FALSE)
+```
+
+
+# SF v TP deep 5-15 cm
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, tp15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 2.75, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 2.75) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_deep.csv",
+          row.names = FALSE)
+```
+
+
+
+# TP v SJ deep 5-15 cm
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "TP v SJ deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs (15 cm)
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SJ Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 8, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SJ Enriched" = "#E09351",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_TP_v_SJ_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 8) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_TP_v_SJ_deep.csv",
+          row.names = FALSE)
+```
+
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_deep.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_SJ_deep.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_TP_v_SJ_deep.csv")
+
+# Add source columns to track which comparisons each outlier came from
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count appearances by OTUID
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(Comparisons = paste(unique(Comparison), collapse = "; "),
+            Count = n(), .groups = "drop") %>%
+  filter(Count > 1)  # Keep only those that appear in >1 comparison
+
+# Save
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_deep_outliers.csv")
+```
+
+
+
+
+
+# Looking at consistent deep outliers
+
+# SF v TP deep with highlighted consistent deep outliers
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+library(readr)
+
+# Load consistent deep outliers
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx",
+                   sheet = "SF v TP deep") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SF15_discrim") %>% pull(OTUID) %>% trimws()
+
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "TP15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Prepare data
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, tp15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 2.75, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Unique colors for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(
+  filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_deep_consistent.svg",
+  plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg"
+)
+```
+
+
+
+# SJ v SF deep with highlighted consistent deep outliers
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx",
+                   sheet = "SJ v SF deep") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SJ15_discrim") %>% pull(OTUID) %>% trimws()
+
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SF15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Prep consistent OTUs
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Merge & annotate
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 10, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Create colors
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(
+  filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_deep_consistent.svg",
+  plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg"
+)
+```
+
+
+# TP v SJ deep with highlighted consistent deep outliers
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx",
+                   sheet = "TP v SJ deep") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "TP15_discrim") %>% pull(OTUID) %>% trimws()
+
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SJ15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent deep outliers
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Annotate data
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 8, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Colors for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Volcano plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "TP Enriched" = "#94B594",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save to file
+ggsave(
+  filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_TP_v_SJ_deep_consistent.svg",
+  plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg"
+)
+```
+
+
+
+
+
+
+
+
+# SJ v SF OM
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SJ v SF OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SJOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 5, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 5) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SJ_v_SF_OM.csv",
+          row.names = FALSE)
+```
+
+
+# SF v TP OM
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, tpom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 6, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 6) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_OM.csv",
+          row.names = FALSE)
+```
+
+
+# TP v SJ OM
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, tpom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]), # Extract family names
+    LabelText = family, # Use only family names for labels
+    Label = ifelse(log_q > 6, LabelText, NA) # Apply threshold for labeling
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") + # Ensure x-axis crosses at y=0
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.05))) + # Ensure y-axis includes 0
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(), # Remove gridlines
+    axis.line = element_line(color = "black"), # Add black axis lines
+    axis.ticks = element_line(color = "black"), # Add black axis ticks
+    axis.text = element_text(size = 12, color = "black"), # Customize axis text
+    axis.title = element_text(size = 14, color = "black") # Customize axis titles
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 6) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_OM.csv",
+          row.names = FALSE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_TP_OM.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_SF_v_SJ_OM.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/outliers_TP_v_SJ_OM.csv")
+
+# Add source columns to track which comparisons each outlier came from
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count appearances by OTUID
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(Comparisons = paste(unique(Comparison), collapse = "; "),
+            Count = n(), .groups = "drop") %>%
+  filter(Count > 1)  # Keep only those that appear in >1 comparison
+
+# Save
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_OM_outliers.csv")
+```
+
+
+```{r}
+# Load consistent outliers for OM (previously saved)
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_OM_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+```
+
+
+# SF v TP OM with highlighted consistent outliers
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx", sheet = "SF v TP OM") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminants
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+# Merge + process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, tpom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 6, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Colors
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save
+ggsave(
+  filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SF_v_TP_OM_consistent.svg",
+  plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg"
+)
+```
+
+
+# SJ v SF OM with highlighted consistent outliers
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+library(readr)
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_OM_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx",
+                   sheet = "SJ v SF OM") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SJOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SFOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+# Join and process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(distinct_colors,
+                               "SF Enriched" = "#B75347",
+                               "SJ Enriched" = "#E09351",
+                               "Non-Significant" = "gray80"),
+                    na.translate = FALSE) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_SJ_v_SF_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# TP v SJ OM with highlighted consistent outliers
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+library(readr)
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/consistent_OM_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_allresults_COMBINED_16S.xlsx",
+                   sheet = "TP v SJ OM") %>%
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "TPOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/Maaslin_discrimcomparisons_040725.xlsx",
+                           sheet = "SJOM_discrim") %>%
+  pull(OTUID) %>% trimws()
+
+# Join and process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tpom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 8, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(distinct_colors,
+                               "TP Enriched" = "#94B594",
+                               "SJ Enriched" = "#E09351",
+                               "Non-Significant" = "gray80"),
+                    na.translate = FALSE) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Plots/volcano_TP_v_SJ_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+
+
+
+
+
+
+
+
+-----------------------------
+
+# ITS
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+library(dplyr)
+library(readxl)
+library(stringr)
+```
+
+# SF v TP shallow 0-5 cm
+
+```{r}
+# SF v TP shallow 0-5 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SF v TP shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx",sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SF Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 3, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SF_v_TP_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 3) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_shallow.csv",
+          row.names = FALSE)
+```
+
+
+
+# SJ v TP shallow 0-5 cm
+```{r}
+# SJ v TP shallow 0-5 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx",sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sj5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = .6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SJ Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_TP_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 5) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_TP_shallow.csv",
+          row.names = FALSE)
+```
+
+
+# SJ v SF shallow 0-5 cm
+```{r}
+# SJ v SF shallow 0-5 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+names(data)
+
+# Load discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx",sheet = "SJ5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF5_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = .6, color = "black", alpha = .7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_shallow.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 5) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_shallow.csv",
+          row.names = FALSE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow ITS comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_shallow.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_shallow.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_TP_shallow.csv") # TP v SJ == SJ v TP
+
+# Tag each dataset by comparison
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count how many comparisons each OTUID appears in
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(
+    Comparisons = paste(unique(Comparison), collapse = "; "),
+    Count = n(),
+    .groups = "drop"
+  ) %>%
+  filter(Count > 1)  # Keep only OTUs seen in >1 comparison
+
+# Save consistent shallow outliers (ITS)
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_shallow_outliers.csv")
+```
+
+
+# Load consistent shallow outliers
+```{r}
+# DON'T drop columns before creating ConsistentID
+consistent_shallow <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_shallow_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))  # Now this column stays!
+```
+
+
+# TP v SF shallow 0-5 cm with highlighted consistent outlier
+```{r}
+data <- data %>%
+  left_join(consistent_shallow %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SF Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, tp5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+distinct_colors <- scales::hue_pal()(nrow(consistent_shallow))
+names(distinct_colors) <- consistent_shallow$ConsistentID
+
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+
+  # 1. Base layer — all points, no stroke
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  # 2. Overlay — only discriminant OTUs with black stroke
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  # Labels for log_q > 5
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  # Guidelines
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  # Color scale for enrichment + unique OTUs
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SF_shallow_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# TP v SJ shallow 0-5 cm with highlighted consistent outlier
+```{r}
+# Data prep
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Discriminant OTUs
+tp5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP5_discrim") %>% pull(OTUID) %>% trimws()
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ5_discrim") %>% pull(OTUID) %>% trimws()
+
+# Join and process
+data <- data %>%
+  left_join(consistent_shallow %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Unique color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_shallow))
+names(distinct_colors) <- consistent_shallow$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SJ Enriched" = "#E09351",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_shallow_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# SJ v SF shallow 0-5 cm with highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF shallow") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Discriminant OTUs
+sj5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ5_discrim") %>% pull(OTUID) %>% trimws()
+sf5_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF5_discrim") %>% pull(OTUID) %>% trimws()
+
+# Join and annotate
+data <- data %>%
+  left_join(consistent_shallow %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf5_discrim, sj5_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Unique color palette for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_shallow))
+names(distinct_colors) <- consistent_shallow$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+
+  # All points — no stroke
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  # Discriminant points — with stroke
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  # Labels
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  # Guides
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  # Color scale
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_shallow_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# SJ v SF deep 5-15 cm
+```{r}
+# SJ v SF deep 5-15 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = .6, color = "black", alpha = .7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 5) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_deep.csv",
+          row.names = FALSE)
+```
+
+
+# SF v TP deep 5-15 cm
+```{r}
+# SF v TP deep 5-15 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SF v TP deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, tp15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 3, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = .6, color = "black", alpha = .7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SF_v_TP_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 3) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_deep.csv",
+          row.names = FALSE)
+```
+
+
+# TP v SJ deep 5-15 cm
+```{r}
+# TP v SJ deep 5-15 cm
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#94B594",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_deep.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 5) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_TP_v_SJ_deep.csv",
+          row.names = FALSE)
+```
+
+# Consistent deep outliers
+# Load outlier data for all deep ITS comparisons
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow ITS comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_deep.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_deep.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_TP_deep.csv") # TP v SJ == SJ v TP
+
+# Tag each dataset by comparison
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count how many comparisons each OTUID appears in
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(
+    Comparisons = paste(unique(Comparison), collapse = "; "),
+    Count = n(),
+    .groups = "drop"
+  ) %>%
+  filter(Count > 1)  # Keep only OTUs seen in >1 comparison
+
+# Save consistent shallow outliers (ITS)
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_deep_outliers.csv")
+```
+
+
+
+# SJ v SF deep 5-15 cm with highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% pull(OTUID) %>% trimws()
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent deep outliers
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Create unique color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # All points — no stroke
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  # Discriminant points — with stroke
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  # Labels
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  # Guidelines
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  # Fill colors
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_deep_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+
+# SF v TP deep 5-15 cm with highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SF v TP deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sf15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SF15_discrim") %>% pull(OTUID) %>% trimws()
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent deep outliers
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process data
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sf15_discrim, tp15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 3, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Create unique color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # All points — no stroke
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  # Discriminant OTUs — black stroke
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  # Labels
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  # Guidelines
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  # Fill color scale
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SF_v_TP_deep_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# TP v SJ deep 5-15 cm with highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ deep") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tp15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TP15_discrim") %>% pull(OTUID) %>% trimws()
+sj15_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJ15_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent deep outliers
+consistent_deep <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_deep_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process data
+data <- data %>%
+  left_join(consistent_deep %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tp15_discrim, sj15_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Unique colors for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_deep))
+names(distinct_colors) <- consistent_deep$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "TP Enriched" = "#94B594",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_deep_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# SJ v SF OM
+```{r}
+# SJ v SF OM
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 6, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 6) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_OM.csv",
+          row.names = FALSE)
+```
+
+
+# SF v TP OM
+```{r}
+# SF v TP OM
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SF v TP OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, tpom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 3, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "SF Enriched" = "#B75347",
+    "TP Enriched" = "#94B594",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SF_v_TP_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 3) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_OM.csv",
+          row.names = FALSE)
+```
+
+
+# TP v SJ OM
+```{r}
+# TP v SJ OM
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Process data
+data <- data %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tpom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA)
+  )
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0, color = "black", alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = Enrichment),
+             shape = 21, size = 3, stroke = 0.6, color = "black", alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c(
+    "TP Enriched" = "#94B594",
+    "SJ Enriched" = "#E09351",
+    "Non-Significant" = "gray80"
+  )) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Enrichment") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_OM.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+
+# Save outliers
+outliers_df <- data %>%
+  filter(log_q > 7) %>%
+  select(OTUID, taxonomy, LabelText, coef, qval, log_q, Enrichment)
+
+write.csv(outliers_df,
+          file = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_TP_v_SJ_OM.csv",
+          row.names = FALSE)
+```
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Load outlier data for all shallow ITS comparisons
+sf_tp <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SF_v_TP_OM.csv")
+sj_sf <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_SF_OM.csv")
+tp_sj <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/outliers_SJ_v_TP_OM.csv") # TP v SJ == SJ v TP
+
+# Tag each dataset by comparison
+sf_tp <- sf_tp %>% mutate(Comparison = "SF_v_TP")
+sj_sf <- sj_sf %>% mutate(Comparison = "SJ_v_SF")
+tp_sj <- tp_sj %>% mutate(Comparison = "TP_v_SJ")
+
+# Combine all outliers
+all_shallow_outliers <- bind_rows(sf_tp, sj_sf, tp_sj)
+
+# Count how many comparisons each OTUID appears in
+outlier_counts <- all_shallow_outliers %>%
+  group_by(OTUID, taxonomy) %>%
+  summarise(
+    Comparisons = paste(unique(Comparison), collapse = "; "),
+    Count = n(),
+    .groups = "drop"
+  ) %>%
+  filter(Count > 1)  # Keep only OTUs seen in >1 comparison
+
+# Save consistent shallow outliers (ITS)
+write_csv(outlier_counts, "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_OM_outliers.csv")
+```
+
+
+```{r}
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_OM_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+```
+
+# SJ v SF OM highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SJ v SF OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJOM_discrim") %>% pull(OTUID) %>% trimws()
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_om_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 6, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Create unique color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SJ_v_SF_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# SF v TP OM highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "SF v TP OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+sfom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SFOM_discrim") %>% pull(OTUID) %>% trimws()
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_om_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef < 0 ~ "SF Enriched",
+      coef > 0 ~ "TP Enriched"
+    ),
+    Discriminant = OTUID %in% c(sfom_discrim, tpom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 5, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Create color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  
+  # All points
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  # Discriminants with outline
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  # Labels
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  # Guides
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  # Colors
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "SF Enriched" = "#B75347",
+               "TP Enriched" = "#94B594",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_SF_v_TP_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+# TP v SJ OM highlighted consistent outlier
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", sheet = "TP v SJ OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "TPOM_discrim") %>% pull(OTUID) %>% trimws()
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", sheet = "SJOM_discrim") %>% pull(OTUID) %>% trimws()
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_om_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tpom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) x[grepl("^c__", x)][1]),
+    order = sapply(tax_parts, function(x) x[grepl("^o__", x)][1]),
+    family = sapply(tax_parts, function(x) x[grepl("^f__", x)][1]),
+    genus  = sapply(tax_parts, function(x) x[grepl("^g__", x)][1]),
+    species = sapply(tax_parts, function(x) x[grepl("^s__", x)][1]),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  )
+
+# Color palette
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "TP Enriched" = "#94B594",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal()
+
+print(volcano_plot)
+
+# Save
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
+
+
+```{r}
+# Load main results
+data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslinResults_cleaned_allSheets_OTUID.xlsx", 
+                   sheet = "TP v SJ OM") %>% 
+  mutate(OTUID = trimws(as.character(OTUID)))
+
+# Load discriminant OTUs
+tpom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", 
+                           sheet = "TPOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+sjom_discrim <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx", 
+                           sheet = "SJOM_discrim") %>% 
+  pull(OTUID) %>% trimws()
+
+# Load consistent OM outliers
+consistent_om <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/consistent_om_outliers.csv") %>%
+  mutate(ConsistentID = paste0("OTU_", row_number()))
+
+# Join and process data
+data <- data %>%
+  left_join(consistent_om %>% select(OTUID, ConsistentID), by = "OTUID") %>%
+  mutate(
+    log_q = -log10(qval),
+    Enrichment = case_when(
+      qval >= 0.05 ~ "Non-Significant",
+      coef > 0 ~ "TP Enriched",
+      coef < 0 ~ "SJ Enriched"
+    ),
+    Discriminant = OTUID %in% c(tpom_discrim, sjom_discrim),
+    tax_parts = str_split(taxonomy, ";\\s*"),
+    class = sapply(tax_parts, function(x) if (length(x) > 0) x[grepl("^c__", x)][1] else NA),
+    order = sapply(tax_parts, function(x) if (length(x) > 0) x[grepl("^o__", x)][1] else NA),
+    family = sapply(tax_parts, function(x) if (length(x) > 0) x[grepl("^f__", x)][1] else NA),
+    genus = sapply(tax_parts, function(x) if (length(x) > 0) x[grepl("^g__", x)][1] else NA),
+    species = sapply(tax_parts, function(x) if (length(x) > 0) x[grepl("^s__", x)][1] else NA),
+    LabelText = paste(class, order, family, genus, species, sep = " "),
+    Label = ifelse(log_q > 7, LabelText, NA),
+    PlotGroup = ifelse(!is.na(ConsistentID), ConsistentID, Enrichment)
+  ) %>%
+  filter(!is.na(log_q) & !is.na(coef))  # Remove rows with NA in key columns
+
+# Create a unique color palette for consistent OTUs
+distinct_colors <- scales::hue_pal()(nrow(consistent_om))
+names(distinct_colors) <- consistent_om$ConsistentID
+
+# Plot
+volcano_plot <- ggplot(data, aes(x = coef, y = log_q)) +
+  geom_point(data = data,
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0, alpha = 0.7) +
+  geom_point(data = filter(data, Discriminant),
+             aes(fill = PlotGroup),
+             shape = 21, size = 3,
+             color = "black", stroke = 0.6, alpha = 0.7) +
+  geom_text_repel(data = filter(data, !is.na(Label)),
+                  aes(label = Label),
+                  size = 2.5, max.overlaps = 25, segment.color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted") +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  scale_fill_manual(
+    values = c(distinct_colors,
+               "TP Enriched" = "#94B594",
+               "SJ Enriched" = "#E09351",
+               "Non-Significant" = "gray80"),
+    na.translate = FALSE
+  ) +
+  labs(x = "Coefficient", y = "-log10(q-value)", fill = "Group") +
+  theme_minimal() +
+  theme(
+    panel.grid = element_blank(),
+    axis.line = element_line(color = "black"),
+    axis.ticks = element_line(color = "black"),
+    axis.text = element_text(size = 12, color = "black"),
+    axis.title = element_text(size = 14, color = "black")
+  )
+
+print(volcano_plot)
+
+# Save plot
+ggsave(filename = "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/volcano_TP_v_SJ_OM_consistent.svg",
+       plot = volcano_plot, width = 6, height = 6, dpi = 300, device = "svg")
+```
