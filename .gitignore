@@ -35,3 +35,15 @@ results/
 *.gz
 *.zip
 *.tar
+
+# Ignore screenshots, figures, and large media
+*.jpg
+*.png
+*.svg
+*.webp
+*.xlsx
+*.pdf
+Screenshot*
+*_transition*
+*_resilience*
+*_scaled-resistance*
