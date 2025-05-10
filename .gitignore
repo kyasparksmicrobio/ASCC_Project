@@ -47,3 +47,25 @@ Screenshot*
 *_transition*
 *_resilience*
 *_scaled-resistance*
+
+# Ignore photos and presentation files
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.svg
+*.gif
+*.tif
+*.tiff
+*.bmp
+
+# Ignore PowerPoint and Keynote
+*.ppt
+*.pptx
+*.key
+
+# Ignore screenshots by name
+Screenshot*
+*_transition*
+*_resilience*
+*_scaled-resistance*
