@@ -105,17 +105,9 @@ This repository tracks only the necessary text files and figures. Images, PowerP
 
 ---
 
-## Citation
-
-If you use any part of this repository in your work, please cite:
-
-> Sparks, K. et al. (2025). Soil microbial responses to adaptive silviculture for climate change in western coniferous forests. *In prep.*
-
----
-
 ## Contact
 
-Kya Sparks — Soil Microbiology PhD Student, Colorado State University
+Kya Sparks — Soil Microbiology PhD Student, Wilkins Lab, Colorado State University
 [kya.sparks@colostate.edu](mailto:kya.sparks@colostate.edu)
 GitHub: [kyasparksmicrobio](https://github.com/kyasparksmicrobio)
 
