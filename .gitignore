@@ -1,56 +1,36 @@
-# R and RStudio
-.Rproj.user/
-.Rhistory
-.RData
-.Ruserdata
-*.Rproj
+# === MAGs and 16S_Maaslin-specific ignores ===
 
-# macOS
-.DS_Store
+# Ignore images in MAGs and 16S_Maaslin folders
+MAGs/*.jpg
+MAGs/*.jpeg
+MAGs/*.png
+MAGs/*.webp
+MAGs/*.svg
+MAGs/*.ai
 
-# Large/intermediate bioinformatics files
-*.qza
-*.qzv
-*.fastq
-*.bam
-*.sam
-*.rds
-*.RData
-*.log
-*.gz
-*.zip
-*.tar
-*.yml
-*.yaml
+16S_Maaslin/*.jpg
+16S_Maaslin/*.jpeg
+16S_Maaslin/*.png
+16S_Maaslin/*.webp
+16S_Maaslin/*.svg
 
-# Excel files — keep these
-!*.xlsx
+# Ignore PowerPoint or Keynote slides
+MAGs/*.ppt
+MAGs/*.pptx
+MAGs/*.key
 
-# Data tables — keep these
-!*.csv
-!*.tsv
-!*.html
+16S_Maaslin/*.ppt
+16S_Maaslin/*.pptx
+16S_Maaslin/*.key
 
-# Image files
-*.jpg
-*.jpeg
-*.png
-*.webp
-*.svg
+# Keep useful files
+!MAGs/*.xlsx
+!MAGs/*.csv
+!MAGs/*.tsv
+!MAGs/*.html
 
-# Presentations
-*.ppt
-*.pptx
-*.key
+!16S_Maaslin/*.xlsx
+!16S_Maaslin/*.csv
+!16S_Maaslin/*.tsv
+!16S_Maaslin/*.html
 
-# Slurm/cluster logs
-slurm-*
-*.out
-*.err
-
-# Output/scratch folders
-outputs/
-results/
-*_output/
-*_outputs/
-*/__pycache__/
