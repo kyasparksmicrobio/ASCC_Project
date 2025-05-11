@@ -119,7 +119,3 @@ Kya Sparks — Soil Microbiology PhD Student, Colorado State University
 [kya.sparks@colostate.edu](mailto:kya.sparks@colostate.edu)
 GitHub: [kyasparksmicrobio](https://github.com/kyasparksmicrobio)
 
----
-
-Let me know if you'd like this broken into sub-README files by folder.
-
