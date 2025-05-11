@@ -1,0 +1,300 @@
+---
+title: "Untitled"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(vegan)
+library(ggplot2)
+library(reshape2)
+library(phyloseq)
+```
+
+
+### 16S
+
+```{r}
+# Import your metadata
+metadata <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.txt", row.names =1)
+
+# Import feature table
+otus <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/Filtered_ASCC_16S_feature_table_rem.txt", row.names=1)
+```
+
+
+```{r}
+# check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
+all.equal(names(otus),row.names(metadata)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
+```
+
+
+
+```{r}
+# otus_5<- otus %>% 
+#   select(contains("_1C_5"))
+
+# meta_5 <- metadata %>% 
+#   filter(Depth=="0_5cm")
+```
+
+
+```{r}
+# check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
+# all.equal(names(otus_5),row.names(meta_5)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
+```
+
+
+
+```{r}
+# now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
+otumat<-as.matrix(otus)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+taxa<-read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxmat<-as.matrix(taxa)
+all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
+TAX = tax_table(taxmat)
+physeq<-phyloseq(OTU,TAX) #make your phyloseq object, which is basically just a R object that has all of your data for the analyses stored into it
+all.equal(row.names(metadata),sample_names(physeq)) # Final check to make sure everything lines up
+sampledata<-sample_data(metadata)
+mgd<-merge_phyloseq(physeq,sampledata) #make the final phyloseq object
+```
+
+
+
+# Calculate relative abundance from ASV count data - dont need to run this step if you have already done so but it shouldnt really effect! 
+```{r}
+mgd_relabund<-transform_sample_counts(mgd,function(x)x/sum(x)) #Calculate relative abundance from ASV count data - this is what you can save and use for other taxonomy analyses. If you're interested in doing these, let me know and i can help out!
+```
+
+# Calculate Bray-Curtis dissimilary (distance) 
+```{r}
+mgd_relabund.bray<-distance(mgd_relabund,"bray") 
+```
+
+
+# Final line to generate NMDS ordination 
+```{r}
+mgd_relabund.bray.nmds<-ordinate(mgd_relabund,"NMDS",mgd_relabund.bray) #WAHOO DO NMDS!!
+```
+
+# Use this to read out the NMDS stress (you generally want the stress to be below 0.2)
+```{r}
+mgd_relabund.bray.nmds$stress 
+# stress = 0.1441404
+# [1] 0.1272094  1/25/25
+```
+
+#Create plain data frame 'map' of sample metadata
+
+```{r}
+mgd_relabund_map=as(sample_data(mgd_relabund),"data.frame") 
+sample_tab<-mgd_relabund_map
+```
+
+
+# # Add NMDS coordinates (scores) to the sample table
+```{r}
+sample_tab$NMDS1<-scores(mgd_relabund.bray.nmds$points)[,1] 
+sample_tab$NMDS2<-scores(mgd_relabund.bray.nmds$points)[,2]
+```
+
+
+```{r}
+env_data = as.data.frame(sample_tab[, -c((ncol(sample_tab) - 1), ncol(sample_tab))])
+
+
+# Assigning your data (sample_tab file with metadata) a new variable name 
+
+all.equal(row.names(sample_tab), row.names(env_data)) 
+# Just checking all is aligned
+
+# Run envfit
+numeric_env_data <- env_data[, sapply(env_data, is.numeric)]
+fit <- envfit(mgd_relabund.bray.nmds, numeric_env_data, perm = 10000, na.rm = TRUE)
+# Function envfit finds vectors or factor averages of environmental variables/metadata
+
+fit.scrs = as.data.frame(scores(fit, display = "vectors")) 
+
+# Add those scores as vectors to the plot
+
+fit.scrs <- cbind(fit.scrs, Soil_Chem = rownames(fit.scrs)) 
+
+# Adding this info to the matrix 'fit.scrs'
+
+# This is your ggplot code from your normal NMDS - adjust as needed so yours looks similar
+# Note here we are assigning the plot as 'p' - so it will not show the plot until you run line 20 below which is just 'p'
+
+p = ggplot(data=sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color=ASCC_Site, shape= Depth),alpha=.75) +
+  theme_classic()   
+p
+
+# ADD VECTORS TO THE PLOT
+# Now we are telling ggplot to add more 'stuff' to the plot - the envfit information 
+# So we say our 'p' is the old plot + new stuff (everything after geom_segment)  
+# Again, we run 'p' to see what this has added, hopefully vectors! 
+p = p +
+  geom_segment(data = fit.scrs, aes(x = 0, xend = NMDS1, y = 0, yend = NMDS2), 
+               arrow = arrow(length = unit(0.25, "cm")), arrow.fill = "black")
+
+p
+
+# LABEL VECTORS
+# Again, we are building off the previous plots (as saved by 'p')
+# This time the ordination should be updated to have vectors that are labeled 
+
+p = p + 
+  geom_text(data = fit.scrs, aes(x = NMDS1 * 1.1, y = NMDS2 * 1.1, label = Soil_Chem), size = 2) 
+p
+
+# Save the ordination + vectors 
+ggsave("NMDS-with-vectors_waterextractable.pdf")
+
+# The following commands will list which variables have a significant p value (first line), 
+# show the p-values (second line), and then show all data (third line)
+which(fit$vectors$pvals <= 0.05)
+fit$vectors$pvals
+fit$vectors
+
+# Write the p-values for the variables to a .csv file and save it in your working directory
+write.table(fit$vectors$pvals, file = 'pvals_vectors_16S_alldepths.txt', quote = FALSE, sep = '/t')
+```
+
+
+
+### ITS 
+
+```{r}
+# Import your metadata
+metadata <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_ITS_KMS2.txt", row.names =1)
+
+# Import feature table
+otus <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/Filtered_ASCC_ITS_feature_table_rem_forvectors.txt", row.names=1)
+```
+
+
+```{r}
+# check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
+all.equal(names(otus),row.names(metadata)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
+```
+
+
+
+
+```{r}
+# now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
+otumat<-as.matrix(otus)
+OTU = otu_table(otumat, taxa_are_rows = TRUE)
+taxa<-read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxmat<-as.matrix(taxa)
+all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
+TAX = tax_table(taxmat)
+physeq<-phyloseq(OTU,TAX) #make your phyloseq object, which is basically just a R object that has all of your data for the analyses stored into it
+all.equal(row.names(metadata),sample_names(physeq)) # Final check to make sure everything lines up
+sampledata<-sample_data(metadata)
+mgd<-merge_phyloseq(physeq,sampledata) #make the final phyloseq object
+```
+
+
+
+# Calculate relative abundance from ASV count data - dont need to run this step if you have already done so but it shouldnt really effect! 
+```{r}
+mgd_relabund<-transform_sample_counts(mgd,function(x)x/sum(x)) #Calculate relative abundance from ASV count data - this is what you can save and use for other taxonomy analyses. If you're interested in doing these, let me know and i can help out!
+```
+
+# Calculate Bray-Curtis dissimilary (distance) 
+```{r}
+mgd_relabund.bray<-distance(mgd_relabund,"bray") 
+```
+
+
+# Final line to generate NMDS ordination 
+```{r}
+mgd_relabund.bray.nmds<-ordinate(mgd_relabund,"NMDS",mgd_relabund.bray) #WAHOO DO NMDS!!
+```
+
+# Use this to read out the NMDS stress (you generally want the stress to be below 0.2)
+```{r}
+mgd_relabund.bray.nmds$stress 
+# stress =[1] 0.2316173
+```
+
+#Create plain data frame 'map' of sample metadata
+
+```{r}
+mgd_relabund_map=as(sample_data(mgd_relabund),"data.frame") 
+sample_tab<-mgd_relabund_map
+```
+
+
+# # Add NMDS coordinates (scores) to the sample table
+```{r}
+sample_tab$NMDS1<-scores(mgd_relabund.bray.nmds$points)[,1] 
+sample_tab$NMDS2<-scores(mgd_relabund.bray.nmds$points)[,2]
+```
+
+
+```{r}
+env_data = as.data.frame(sample_tab[, -c((ncol(sample_tab) - 1), ncol(sample_tab))])
+
+
+# Assigning your data (sample_tab file with metadata) a new variable name 
+
+all.equal(row.names(sample_tab), row.names(env_data)) 
+# Just checking all is aligned
+
+# Run envfit
+numeric_env_data <- env_data[, sapply(env_data, is.numeric)]
+fit <- envfit(mgd_relabund.bray.nmds, numeric_env_data, perm = 10000, na.rm = TRUE)
+# Function envfit finds vectors or factor averages of environmental variables/metadata
+
+fit.scrs = as.data.frame(scores(fit, display = "vectors")) 
+
+# Add those scores as vectors to the plot
+
+fit.scrs <- cbind(fit.scrs, Soil_Chem = rownames(fit.scrs)) 
+
+# Adding this info to the matrix 'fit.scrs'
+
+# This is your ggplot code from your normal NMDS - adjust as needed so yours looks similar
+# Note here we are assigning the plot as 'p' - so it will not show the plot until you run line 20 below which is just 'p'
+
+p = ggplot(data=sample_tab, aes(x = NMDS1, y = NMDS2)) + 
+  geom_point(aes(color=ASCC_Site, shape= Depth),alpha=.75) +
+  theme_classic()   
+p
+
+# ADD VECTORS TO THE PLOT
+# Now we are telling ggplot to add more 'stuff' to the plot - the envfit information 
+# So we say our 'p' is the old plot + new stuff (everything after geom_segment)  
+# Again, we run 'p' to see what this has added, hopefully vectors! 
+p = p +
+  geom_segment(data = fit.scrs, aes(x = 0, xend = NMDS1, y = 0, yend = NMDS2), 
+               arrow = arrow(length = unit(0.25, "cm")), arrow.fill = "black")
+
+p
+
+# LABEL VECTORS
+# Again, we are building off the previous plots (as saved by 'p')
+# This time the ordination should be updated to have vectors that are labeled 
+
+p = p + 
+  geom_text(data = fit.scrs, aes(x = NMDS1 * 1.1, y = NMDS2 * 1.1, label = Soil_Chem), size = 2) 
+p
+
+# Save the ordination + vectors 
+ggsave("NMDS-with-vectors_waterextractable.pdf")
+
+# The following commands will list which variables have a significant p value (first line), 
+# show the p-values (second line), and then show all data (third line)
+which(fit$vectors$pvals <= 0.05)
+fit$vectors$pvals
+fit$vectors
+
+# Write the p-values for the variables to a .csv file and save it in your working directory
+write.table(fit$vectors$pvals, file = 'pvals_vectors_ITS_alldepths.txt', quote = FALSE, sep = '/t')
+```

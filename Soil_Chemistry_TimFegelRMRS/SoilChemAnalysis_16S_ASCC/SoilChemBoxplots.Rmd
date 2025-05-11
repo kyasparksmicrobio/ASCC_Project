@@ -1,0 +1,311 @@
+---
+title: "Soil Chem Box Plots"
+author: "Kya Sparks"
+output: html_document
+---
+
+```{r}
+library(vegan)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(ggsignif)
+library(ggpubr)
+library(paletteer) 
+```
+
+
+```{r}
+soil_chem <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata_rem.csv")
+```
+
+```{r}
+soilchem_5 <- soil_chem %>% 
+    filter(Depth == "0_5cm")
+```
+
+```{r}
+my_comparisons<-list(c('SF','TP'),c('SF','SJ'),c('TP','SJ'))
+
+my_comparisons2<-list(c('0_5cm','5_15cm'),c('0_5cm','OM'),c('OM','5_15cm'))
+```
+
+```{r}
+soil_chem$Depth <- factor(soil_chem$Depth, levels=c('OM','0_5cm','5_15cm'))
+
+soil_chem$Full_name_old <- factor(soil_chem$Full_name_old, levels=c('SF','TP','SJ'))
+```
+
+```{r}
+ggplot(data=soil_chem,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    facet_wrap(~Depth, nrow = 1,scales = "free_y")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% at each site and depth", x = "Site", y ="C(%)", fill = "Site" )+
+    scale_colour_paletteer_d("lisa::BridgetRiley")+
+    scale_fill_paletteer_d("lisa::BridgetRiley")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soil_chem,mapping=aes(x=Full_name_old, y= N_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    facet_wrap(~Depth, nrow = 1,scales = "free_y")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% at each site and depth", x = "Site", y ="N(%)", fill = "Site" )+
+    scale_colour_paletteer_d("lisa::BridgetRiley")+
+    scale_fill_paletteer_d("lisa::BridgetRiley")+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soil_chem,mapping=aes(x=Full_name_old, y= Water_Content)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    facet_wrap(~Depth, nrow = 1,scales = "free_y")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content at each site and depth", x = "Site", y ="Water Content", fill = "Site" )+
+    scale_colour_paletteer_d("lisa::BridgetRiley")+
+    scale_fill_paletteer_d("lisa::BridgetRiley")+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=Full_name_old, y= N_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for 0-5cm Samples", x = "Site", y ="N(%)", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for 0-5cm Samples", x = "Site", y ="Water Content", fill = "Site" )+
+    theme_bw()
+```
+
+
+
+
+```{r}
+soilchem_15 <- soil_chem %>% 
+    filter(Depth == "5_15cm")
+```
+
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% for 5-15cm Samples", x = "Site", y ="C(%)", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=Full_name_old, y= N_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for 5-15cm Samples", x = "Site", y ="N(%)", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for 5-15cm Samples", x = "Site", y ="Water Content", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+soilchem_OM <- soil_chem %>% 
+    filter(Depth == "OM")
+```
+
+
+```{r}
+ggplot(data=soilchem_OM,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% for OM Samples", x = "Site", y ="C(%)", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_OM,mapping=aes(x=Full_name_old, y= N_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for OM Samples", x = "Site", y ="N(%)", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_OM,mapping=aes(x=Full_name_old, y= C_perc)) + 
+    geom_boxplot(aes(fill=Full_name_old), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for OM Samples", x = "Site", y ="Water Content", fill = "Site" )+
+    theme_bw()
+```
+
+
+
+
+
+
+
+
+
+```{r}
+soilchem_SF <- soil_chem %>% 
+    filter(Full_name_old== "SF")
+```
+
+```{r}
+my_comparisons<-list(c('SF','TP'),c('SF','SJ'),c('TP','SJ'))
+
+my_comparisons2<-list(c('0_5cm','5_15cm'),c('0_5cm','OM'),c('OM','5_15cm'))
+```
+
+
+```{r}
+ggplot(data=soilchem_SF,mapping=aes(x=Depth, y= C_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% for State Forest Samples", x = "Depth", y ="C(%)", fill = "Depth" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_SF,mapping=aes(x=Depth, y= N_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for State Forest Samples", x = "Depth", y ="N(%)", fill = "Depth")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_SF,mapping=aes(x=Depth, y= Water_Content)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for State Forest Samples", x = "Depth", y ="Water Content", fill = "Depth" )+
+    theme_bw()
+```
+
+
+
+
+
+
+```{r}
+soilchem_TP <- soil_chem %>% 
+    filter(Full_name_old== "TP")
+```
+
+```{r}
+ggplot(data=soilchem_TP,mapping=aes(x=Depth, y= C_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% for Taylor Park Samples", x = "Depth", y ="C(%)", fill = "Depth" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_TP,mapping=aes(x=Depth, y= N_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for Taylor Park Samples", x = "Depth", y ="N(%)", fill = "Depth")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_TP,mapping=aes(x=Depth, y= Water_Content)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for Taylor Park Samples", x = "Depth", y ="Water Content", fill = "Depth" )+
+    theme_bw()
+```
+
+
+
+
+
+
+
+
+
+```{r}
+soilchem_SJ <- soil_chem %>% 
+    filter(Full_name_old== "SJ")
+```
+
+```{r}
+ggplot(data=soilchem_SJ,mapping=aes(x=Depth, y= C_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "C% for San Juan Samples", x = "Depth", y ="C(%)", fill = "Depth" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_SJ,mapping=aes(x=Depth, y= N_perc)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "N% for San Juan Samples", x = "Depth", y ="N(%)", fill = "Depth")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_SJ,mapping=aes(x=Depth, y= Water_Content)) + 
+    geom_boxplot(aes(fill=Depth), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons2, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) + 
+    labs(title = "Water Content for San Juan Samples", x = "Depth", y ="Water Content", fill = "Depth" )+
+    theme_bw()
+```
+
+

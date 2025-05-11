@@ -1,0 +1,270 @@
+---
+title: "Soil Chem Box Plots"
+author: "Kya Sparks"
+output: html_document
+---
+
+```{r}
+#install.packages("readxl")
+library(vegan)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(ggsignif)
+library(ggpubr)
+library(readxl)
+```
+
+
+```{r}
+soil_chem <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_ITS_KMS2.txt", row.names =1)
+```
+
+```{r}
+soilchem_5 <- soil_chem %>% 
+    filter(Depth == "0_5cm")
+```
+
+```{r}
+my_comparisons<-list(c('SF','TP'),c('SF','SJ'),c('TP','SJ'))
+
+# my_comparisons2<-list(c('0_5cm','5_15cm'),c('0_5cm','OM'),c('OM','5_15cm'))
+
+# my_comparisons3 <- list( c('+.0_5cm','+.5_15cm'),c('+.0_5cm','-.OM'),c('+.5_15cm','-.OM'))
+
+#my_comparisons3 <- list(c('0_5cm','5_15cm'),c('5_15cm','0_5cm'))
+```
+
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= DOC)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "DOC for 0-5cm Samples", x = "Site", y ="DOC", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= TDN)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "TDN for 0-5cm Samples", x = "Site", y ="TDN", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= Na)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Na for 0-5cm Samples", x = "Site", y ="Na", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= NH4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "NH4 for 0-5cm Samples", x = "Site", y ="NH4", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= K)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "K for 0-5cm Samples", x = "Site", y ="K", fill = "Site")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= Mg)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Mg for 0-5cm Samples", x = "Site", y ="Mg", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= Ca)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Ca for 0-5cm Samples", x = "Site", y ="Ca", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y=Cl)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Cl for 0-5cm Samples", x = "Site", y ="Cl", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= NO3)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "NO3 for 0-5cm Samples", x = "Site", y ="NO3", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= PO4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "PO4 for 0-5cm Samples", x = "Site", y ="PO4", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_5,mapping=aes(x=ASCC_Site, y= SO4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "SO4 for 0-5cm Samples", x = "Site", y ="SO4", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+soilchem_15 <- soil_chem %>% 
+    filter(Depth == "5_15cm")
+```
+
+
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= DOC)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "DOC for 5-15cm Samples", x = "Site", y ="DOC", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= TDN)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "TDN for 5-15cm Samples", x = "Site", y ="TDN", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= Na)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Na for 5-15cm Samples", x = "Site", y ="Na", fill = "Site" )+
+    theme_bw()
+```
+
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= NH4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "NH4 for 5-15cm Samples", x = "Site", y ="NH4", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= K)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "K for 5-15cm Samples", x = "Site", y ="K", fill = "Site")+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= Mg)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Mg for 5-15cm Samples", x = "Site", y ="Mg", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= Ca)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Ca for 5-15cm Samples", x = "Site", y ="Ca", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y=Cl)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "Cl for 5-15cm Samples", x = "Site", y ="Cl", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= NO3)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "NO3 for 5-15cm Samples", x = "Site", y ="NO3", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= PO4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "PO4 for 5-15cm Samples", x = "Site", y ="PO4", fill = "Site" )+
+    theme_bw()
+```
+
+```{r}
+ggplot(data=soilchem_15,mapping=aes(x=ASCC_Site, y= SO4)) + 
+    geom_boxplot(aes(fill=ASCC_Site), show.legend =TRUE) + 
+    geom_jitter(height = 0.1, width = 0.1) +
+    #facet_wrap(~location2, nrow = 1,scales = "free_x")+
+    stat_compare_means(comparisons=my_comparisons, method = "wilcox.test", label="p.signif", show.legend = FALSE, size = 6, hide.ns = FALSE, tip.length = 0.035, bracket.size = 0.5) +
+    labs(title = "SO4 for 5-15cm Samples", x = "Site", y ="SO4", fill = "Site" )+
+    theme_bw()
+```
+
+

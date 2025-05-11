@@ -1,0 +1,978 @@
+[1] "ANOVA for DOC by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2   1960   979.9   12.88 7.51e-06 ***
+Residuals   137  10425    76.1                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for DOC by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1    110  110.29    1.24  0.267
+Residuals   138  12275   88.95               
+[1] "Kruskal-Wallis Test for DOC by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df          p method        
+* <chr> <int>     <dbl> <int>      <dbl> <chr>         
+1 DOC     140      27.5     2 0.00000109 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for DOC by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 DOC     140      2.01     1 0.156 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for TDN by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  70.12   35.06   33.95 1.06e-12 ***
+Residuals   137 141.46    1.03                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for TDN by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1   3.95   3.950   2.625  0.107
+Residuals   138 207.63   1.505               
+[1] "Kruskal-Wallis Test for TDN by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 TDN     140      45.9     2 1.11e-10 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for TDN by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 TDN     140      1.95     1 0.163 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for Na by ASCC_Site"
+             Df Sum Sq Mean Sq F value Pr(>F)    
+ASCC_Site     2  7.307   3.653      70 <2e-16 ***
+Residuals   137  7.150   0.052                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for Na by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1  0.117  0.1167   1.123  0.291
+Residuals   138 14.340  0.1039               
+[1] "Kruskal-Wallis Test for Na by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 Na      140      69.6     2 7.64e-16 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for Na by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 Na      140      1.68     1 0.195 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for NH4 by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  5.747  2.8735   21.08 1.04e-08 ***
+Residuals   137 18.672  0.1363                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for NH4 by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)  
+Depth         1  0.497  0.4973   2.869 0.0926 .
+Residuals   138 23.921  0.1733                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "Kruskal-Wallis Test for NH4 by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 NH4     140      4.11     2 0.128 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for NH4 by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df       p method        
+* <chr> <int>     <dbl> <int>   <dbl> <chr>         
+1 NH4     140      9.98     1 0.00158 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for K by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  111.8   55.89   10.44 6.05e-05 ***
+Residuals   137  733.8    5.36                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for K by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)  
+Depth         1   26.2  26.229   4.417 0.0374 *
+Residuals   138  819.4   5.938                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "Kruskal-Wallis Test for K by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df       p method        
+* <chr> <int>     <dbl> <int>   <dbl> <chr>         
+1 K       140      10.2     2 0.00609 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for K by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df      p method        
+* <chr> <int>     <dbl> <int>  <dbl> <chr>         
+1 K       140      5.72     1 0.0167 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for Mg by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  11.23   5.613   27.07 1.24e-10 ***
+Residuals   137  28.41   0.207                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for Mg by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1   0.19  0.1908   0.667  0.415
+Residuals   138  39.44  0.2858               
+[1] "Kruskal-Wallis Test for Mg by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df            p method        
+* <chr> <int>     <dbl> <int>        <dbl> <chr>         
+1 Mg      140      33.7     2 0.0000000469 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for Mg by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 Mg      140     0.681     1 0.409 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for Ca by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  526.6  263.30   29.73 1.88e-11 ***
+Residuals   137 1213.2    8.86                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for Ca by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1   10.3   10.31   0.823  0.366
+Residuals   138 1729.5   12.53               
+[1] "Kruskal-Wallis Test for Ca by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 Ca      140      45.8     2 1.13e-10 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for Ca by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 Ca      140    0.0136     1 0.907 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for Cl by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2   21.9  10.952   13.11 6.15e-06 ***
+Residuals   137  114.4   0.835                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for Cl by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1   0.16  0.1644   0.167  0.684
+Residuals   138 136.15  0.9866               
+[1] "Kruskal-Wallis Test for Cl by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 Cl      140      43.4     2 3.81e-10 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for Cl by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 Cl      140     0.529     1 0.467 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for NO3 by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  154.4   77.20    27.9 6.86e-11 ***
+Residuals   137  379.1    2.77                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for NO3 by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1    6.4   6.361   1.665  0.199
+Residuals   138  527.2   3.820               
+[1] "Kruskal-Wallis Test for NO3 by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df            p method        
+* <chr> <int>     <dbl> <int>        <dbl> <chr>         
+1 NO3     140      40.8     2 0.0000000014 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for NO3 by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df      p method        
+* <chr> <int>     <dbl> <int>  <dbl> <chr>         
+1 NO3     140      3.03     1 0.0819 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for PO4 by ASCC_Site"
+             Df Sum Sq Mean Sq F value Pr(>F)    
+ASCC_Site     2  73.95   36.97   130.5 <2e-16 ***
+Residuals   137  38.82    0.28                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for PO4 by Depth"
+             Df Sum Sq Mean Sq F value Pr(>F)
+Depth         1   0.33  0.3325   0.408  0.524
+Residuals   138 112.44  0.8148               
+[1] "Kruskal-Wallis Test for PO4 by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 PO4     140      86.2     2 1.93e-19 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for PO4 by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df     p method        
+* <chr> <int>     <dbl> <int> <dbl> <chr>         
+1 PO4     140    0.0625     1 0.803 Kruskal-Wallis
+
+------------------------------
+[1] "ANOVA for SO4 by ASCC_Site"
+             Df Sum Sq Mean Sq F value   Pr(>F)    
+ASCC_Site     2  17.51   8.754    39.7 2.51e-14 ***
+Residuals   137  30.21   0.220                     
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "ANOVA for SO4 by Depth"
+             Df Sum Sq Mean Sq F value  Pr(>F)   
+Depth         1   3.09  3.0901   9.556 0.00241 **
+Residuals   138  44.62  0.3234                   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+[1] "Kruskal-Wallis Test for SO4 by ASCC_Site"
+# A tibble: 1 × 6
+  .y.       n statistic    df        p method        
+* <chr> <int>     <dbl> <int>    <dbl> <chr>         
+1 SO4     140      62.9     2 2.24e-14 Kruskal-Wallis
+[1] "Kruskal-Wallis Test for SO4 by Depth"
+# A tibble: 1 × 6
+  .y.       n statistic    df      p method        
+* <chr> <int>     <dbl> <int>  <dbl> <chr>         
+1 SO4     140      3.99     1 0.0459 Kruskal-Wallis
+
+------------------------------
+[[1]]
+NULL
+
+[[2]]
+NULL
+
+[[3]]
+NULL
+
+[[4]]
+NULL
+
+[[5]]
+NULL
+
+[[6]]
+NULL
+
+[[7]]
+NULL
+
+[[8]]
+NULL
+
+[[9]]
+NULL
+
+[[10]]
+NULL
+
+[[11]]
+NULL
+
+[[1]]
+                            Variable           Test Grouping_Factor Statistic
+1                                DOC          ANOVA       ASCC_Site 12.876938
+2                                DOC          ANOVA           Depth  1.239959
+Kruskal-Wallis chi-squared       DOC Kruskal-Wallis       ASCC_Site 27.454570
+Kruskal-Wallis chi-squared1      DOC Kruskal-Wallis           Depth  2.007829
+                                 P_Value
+1                           7.506926e-06
+2                           2.674147e-01
+Kruskal-Wallis chi-squared  1.090000e-06
+Kruskal-Wallis chi-squared1 1.560000e-01
+
+[[2]]
+                            Variable           Test Grouping_Factor Statistic
+1                                DOC          ANOVA       ASCC_Site 12.876938
+2                                DOC          ANOVA           Depth  1.239959
+Kruskal-Wallis chi-squared       DOC Kruskal-Wallis       ASCC_Site 27.454570
+Kruskal-Wallis chi-squared1      DOC Kruskal-Wallis           Depth  2.007829
+11                               TDN          ANOVA       ASCC_Site 33.954288
+12                               TDN          ANOVA           Depth  2.625336
+Kruskal-Wallis chi-squared2      TDN Kruskal-Wallis       ASCC_Site 45.851254
+Kruskal-Wallis chi-squared3      TDN Kruskal-Wallis           Depth  1.949201
+                                 P_Value
+1                           7.506926e-06
+2                           2.674147e-01
+Kruskal-Wallis chi-squared  1.090000e-06
+Kruskal-Wallis chi-squared1 1.560000e-01
+11                          1.055577e-12
+12                          1.074531e-01
+Kruskal-Wallis chi-squared2 1.110000e-10
+Kruskal-Wallis chi-squared3 1.630000e-01
+
+[[3]]
+                            Variable           Test Grouping_Factor Statistic
+1                                DOC          ANOVA       ASCC_Site 12.876938
+2                                DOC          ANOVA           Depth  1.239959
+Kruskal-Wallis chi-squared       DOC Kruskal-Wallis       ASCC_Site 27.454570
+Kruskal-Wallis chi-squared1      DOC Kruskal-Wallis           Depth  2.007829
+11                               TDN          ANOVA       ASCC_Site 33.954288
+12                               TDN          ANOVA           Depth  2.625336
+Kruskal-Wallis chi-squared2      TDN Kruskal-Wallis       ASCC_Site 45.851254
+Kruskal-Wallis chi-squared3      TDN Kruskal-Wallis           Depth  1.949201
+13                                Na          ANOVA       ASCC_Site 70.001689
+14                                Na          ANOVA           Depth  1.122838
+Kruskal-Wallis chi-squared4       Na Kruskal-Wallis       ASCC_Site 69.615952
+Kruskal-Wallis chi-squared5       Na Kruskal-Wallis           Depth  1.680086
+                                 P_Value
+1                           7.506926e-06
+2                           2.674147e-01
+Kruskal-Wallis chi-squared  1.090000e-06
+Kruskal-Wallis chi-squared1 1.560000e-01
+11                          1.055577e-12
+12                          1.074531e-01
+Kruskal-Wallis chi-squared2 1.110000e-10
+Kruskal-Wallis chi-squared3 1.630000e-01
+13                          1.135356e-21
+14                          2.911593e-01
+Kruskal-Wallis chi-squared4 7.640000e-16
+Kruskal-Wallis chi-squared5 1.950000e-01
+
+[[4]]
+                            Variable           Test Grouping_Factor Statistic
+1                                DOC          ANOVA       ASCC_Site 12.876938
+2                                DOC          ANOVA           Depth  1.239959
+Kruskal-Wallis chi-squared       DOC Kruskal-Wallis       ASCC_Site 27.454570
+Kruskal-Wallis chi-squared1      DOC Kruskal-Wallis           Depth  2.007829
+11                               TDN          ANOVA       ASCC_Site 33.954288
+12                               TDN          ANOVA           Depth  2.625336
+Kruskal-Wallis chi-squared2      TDN Kruskal-Wallis       ASCC_Site 45.851254
+Kruskal-Wallis chi-squared3      TDN Kruskal-Wallis           Depth  1.949201
+13                                Na          ANOVA       ASCC_Site 70.001689
+14                                Na          ANOVA           Depth  1.122838
+Kruskal-Wallis chi-squared4       Na Kruskal-Wallis       ASCC_Site 69.615952
+Kruskal-Wallis chi-squared5       Na Kruskal-Wallis           Depth  1.680086
+15                               NH4          ANOVA       ASCC_Site 21.083480
+16                               NH4          ANOVA           Depth  2.868871
+Kruskal-Wallis chi-squared6      NH4 Kruskal-Wallis       ASCC_Site  4.109968
+Kruskal-Wallis chi-squared7      NH4 Kruskal-Wallis           Depth  9.980449
+                                 P_Value
+1                           7.506926e-06
+2                           2.674147e-01
+Kruskal-Wallis chi-squared  1.090000e-06
+Kruskal-Wallis chi-squared1 1.560000e-01
+11                          1.055577e-12
+12                          1.074531e-01
+Kruskal-Wallis chi-squared2 1.110000e-10
+Kruskal-Wallis chi-squared3 1.630000e-01
+13                          1.135356e-21
+14                          2.911593e-01
+Kruskal-Wallis chi-squared4 7.640000e-16
+Kruskal-Wallis chi-squared5 1.950000e-01
+15                          1.040377e-08
+16                          9.256413e-02
+Kruskal-Wallis chi-squared6 1.280000e-01
+Kruskal-Wallis chi-squared7 1.580000e-03
+
+[[5]]
+                            Variable           Test Grouping_Factor Statistic
+1                                DOC          ANOVA       ASCC_Site 12.876938
+2                                DOC          ANOVA           Depth  1.239959
+Kruskal-Wallis chi-squared       DOC Kruskal-Wallis       ASCC_Site 27.454570
+Kruskal-Wallis chi-squared1      DOC Kruskal-Wallis           Depth  2.007829
+11                               TDN          ANOVA       ASCC_Site 33.954288
+12                               TDN          ANOVA           Depth  2.625336
+Kruskal-Wallis chi-squared2      TDN Kruskal-Wallis       ASCC_Site 45.851254
+Kruskal-Wallis chi-squared3      TDN Kruskal-Wallis           Depth  1.949201
+13                                Na          ANOVA       ASCC_Site 70.001689
+14                                Na          ANOVA           Depth  1.122838
+Kruskal-Wallis chi-squared4       Na Kruskal-Wallis       ASCC_Site 69.615952
+Kruskal-Wallis chi-squared5       Na Kruskal-Wallis           Depth  1.680086
+15                               NH4          ANOVA       ASCC_Site 21.083480
+16                               NH4          ANOVA           Depth  2.868871
+Kruskal-Wallis chi-squared6      NH4 Kruskal-Wallis       ASCC_Site  4.109968
+Kruskal-Wallis chi-squared7      NH4 Kruskal-Wallis           Depth  9.980449
+17                                 K          ANOVA       ASCC_Site 10.434743
+18                                 K          ANOVA           Depth  4.417401
+Kruskal-Wallis chi-squared8        K Kruskal-Wallis       ASCC_Site 10.202011
+Kruskal-Wallis chi-squared9        K Kruskal-Wallis           Depth  5.722678
+                                 P_Value
+1                           7.506926e-06
+2                           2.674147e-01
+Kruskal-Wallis chi-squared  1.090000e-06
+Kruskal-Wallis chi-squared1 1.560000e-01
+11                          1.055577e-12
+12                          1.074531e-01
+Kruskal-Wallis chi-squared2 1.110000e-10
+Kruskal-Wallis chi-squared3 1.630000e-01
+13                          1.135356e-21
+14                          2.911593e-01
+Kruskal-Wallis chi-squared4 7.640000e-16
+Kruskal-Wallis chi-squared5 1.950000e-01
+15                          1.040377e-08
+16                          9.256413e-02
+Kruskal-Wallis chi-squared6 1.280000e-01
+Kruskal-Wallis chi-squared7 1.580000e-03
+17                          6.052468e-05
+18                          3.739153e-02
+Kruskal-Wallis chi-squared8 6.090000e-03
+Kruskal-Wallis chi-squared9 1.670000e-02
+
+[[6]]
+                             Variable           Test Grouping_Factor  Statistic
+1                                 DOC          ANOVA       ASCC_Site 12.8769378
+2                                 DOC          ANOVA           Depth  1.2399589
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site 27.4545696
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth  2.0078291
+11                                TDN          ANOVA       ASCC_Site 33.9542875
+12                                TDN          ANOVA           Depth  2.6253362
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site 45.8512535
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth  1.9492010
+13                                 Na          ANOVA       ASCC_Site 70.0016887
+14                                 Na          ANOVA           Depth  1.1228381
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site 69.6159520
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth  1.6800858
+15                                NH4          ANOVA       ASCC_Site 21.0834803
+16                                NH4          ANOVA           Depth  2.8688707
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site  4.1099682
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth  9.9804494
+17                                  K          ANOVA       ASCC_Site 10.4347429
+18                                  K          ANOVA           Depth  4.4174008
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site 10.2020108
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth  5.7226783
+19                                 Mg          ANOVA       ASCC_Site 27.0684216
+110                                Mg          ANOVA           Depth  0.6674184
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site 33.7494871
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth  0.6809310
+                                  P_Value
+1                            7.506926e-06
+2                            2.674147e-01
+Kruskal-Wallis chi-squared   1.090000e-06
+Kruskal-Wallis chi-squared1  1.560000e-01
+11                           1.055577e-12
+12                           1.074531e-01
+Kruskal-Wallis chi-squared2  1.110000e-10
+Kruskal-Wallis chi-squared3  1.630000e-01
+13                           1.135356e-21
+14                           2.911593e-01
+Kruskal-Wallis chi-squared4  7.640000e-16
+Kruskal-Wallis chi-squared5  1.950000e-01
+15                           1.040377e-08
+16                           9.256413e-02
+Kruskal-Wallis chi-squared6  1.280000e-01
+Kruskal-Wallis chi-squared7  1.580000e-03
+17                           6.052468e-05
+18                           3.739153e-02
+Kruskal-Wallis chi-squared8  6.090000e-03
+Kruskal-Wallis chi-squared9  1.670000e-02
+19                           1.239558e-10
+110                          4.153613e-01
+Kruskal-Wallis chi-squared10 4.690000e-08
+Kruskal-Wallis chi-squared11 4.090000e-01
+
+[[7]]
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+                               Statistic      P_Value
+1                            12.87693779 7.506926e-06
+2                             1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared   27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1   2.00782906 1.560000e-01
+11                           33.95428751 1.055577e-12
+12                            2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2  45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3   1.94920096 1.630000e-01
+13                           70.00168867 1.135356e-21
+14                            1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4  69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5   1.68008583 1.950000e-01
+15                           21.08348027 1.040377e-08
+16                            2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6   4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7   9.98044937 1.580000e-03
+17                           10.43474289 6.052468e-05
+18                            4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8  10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9   5.72267833 1.670000e-02
+19                           27.06842156 1.239558e-10
+110                           0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10 33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11  0.68093096 4.090000e-01
+111                          29.73363186 1.883564e-11
+112                           0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12 45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13  0.01361729 9.070000e-01
+
+[[8]]
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+113                                Cl          ANOVA       ASCC_Site
+114                                Cl          ANOVA           Depth
+Kruskal-Wallis chi-squared14       Cl Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared15       Cl Kruskal-Wallis           Depth
+                               Statistic      P_Value
+1                            12.87693779 7.506926e-06
+2                             1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared   27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1   2.00782906 1.560000e-01
+11                           33.95428751 1.055577e-12
+12                            2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2  45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3   1.94920096 1.630000e-01
+13                           70.00168867 1.135356e-21
+14                            1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4  69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5   1.68008583 1.950000e-01
+15                           21.08348027 1.040377e-08
+16                            2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6   4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7   9.98044937 1.580000e-03
+17                           10.43474289 6.052468e-05
+18                            4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8  10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9   5.72267833 1.670000e-02
+19                           27.06842156 1.239558e-10
+110                           0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10 33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11  0.68093096 4.090000e-01
+111                          29.73363186 1.883564e-11
+112                           0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12 45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13  0.01361729 9.070000e-01
+113                          13.11434520 6.148920e-06
+114                           0.16666449 6.837261e-01
+Kruskal-Wallis chi-squared14 43.37852191 3.810000e-10
+Kruskal-Wallis chi-squared15  0.52888319 4.670000e-01
+
+[[9]]
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+113                                Cl          ANOVA       ASCC_Site
+114                                Cl          ANOVA           Depth
+Kruskal-Wallis chi-squared14       Cl Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared15       Cl Kruskal-Wallis           Depth
+115                               NO3          ANOVA       ASCC_Site
+116                               NO3          ANOVA           Depth
+Kruskal-Wallis chi-squared16      NO3 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared17      NO3 Kruskal-Wallis           Depth
+                               Statistic      P_Value
+1                            12.87693779 7.506926e-06
+2                             1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared   27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1   2.00782906 1.560000e-01
+11                           33.95428751 1.055577e-12
+12                            2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2  45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3   1.94920096 1.630000e-01
+13                           70.00168867 1.135356e-21
+14                            1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4  69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5   1.68008583 1.950000e-01
+15                           21.08348027 1.040377e-08
+16                            2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6   4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7   9.98044937 1.580000e-03
+17                           10.43474289 6.052468e-05
+18                            4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8  10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9   5.72267833 1.670000e-02
+19                           27.06842156 1.239558e-10
+110                           0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10 33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11  0.68093096 4.090000e-01
+111                          29.73363186 1.883564e-11
+112                           0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12 45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13  0.01361729 9.070000e-01
+113                          13.11434520 6.148920e-06
+114                           0.16666449 6.837261e-01
+Kruskal-Wallis chi-squared14 43.37852191 3.810000e-10
+Kruskal-Wallis chi-squared15  0.52888319 4.670000e-01
+115                          27.89686587 6.862692e-11
+116                           1.66510322 1.990736e-01
+Kruskal-Wallis chi-squared16 40.77865704 1.400000e-09
+Kruskal-Wallis chi-squared17  3.02751052 8.190000e-02
+
+[[10]]
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+113                                Cl          ANOVA       ASCC_Site
+114                                Cl          ANOVA           Depth
+Kruskal-Wallis chi-squared14       Cl Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared15       Cl Kruskal-Wallis           Depth
+115                               NO3          ANOVA       ASCC_Site
+116                               NO3          ANOVA           Depth
+Kruskal-Wallis chi-squared16      NO3 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared17      NO3 Kruskal-Wallis           Depth
+117                               PO4          ANOVA       ASCC_Site
+118                               PO4          ANOVA           Depth
+Kruskal-Wallis chi-squared18      PO4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared19      PO4 Kruskal-Wallis           Depth
+                                Statistic      P_Value
+1                             12.87693779 7.506926e-06
+2                              1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared    27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1    2.00782906 1.560000e-01
+11                            33.95428751 1.055577e-12
+12                             2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2   45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3    1.94920096 1.630000e-01
+13                            70.00168867 1.135356e-21
+14                             1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4   69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5    1.68008583 1.950000e-01
+15                            21.08348027 1.040377e-08
+16                             2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6    4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7    9.98044937 1.580000e-03
+17                            10.43474289 6.052468e-05
+18                             4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8   10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9    5.72267833 1.670000e-02
+19                            27.06842156 1.239558e-10
+110                            0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10  33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11   0.68093096 4.090000e-01
+111                           29.73363186 1.883564e-11
+112                            0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12  45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13   0.01361729 9.070000e-01
+113                           13.11434520 6.148920e-06
+114                            0.16666449 6.837261e-01
+Kruskal-Wallis chi-squared14  43.37852191 3.810000e-10
+Kruskal-Wallis chi-squared15   0.52888319 4.670000e-01
+115                           27.89686587 6.862692e-11
+116                            1.66510322 1.990736e-01
+Kruskal-Wallis chi-squared16  40.77865704 1.400000e-09
+Kruskal-Wallis chi-squared17   3.02751052 8.190000e-02
+117                          130.47410459 1.893389e-32
+118                            0.40814416 5.239719e-01
+Kruskal-Wallis chi-squared18  86.17943680 1.930000e-19
+Kruskal-Wallis chi-squared19   0.06252769 8.030000e-01
+
+[[11]]
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+113                                Cl          ANOVA       ASCC_Site
+114                                Cl          ANOVA           Depth
+Kruskal-Wallis chi-squared14       Cl Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared15       Cl Kruskal-Wallis           Depth
+115                               NO3          ANOVA       ASCC_Site
+116                               NO3          ANOVA           Depth
+Kruskal-Wallis chi-squared16      NO3 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared17      NO3 Kruskal-Wallis           Depth
+117                               PO4          ANOVA       ASCC_Site
+118                               PO4          ANOVA           Depth
+Kruskal-Wallis chi-squared18      PO4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared19      PO4 Kruskal-Wallis           Depth
+119                               SO4          ANOVA       ASCC_Site
+120                               SO4          ANOVA           Depth
+Kruskal-Wallis chi-squared20      SO4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared21      SO4 Kruskal-Wallis           Depth
+                                Statistic      P_Value
+1                             12.87693779 7.506926e-06
+2                              1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared    27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1    2.00782906 1.560000e-01
+11                            33.95428751 1.055577e-12
+12                             2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2   45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3    1.94920096 1.630000e-01
+13                            70.00168867 1.135356e-21
+14                             1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4   69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5    1.68008583 1.950000e-01
+15                            21.08348027 1.040377e-08
+16                             2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6    4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7    9.98044937 1.580000e-03
+17                            10.43474289 6.052468e-05
+18                             4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8   10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9    5.72267833 1.670000e-02
+19                            27.06842156 1.239558e-10
+110                            0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10  33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11   0.68093096 4.090000e-01
+111                           29.73363186 1.883564e-11
+112                            0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12  45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13   0.01361729 9.070000e-01
+113                           13.11434520 6.148920e-06
+114                            0.16666449 6.837261e-01
+Kruskal-Wallis chi-squared14  43.37852191 3.810000e-10
+Kruskal-Wallis chi-squared15   0.52888319 4.670000e-01
+115                           27.89686587 6.862692e-11
+116                            1.66510322 1.990736e-01
+Kruskal-Wallis chi-squared16  40.77865704 1.400000e-09
+Kruskal-Wallis chi-squared17   3.02751052 8.190000e-02
+117                          130.47410459 1.893389e-32
+118                            0.40814416 5.239719e-01
+Kruskal-Wallis chi-squared18  86.17943680 1.930000e-19
+Kruskal-Wallis chi-squared19   0.06252769 8.030000e-01
+119                           39.70403086 2.506851e-14
+120                            9.55614925 2.411477e-03
+Kruskal-Wallis chi-squared20  62.85992880 2.240000e-14
+Kruskal-Wallis chi-squared21   3.98513262 4.590000e-02
+
+                             Variable           Test Grouping_Factor
+1                                 DOC          ANOVA       ASCC_Site
+2                                 DOC          ANOVA           Depth
+Kruskal-Wallis chi-squared        DOC Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared1       DOC Kruskal-Wallis           Depth
+11                                TDN          ANOVA       ASCC_Site
+12                                TDN          ANOVA           Depth
+Kruskal-Wallis chi-squared2       TDN Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared3       TDN Kruskal-Wallis           Depth
+13                                 Na          ANOVA       ASCC_Site
+14                                 Na          ANOVA           Depth
+Kruskal-Wallis chi-squared4        Na Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared5        Na Kruskal-Wallis           Depth
+15                                NH4          ANOVA       ASCC_Site
+16                                NH4          ANOVA           Depth
+Kruskal-Wallis chi-squared6       NH4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared7       NH4 Kruskal-Wallis           Depth
+17                                  K          ANOVA       ASCC_Site
+18                                  K          ANOVA           Depth
+Kruskal-Wallis chi-squared8         K Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared9         K Kruskal-Wallis           Depth
+19                                 Mg          ANOVA       ASCC_Site
+110                                Mg          ANOVA           Depth
+Kruskal-Wallis chi-squared10       Mg Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared11       Mg Kruskal-Wallis           Depth
+111                                Ca          ANOVA       ASCC_Site
+112                                Ca          ANOVA           Depth
+Kruskal-Wallis chi-squared12       Ca Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared13       Ca Kruskal-Wallis           Depth
+113                                Cl          ANOVA       ASCC_Site
+114                                Cl          ANOVA           Depth
+Kruskal-Wallis chi-squared14       Cl Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared15       Cl Kruskal-Wallis           Depth
+115                               NO3          ANOVA       ASCC_Site
+116                               NO3          ANOVA           Depth
+Kruskal-Wallis chi-squared16      NO3 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared17      NO3 Kruskal-Wallis           Depth
+117                               PO4          ANOVA       ASCC_Site
+118                               PO4          ANOVA           Depth
+Kruskal-Wallis chi-squared18      PO4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared19      PO4 Kruskal-Wallis           Depth
+119                               SO4          ANOVA       ASCC_Site
+120                               SO4          ANOVA           Depth
+Kruskal-Wallis chi-squared20      SO4 Kruskal-Wallis       ASCC_Site
+Kruskal-Wallis chi-squared21      SO4 Kruskal-Wallis           Depth
+                                Statistic      P_Value
+1                             12.87693779 7.506926e-06
+2                              1.23995894 2.674147e-01
+Kruskal-Wallis chi-squared    27.45456957 1.090000e-06
+Kruskal-Wallis chi-squared1    2.00782906 1.560000e-01
+11                            33.95428751 1.055577e-12
+12                             2.62533625 1.074531e-01
+Kruskal-Wallis chi-squared2   45.85125351 1.110000e-10
+Kruskal-Wallis chi-squared3    1.94920096 1.630000e-01
+13                            70.00168867 1.135356e-21
+14                             1.12283808 2.911593e-01
+Kruskal-Wallis chi-squared4   69.61595200 7.640000e-16
+Kruskal-Wallis chi-squared5    1.68008583 1.950000e-01
+15                            21.08348027 1.040377e-08
+16                             2.86887074 9.256413e-02
+Kruskal-Wallis chi-squared6    4.10996818 1.280000e-01
+Kruskal-Wallis chi-squared7    9.98044937 1.580000e-03
+17                            10.43474289 6.052468e-05
+18                             4.41740081 3.739153e-02
+Kruskal-Wallis chi-squared8   10.20201075 6.090000e-03
+Kruskal-Wallis chi-squared9    5.72267833 1.670000e-02
+19                            27.06842156 1.239558e-10
+110                            0.66741838 4.153613e-01
+Kruskal-Wallis chi-squared10  33.74948707 4.690000e-08
+Kruskal-Wallis chi-squared11   0.68093096 4.090000e-01
+111                           29.73363186 1.883564e-11
+112                            0.82259133 3.660046e-01
+Kruskal-Wallis chi-squared12  45.81522165 1.130000e-10
+Kruskal-Wallis chi-squared13   0.01361729 9.070000e-01
+113                           13.11434520 6.148920e-06
+114                            0.16666449 6.837261e-01
+Kruskal-Wallis chi-squared14  43.37852191 3.810000e-10
+Kruskal-Wallis chi-squared15   0.52888319 4.670000e-01
+115                           27.89686587 6.862692e-11
+116                            1.66510322 1.990736e-01
+Kruskal-Wallis chi-squared16  40.77865704 1.400000e-09
+Kruskal-Wallis chi-squared17   3.02751052 8.190000e-02
+117                          130.47410459 1.893389e-32
+118                            0.40814416 5.239719e-01
+Kruskal-Wallis chi-squared18  86.17943680 1.930000e-19
+Kruskal-Wallis chi-squared19   0.06252769 8.030000e-01
+119                           39.70403086 2.506851e-14
+120                            9.55614925 2.411477e-03
+Kruskal-Wallis chi-squared20  62.85992880 2.240000e-14
+Kruskal-Wallis chi-squared21   3.98513262 4.590000e-02
+Permutation test for adonis under reduced model
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = dist_matrix ~ ASCC_Site, data = df, permutations = 999)
+          Df SumOfSqs      R2     F Pr(>F)    
+Model      2   2.0855 0.25978 24.04  0.001 ***
+Residual 137   5.9426 0.74022                 
+Total    139   8.0280 1.00000                 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Permutation test for adonis under reduced model
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = dist_matrix ~ Depth, data = df, permutations = 999)
+          Df SumOfSqs      R2      F Pr(>F)  
+Model      1   0.1273 0.01585 2.2227  0.076 .
+Residual 138   7.9008 0.98415                
+Total    139   8.0280 1.00000                
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+                            Variable           Test Grouping_Factor  Statistic
+1                            Soil_pH          ANOVA       ASCC_Site  93.872814
+2                            Soil_pH          ANOVA           Depth   2.174532
+Kruskal-Wallis chi-squared   Soil_pH Kruskal-Wallis       ASCC_Site 115.340895
+Kruskal-Wallis chi-squared1  Soil_pH Kruskal-Wallis           Depth   4.103507
+                                 P_Value
+1                           2.118622e-29
+2                           1.163683e-01
+Kruskal-Wallis chi-squared  9.000000e-26
+Kruskal-Wallis chi-squared1 1.290000e-01
+
+The downloaded binary packages are in
+	/var/folders/9b/fdqx93nj7fs08wjbh121z_9c0000gn/T//Rtmp1s14kc/downloaded_packages

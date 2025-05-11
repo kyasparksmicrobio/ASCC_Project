@@ -1,0 +1,176 @@
+---
+title: "NMDS Analysis of Microbial Communities"
+output: html_document
+---
+
+# Load Libraries
+```{r}
+library(tidyverse)
+library(vegan)
+library(ggplot2)
+```
+
+# Step 1: Read the data
+```{r}
+soil_chem_data <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata_rem.csv")
+
+
+feature <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.txt")
+```
+
+
+# Step 2: Reshape the feature data into a long format
+```{r}
+microbe_data_long <- feature %>%
+  pivot_longer(cols = 4:306, names_to = "Sample", values_to = "Abundance") %>%
+  replace(is.na(.), 0)  # Replace NA values with 0
+```
+
+
+# Step 3: Convert non-numeric columns to numeric as needed
+```{r}
+numeric_columns <- microbe_data_long %>%
+  select(-c(feature, Sample, Site, OTUID)) %>%
+  mutate(across(everything(), ~ as.numeric(as.character(.))))
+```
+
+
+
+# Step 4: Combine the numeric data back with the identifier columns
+```{r}
+microbe_data_wide <- cbind(microbe_data_long[ , c("feature","Sample", "Site", "OTUID")], numeric_columns)
+
+microbe_data_clean <- na.omit(microbe_data_wide)
+```
+
+# Step 5: Create a matrix for dissimilarity calculations
+```{r}
+microbe_data_matrix <- as.matrix(microbe_data_clean[, -c(1, 2, 3)])
+```
+
+
+
+# Remove empty columns and rows if any
+```{r}
+microbe_data_matrix <- microbe_data_matrix[, colSums(microbe_data_matrix != 0) > 0]
+
+microbe_data_matrix <- microbe_data_matrix[rowSums(microbe_data_matrix) > 0, ]
+```
+
+# Step 6: Calculate dissimilarity matrices
+```{r}
+microbe_matrix <- vegdist(microbe_data_matrix, method = "bray")  # Bray-Curtis for microbial data
+```
+
+# Step 7: Perform NMDS on microbial data
+```{r}
+nmds_result <- metaMDS(microbe_matrix, k = 2, trymax = 100)
+```
+
+# Step 8: Prepare the NMDS results for plotting
+```{r}
+nmds_data <- as.data.frame(scores(nmds_result))  # Extract NMDS scores
+nmds_data$Sample <- rownames(nmds_data)  # Add sample names
+```
+
+# Merge with metadata to include site and depth information
+```{r}
+nmds_data <- nmds_data %>%
+  left_join(microbe_data_long %>% select(Sample, Site, Depth, Abundance), by = "Sample")
+```
+
+# Step 9: Plot NMDS results
+```{r}
+ggplot(nmds_data, aes(x = NMDS1, y = NMDS2, color = Abundance)) +
+  geom_point(size = 2, show.legend = TRUE) +
+  facet_wrap(~ Depth) +
+  theme(text = element_text(size = 24)) +
+  xlim(-1.4, 1.7) +
+  ylim(-1.51, 1.67) +
+  theme_classic() +
+  labs(title = "NMDS Plot of Microbial Communities",
+       x = "NMDS Axis 1",
+       y = "NMDS Axis 2")
+
+```
+
+
+
+
+
+```{r}
+# Load necessary libraries
+library(tidyverse)
+library(vegan)
+library(ggplot2)
+
+# Step 1: Read the data
+soil_chem_data <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_16S_SoilChemMetadata_rem.csv")
+
+feature <- read.delim("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.txt")
+
+# Step 2: Reshape the feature data into a long format
+microbe_data_long <- feature %>%
+  pivot_longer(cols = 4:306, names_to = "Sample", values_to = "Abundance") %>%
+  replace(is.na(.), 0)  # Replace NA values with 0
+
+# Step 3: Convert non-numeric columns to numeric as needed
+numeric_columns <- microbe_data_long %>%
+  select(-c(feature, Sample, Site, OTUID)) %>%
+  mutate(across(everything(), ~ as.numeric(as.character(.))))
+
+# Step 4: Combine the numeric data back with the identifier columns
+microbe_data_wide <- cbind(microbe_data_long[ , c("feature","Sample", "Site", "OTUID")], numeric_columns)
+microbe_data_clean <- na.omit(microbe_data_wide)
+
+microbe_data_clean <- na.omit(microbe_data_wide)  # Ensure this is applied correctly
+
+# Step 5: Create a matrix for dissimilarity calculations for microbial data
+microbe_data_matrix <- as.matrix(microbe_data_clean[, -c(1, 2, 3, 4)])
+
+# Remove empty columns and rows if any
+microbe_data_matrix <- microbe_data_matrix[, colSums(microbe_data_matrix != 0) > 0]
+microbe_data_matrix <- microbe_data_matrix[rowSums(microbe_data_matrix) > 0, ]
+
+# Check for NAs in the matrix
+if (any(is.na(microbe_data_matrix))) {
+  stop("NA values found in the microbial data matrix")
+}
+
+# Remove empty columns and rows if any
+microbe_data_matrix <- microbe_data_matrix[, colSums(microbe_data_matrix != 0) > 0]
+microbe_data_matrix <- microbe_data_matrix[rowSums(microbe_data_matrix) > 0, ]
+
+# Step 6: Calculate dissimilarity matrices for microbial data
+microbe_matrix <- vegdist(microbe_data_matrix, method = "bray")  # Bray-Curtis for microbial data
+
+# Step 7: Perform PCoA on microbial data
+pcoa_microbe <- cmdscale(microbe_matrix, k = 2, eig = TRUE)
+
+# Step 8: Prepare the PCoA results for plotting
+pcoa_data <- data.frame(NMDS1 = pcoa_microbe[, 1], NMDS2 = pcoa_microbe[, 2])
+pcoa_data$Sample <- rownames(pcoa_data)
+
+# Merge with metadata to include site and depth information
+pcoa_data <- left_join(pcoa_data, microbe_data_long %>% select(Sample, Site, Depth), by = "Sample")
+
+# Step 9: Calculate dissimilarity matrices for soil chemistry
+soil_data_matrix <- as.matrix(soil_chem_data[, -1])  # Exclude non-numeric columns (like Sample names)
+soil_data_matrix <- scale(soil_data_matrix)  # Optionally scale the data
+soil_matrix <- dist(soil_data_matrix, method = "euclidean")  # Calculate Euclidean distance for soil chemistry
+
+# Step 10: Fit environmental vectors from soil chemistry data
+envfit_results <- envfit(pcoa_microbe, soil_data_matrix, perm = 999)  # Adjust as necessary
+
+# Step 11: Plot PCoA results with environmental vectors
+ggplot(pcoa_data, aes(x = NMDS1, y = NMDS2, color = Site)) +
+  geom_point(size = 3) +
+  geom_segment(data = as.data.frame(scores(envfit_results, "vectors")), 
+               aes(x = 0, y = 0, xend = NMDS1, yend = NMDS2), 
+               arrow = arrow(length = unit(0.2, "inches")), 
+               color = "blue") +
+  theme_classic() +
+  labs(title = "PCoA of Microbial Communities with Soil Chemistry Vectors",
+       x = "PCoA Axis 1",
+       y = "PCoA Axis 2")
+```

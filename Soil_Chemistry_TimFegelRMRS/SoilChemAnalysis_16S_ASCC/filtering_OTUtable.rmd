@@ -1,0 +1,30 @@
+
+```{r}
+# Load necessary libraries
+library(readr)    # For reading the text file
+library(readxl)   # For reading the Excel file
+library(dplyr)    # For data manipulation
+
+# File paths
+excel_file_path <- "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_WaterExtractable_Chemistry_EDITED_KMS.xlsx"
+text_file_path <- "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_EDIT.txt"
+output_file_path <- "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/Filtered_ASCC_16S_feature_table_rem.txt"
+
+# Step 1: Load the `removed_edit` sheet from the Excel file
+removed_edit <- read_excel(excel_file_path, sheet = "removed_edit")
+
+# Extract the unique OTUIDs from the Excel sheet
+otuids_to_keep <- removed_edit$OTUID %>% unique() %>% na.omit()
+
+# Step 2: Load the feature table from the text file
+feature_table <- read_delim(text_file_path, delim = "\t")
+
+# Step 3: Filter the columns to retain only matching OTUIDs (excluding the first column)
+filtered_table <- feature_table %>%
+  select(OTUID, one_of(otuids_to_keep))
+
+# Step 4: Save the filtered table to a new file
+write_tsv(filtered_table, output_file_path)
+
+cat("Filtered table saved to:", output_file_path, "\n")
+```

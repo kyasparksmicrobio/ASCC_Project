@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "16S",
+			"path": "../../16S"
+		},
+		{
+			"name": "ASCC_July2024_USETHIS_ks",
+			"path": "../.."
+		},
+		{
+			"name": "SoilChemAnalysis_16S_ASCC",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
