@@ -1,3 +1,3 @@
-"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
-"600c14bbab2e89a35844eeeb19248a9d","k__Fungi; p__Basidiomycota; c__Geminibasidiomycetes; o__Geminibasidiales; f__Geminibasidiaceae; g__Geminibasidium; s__Geminibasidium_sp","c__Geminibasidiomycetes o__Geminibasidiales f__Geminibasidiaceae g__Geminibasidium s__Geminibasidium_sp",3.53697655939964,1.00943729385783e-11,10.9959206542115,"TP Enriched"
-"72ca0a899d71f7d9023e44474c260434","k__Fungi; p__Basidiomycota; c__Microbotryomycetes; o__Microbotryales; f__unidentified; g__unidentified; s__Microbotryales_sp","c__Microbotryomycetes o__Microbotryales f__unidentified g__unidentified s__Microbotryales_sp",3.3081878730591,0.000105448526575714,3.97695948424605,"TP Enriched"
+version https://git-lfs.github.com/spec/v1
+oid sha256:9b439795f97e25ad20eac3b5089b83bc97aa30f85efe462538fa7829c1572d7d
+size 739

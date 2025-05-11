@@ -1,5 +1,3 @@
-"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
-"2a52836cd32669f2fbe6c09e786a7f74","k__Fungi; p__Mortierellomycota; c__Mortierellomycetes; o__Mortierellales; f__Mortierellaceae","f__Mortierellaceae",3.15222419418088,2.58923559959084e-08,7.58682843046626,"TP Enriched"
-"cc116080ed11666e003af169a31bf77b","k__Fungi; p__Basidiomycota; c__Tremellomycetes; o__Filobasidiales; f__Piskurozymaceae; g__Solicoccozyma; s__Solicoccozyma_aeria","f__Piskurozymaceae",-3.21402170690624,7.6396275113516e-10,9.11692781599345,"SJ Enriched"
-"9038eaddace005315f06a11e8208395a","k__Fungi; p__Ascomycota; c__Leotiomycetes; o__Helotiales; f__Mollisiaceae; g__Phialocephala","f__Mollisiaceae",2.8457320641147,2.81793842125271e-08,7.55006850150429,"TP Enriched"
-"2be07a8d72925262126f2a02c52dddea","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Exophiala; s__Exophiala_radicis","f__Herpotrichiellaceae",-2.99977861154821,6.35839403928843e-11,10.1966525617018,"SJ Enriched"
+version https://git-lfs.github.com/spec/v1
+oid sha256:d9136d3a10b77f034f04a37b3605c8eed3dfd7006fb9a853fe8a3ba771d46c99
+size 1011

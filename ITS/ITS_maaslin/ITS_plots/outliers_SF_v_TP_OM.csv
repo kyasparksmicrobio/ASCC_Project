@@ -1,4 +1,3 @@
-"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
-"d27b07c3296662644178e00972cf0baa","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Cladophialophora;","c__Eurotiomycetes o__Chaetothyriales f__Herpotrichiellaceae g__Cladophialophora NA",-4.23875735574281,1.43942589686196e-09,8.84181068814076,"SF Enriched"
-"72c8401fff71a78b00b765b8085a3667","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; ;","c__Eurotiomycetes o__Chaetothyriales f__Herpotrichiellaceae NA NA",3.30117218418784,1.75243561467917e-09,8.75635792925472,"TP Enriched"
-"12410d7307e6e4dbdae768c5c47b748d","k__Fungi; ; ; ; ; ;","NA NA NA NA NA",-2.53466362956974,8.37525827507595e-05,4.07700179137043,"SF Enriched"
+version https://git-lfs.github.com/spec/v1
+oid sha256:04c2f5630248f7ca9de26880f25d8da91cba6e46e9b96e214f62308d470eb1bd
+size 775
