@@ -4,7 +4,7 @@ This repository contains data processing, analysis scripts, and results for the 
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ASCC_Project/
@@ -29,7 +29,7 @@ ASCC_Project/
 
 ---
 
-## 🔬 Summary
+## Summary
 
 This project examines bacterial and fungal community responses across different depths and sites in forest soils under climate-adapted silvicultural treatments. It includes:
 
@@ -40,7 +40,7 @@ This project examines bacterial and fungal community responses across different 
 
 ---
 
-## 💻 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -58,7 +58,7 @@ git lfs install
 
 ---
 
-## 📊 Key Tools and Pipelines
+## Key Tools and Pipelines
 
 | Component     | Tools Used                              |
 |---------------|------------------------------------------|
@@ -70,7 +70,7 @@ git lfs install
 
 ---
 
-## 📁 Data Notes
+## Data Notes
 
 - Large files (e.g., `.csv`, `.xlsx`, `.tsv`) are tracked with **Git LFS**.
 - Intermediate `.qza`, `.fastq`, and `.pptx` files are excluded via `.gitignore`.
@@ -78,7 +78,7 @@ git lfs install
 
 ---
 
-## 🧬 Git LFS Warnings
+## Git LFS Warnings
 
 GitHub may warn about large files (>50MB), but these are safely managed with Git LFS. If you clone this repo, make sure you run:
 
@@ -89,13 +89,13 @@ git lfs pull
 
 ---
 
-## ✍️ Contact
+## Contact
 
 Maintained by **Kya Sparks** (kyasparks@colostate.edu)  
-Colorado State University, Soil & Crop Sciences / Forest Microbiomes Lab
+Colorado State University, Soil & Crop Sciences / Wilkins Lab
 
 ---
 
-## 📄 License
+## License
 
 [MIT License](LICENSE) — open for academic use and collaboration.
