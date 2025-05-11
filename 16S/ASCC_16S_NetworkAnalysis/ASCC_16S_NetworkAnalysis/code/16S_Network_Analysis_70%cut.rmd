@@ -1,0 +1,1701 @@
+---
+title: "Co-Occurence Network Analysis"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+# Co-Occurrence Network Analysis: {style="font-size: 2rem;   font-family:sans-serif;   text-align: left;   color: #88B2AC"}
+
+```{r setup, include=FALSE}
+#install.packages("igraph") # uncomment this line in order to install this package
+library(igraph)  
+# install.packages("Hmisc") # uncomment this line in order to install this package
+library(Hmisc)  
+#nstall.packages("Matrix") # uncomment this line in order to install this package
+library(Matrix) 
+library(tidyverse)
+#devtools::install_github("RMHogervorst/gephi")
+library(gephi)
+library(dplyr)
+```
+
+```{r}
+asv.table<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1)
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t <- as.data.frame(t(asv.table[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t)
+
+#[1]   294 44371
+```
+
+```{r}
+asv.table.filter <- asv.table.t[ ,colSums(asv.table.t) >= 10]
+print(c(ncol(asv.table.t),"versus",ncol(asv.table.filter))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "10360"
+```
+
+```{r}
+asv.cor <- rcorr(as.matrix(asv.table.filter), type="spearman")
+```
+
+```{r}
+asv.pval <- forceSymmetric(asv.cor$P) 
+```
+
+```{r}
+sel.tax <- taxa[rownames(asv.cor$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax), rownames(asv.pval))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes <- asv.pval<0.05
+r.val = asv.cor$r # select all the correlation values
+p.yes.r <- r.val*p.yes # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r <- abs(p.yes.r)>0.70 # output is logical vector
+p.yes.rr <- p.yes.r*r.val # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm <- as.matrix(p.yes.rr)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph=graph_from_adjacency_matrix(adjm,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew<-E(net.grph)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs<-V(net.grph)[degree(net.grph) == 0] 
+```
+
+```{r}
+net.grph <-delete_vertices(net.grph, bad.vs)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_all_edge2.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_all_edge2.csv")
+
+edges_s <- edges %>% 
+  select(1)
+
+edges_t <- edges %>% 
+  select(2)
+
+edges_all <- edges_s %>% 
+  full_join(edges_t,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_node_all2.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_all <- edges_all %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+
+write_csv(pos_all, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_ALL_positive_edge2.csv")
+```
+
+# Subsetting the data: {#sec-subsetting-the-data style="font-family:sans-serif; color: #88B2AC"}
+
+## 9 Ecotypes: {style="font-family:sans-serif; color: #88B2AC"}
+
+1.  <div>
+
+    ### SF 0-5cm {style="color: pink"}
+
+    </div>
+
+2.  <div>
+
+    ### SF 5-15cm {style="color: pink"}
+
+    </div>
+
+3.  <div>
+
+    ### SF OM {style="color: pink"}
+
+    </div>
+
+4.  <div>
+
+    ### TP 0-5cm {style="color: pink"}
+
+    </div>
+
+5.  <div>
+
+    ### TP 5-15cm {style="color: pink"}
+
+    </div>
+
+6.  <div>
+
+    ### TP OM {style="color: pink"}
+
+    </div>
+
+7.  <div>
+
+    ### SJ 0-5cm {style="color: pink"}
+
+    </div>
+
+8.  <div>
+
+    ### SJ 5-15cm {style="color: pink"}
+
+    </div>
+
+9.  <div>
+
+    ### SJ OM {style="color: pink"}
+
+    </div>
+
+# *STATE FOREST 0-5cm* {#sec-state-forest-0-5cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SF5<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SF_1C_5"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SF5 <- as.data.frame(t(asv.table_SF5[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SF5)
+
+#[1]   27 44371
+```
+
+```{r}
+asv.table.filter_SF5 <- asv.table.t_SF5[ ,colSums(asv.table.t_SF5) >= 10]
+print(c(ncol(asv.table.t_SF5),"versus",ncol(asv.table.filter_SF5))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "1532"  
+```
+
+```{r}
+asv.cor_SF5 <- rcorr(as.matrix(asv.table.filter_SF5), type="spearman")
+```
+
+```{r}
+asv.pval_SF5 <- forceSymmetric(asv.cor_SF5$P) 
+```
+
+```{r}
+sel.tax_SF5 <- taxa[rownames(asv.cor_SF5$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SF5), rownames(asv.pval_SF5))
+#TRUE
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SF5 <- asv.pval_SF5<0.05
+r.val_SF5 = asv.cor_SF5$r # select all the correlation values
+p.yes.r_SF5 <- r.val_SF5*p.yes_SF5 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SF5 <- abs(p.yes.r_SF5)>0.70 # output is logical vector
+p.yes.rr_SF5 <- p.yes.r_SF5*r.val_SF5 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SF5 <- as.matrix(p.yes.rr_SF5)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SF5=graph_from_adjacency_matrix(adjm_SF5,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SF5<-E(net.grph_SF5)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SF5<-V(net.grph_SF5)[degree(net.grph_SF5) == 0] 
+```
+
+```{r}
+net.grph_SF5 <-delete_vertices(net.grph_SF5, bad.vs_SF5)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SF5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF5_edge2.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SF5 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF5_edge2.csv")
+
+edges_s_SF5 <- edges_SF5 %>% 
+  select(1)
+
+edges_t_SF5 <- edges_SF5 %>% 
+  select(2)
+
+edges_all_SF5 <- edges_s_SF5 %>% 
+  full_join(edges_t_SF5,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SF5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SF5_node2.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+
+```{r}
+pos_SF5 <- edges_SF5 %>% 
+filter(weight>0) %>% 
+add_column(direction = "positive")
+
+write_csv(pos_SF5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF5_positive_edge2.csv")
+```
+
+
+
+# *STATE FOREST 5-15cm* {#sec-state-forest-5-15cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SF15<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SF_1C_15"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SF15 <- as.data.frame(t(asv.table_SF15[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SF15)
+
+#[1]   25 44371
+```
+
+```{r}
+asv.table.filter_SF15 <- asv.table.t_SF15[ ,colSums(asv.table.t_SF15) >= 10]
+print(c(ncol(asv.table.t_SF15),"versus",ncol(asv.table.filter_SF15))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "1461"
+```
+
+```{r}
+asv.cor_SF15 <- rcorr(as.matrix(asv.table.filter_SF15), type="spearman")
+```
+
+```{r}
+asv.pval_SF15 <- forceSymmetric(asv.cor_SF15$P) 
+```
+
+```{r}
+sel.tax_SF15 <- taxa[rownames(asv.cor_SF15$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SF15), rownames(asv.pval_SF15))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SF15 <- asv.pval_SF15<0.05
+r.val_SF15 = asv.cor_SF15$r # select all the correlation values
+p.yes.r_SF15 <- r.val_SF15*p.yes_SF15 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SF15 <- abs(p.yes.r_SF15)>0.70 # output is logical vector
+p.yes.rr_SF15 <- p.yes.r_SF15*r.val_SF15 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SF15 <- as.matrix(p.yes.rr_SF15)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SF15=graph_from_adjacency_matrix(adjm_SF15,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SF15<-E(net.grph_SF15)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SF15<-V(net.grph_SF15)[degree(net.grph_SF15) == 0] 
+```
+
+```{r}
+net.grph_SF15 <-delete_vertices(net.grph_SF15, bad.vs_SF15)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SF15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF15_edge_redo70.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SF15 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF15_edge_redo70.csv")
+
+edges_s_SF15 <- edges_SF15 %>% 
+  select(1)
+
+edges_t_SF15 <- edges_SF15 %>% 
+  select(2)
+
+edges_all_SF15 <- edges_s_SF15 %>% 
+  full_join(edges_t_SF15,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SF15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SF15_node_redo.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SF15 <- edges_SF15 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SF15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SF15_positive_edge_redo.csv")
+```
+
+
+
+# *STATE FOREST OM* {#sec-state-forest-om style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SFOM<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SF_1C_OM"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SFOM <- as.data.frame(t(asv.table_SFOM[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SFOM)
+
+#[1]   22 44371
+```
+
+```{r}
+asv.table.filter_SFOM <- asv.table.t_SFOM[ ,colSums(asv.table.t_SFOM) >= 10]
+print(c(ncol(asv.table.t_SFOM),"versus",ncol(asv.table.filter_SFOM))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "1957"
+```
+
+```{r}
+asv.cor_SFOM <- rcorr(as.matrix(asv.table.filter_SFOM), type="spearman")
+```
+
+```{r}
+asv.pval_SFOM <- forceSymmetric(asv.cor_SFOM$P) 
+```
+
+```{r}
+sel.tax_SFOM <- taxa[rownames(asv.cor_SFOM$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SFOM), rownames(asv.pval_SFOM))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SFOM <- asv.pval_SFOM<0.05
+r.val_SFOM = asv.cor_SFOM$r # select all the correlation values
+p.yes.r_SFOM <- r.val_SFOM*p.yes_SFOM # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SFOM <- abs(p.yes.r_SFOM)>0.70 # output is logical vector
+p.yes.rr_SFOM <- p.yes.r_SFOM*r.val_SFOM # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SFOM <- as.matrix(p.yes.rr_SFOM)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SFOM=graph_from_adjacency_matrix(adjm_SFOM,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SFOM<-E(net.grph_SFOM)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SFOM<-V(net.grph_SFOM)[degree(net.grph_SFOM) == 0] 
+```
+
+```{r}
+net.grph_SFOM <-delete_vertices(net.grph_SFOM, bad.vs_SFOM)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SFOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SFOM_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SFOM <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SFOM_edge.csv")
+
+edges_s_SFOM <- edges_SFOM %>% 
+  select(1)
+
+edges_t_SFOM <- edges_SFOM %>% 
+  select(2)
+
+edges_all_SFOM <- edges_s_SFOM %>% 
+  full_join(edges_t_SFOM,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SFOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SFOM_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SFOM <- edges_SFOM %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SFOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SFOM_positive_edge.csv")
+```
+
+# *TAYLOR PARK 0-5cm* {#sec-taylor-park-0-5cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_TP5<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_TP_1C_5"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_TP5 <- as.data.frame(t(asv.table_TP5[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_TP5)
+
+#[1]   27 44371
+```
+
+```{r}
+asv.table.filter_TP5 <- asv.table.t_TP5[ ,colSums(asv.table.t_TP5) >= 10]
+print(c(ncol(asv.table.t_TP5),"versus",ncol(asv.table.filter_TP5))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "1723"
+```
+
+```{r}
+asv.cor_TP5 <- rcorr(as.matrix(asv.table.filter_TP5), type="spearman")
+```
+
+```{r}
+asv.pval_TP5 <- forceSymmetric(asv.cor_TP5$P) 
+```
+
+```{r}
+sel.tax_TP5 <- taxa[rownames(asv.cor_TP5$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_TP5), rownames(asv.pval_TP5))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_TP5 <- asv.pval_TP5<0.05
+r.val_TP5 = asv.cor_TP5$r # select all the correlation values
+p.yes.r_TP5 <- r.val_TP5*p.yes_TP5 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_TP5 <- abs(p.yes.r_TP5)>0.70 # output is logical vector
+p.yes.rr_TP5 <- p.yes.r_TP5*r.val_TP5 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_TP5 <- as.matrix(p.yes.rr_TP5)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_TP5=graph_from_adjacency_matrix(adjm_TP5,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_TP5<-E(net.grph_TP5)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_TP5<-V(net.grph_TP5)[degree(net.grph_TP5) == 0] 
+```
+
+```{r}
+net.grph_TP5 <-delete_vertices(net.grph_TP5, bad.vs_TP5)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_TP5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP5_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_TP5 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP5_edge.csv")
+
+edges_s_TP5 <- edges_TP5 %>% 
+  select(1)
+
+edges_t_TP5 <- edges_TP5 %>% 
+  select(2)
+
+edges_all_TP5 <- edges_s_TP5 %>% 
+  full_join(edges_t_TP5,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_TP5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_TP5_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_TP5 <- edges_TP5 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_TP5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP5_positive_edge.csv")
+```
+
+# *TAYLOR PARK 5-15cm* {#sec-taylor-park-5-15cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_TP15<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_TP_1C_15"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_TP15 <- as.data.frame(t(asv.table_TP15[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_TP15)
+
+#[1]   26 44371
+```
+
+```{r}
+asv.table.filter_TP15 <- asv.table.t_TP15[ ,colSums(asv.table.t_TP15) >= 10]
+print(c(ncol(asv.table.t_TP15),"versus",ncol(asv.table.filter_TP15))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "1589"
+```
+
+```{r}
+asv.cor_TP15 <- rcorr(as.matrix(asv.table.filter_TP15), type="spearman")
+```
+
+```{r}
+asv.pval_TP15 <- forceSymmetric(asv.cor_TP15$P) 
+```
+
+```{r}
+sel.tax_TP15 <- taxa[rownames(asv.cor_TP15$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_TP15), rownames(asv.pval_TP15))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_TP15 <- asv.pval_TP15<0.05
+r.val_TP15 = asv.cor_TP15$r # select all the correlation values
+p.yes.r_TP15 <- r.val_TP15*p.yes_TP15 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_TP15 <- abs(p.yes.r_TP15)>0.70 # output is logical vector
+p.yes.rr_TP15 <- p.yes.r_TP15*r.val_TP15 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_TP15 <- as.matrix(p.yes.rr_TP15)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_TP15=graph_from_adjacency_matrix(adjm_TP15,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_TP15<-E(net.grph_TP15)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_TP15<-V(net.grph_TP15)[degree(net.grph_TP15) == 0] 
+```
+
+```{r}
+net.grph_TP15 <-delete_vertices(net.grph_TP15, bad.vs_TP15)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_TP15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP15_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_TP15 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP15_edge.csv")
+
+edges_s_TP15 <- edges_TP15 %>% 
+  select(1)
+
+edges_t_TP15 <- edges_TP15 %>% 
+  select(2)
+
+edges_all_TP15 <- edges_s_TP15 %>% 
+  full_join(edges_t_TP15,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_TP15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_TP15_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_TP15 <- edges_TP15 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_TP15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TP15_positive_edge.csv")
+```
+
+# *TAYLOR PARK OM* {#sec-taylor-park-om style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_TPOM<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_TP_1C_OM"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_TPOM <- as.data.frame(t(asv.table_TPOM[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_TPOM)
+
+#[1]   26 44371
+```
+
+```{r}
+asv.table.filter_TPOM <- asv.table.t_TPOM[ ,colSums(asv.table.t_TPOM) >= 10]
+print(c(ncol(asv.table.t_TPOM),"versus",ncol(asv.table.filter_TPOM))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "2194"
+```
+
+```{r}
+asv.cor_TPOM <- rcorr(as.matrix(asv.table.filter_TPOM), type="spearman")
+```
+
+```{r}
+asv.pval_TPOM <- forceSymmetric(asv.cor_TPOM$P) 
+```
+
+```{r}
+sel.tax_TPOM <- taxa[rownames(asv.cor_TPOM$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_TPOM), rownames(asv.pval_TPOM))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_TPOM <- asv.pval_TPOM<0.05
+r.val_TPOM = asv.cor_TPOM$r # select all the correlation values
+p.yes.r_TPOM <- r.val_TPOM*p.yes_TPOM # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_TPOM <- abs(p.yes.r_TPOM)>0.70 # output is logical vector
+p.yes.rr_TPOM <- p.yes.r_TPOM*r.val_TPOM # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_TPOM <- as.matrix(p.yes.rr_TPOM)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_TPOM=graph_from_adjacency_matrix(adjm_TPOM,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_TPOM<-E(net.grph_TPOM)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_TPOM<-V(net.grph_TPOM)[degree(net.grph_TPOM) == 0] 
+```
+
+```{r}
+net.grph_TPOM <-delete_vertices(net.grph_TPOM, bad.vs_TPOM)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_TPOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TPOM_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_TPOM <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TPOM_edge.csv")
+
+edges_s_TPOM <- edges_TPOM %>% 
+  select(1)
+
+edges_t_TPOM <- edges_TPOM %>% 
+  select(2)
+
+edges_all_TPOM <- edges_s_TPOM %>% 
+  full_join(edges_t_TPOM,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_TPOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_TPOM_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_TPOM <- edges_TPOM %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_TPOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_TPOM_positive_edge.csv")
+```
+
+# *SAN JUAN 0-5cm* {#sec-san-juan-0-5cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SJ5<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SJ_1C_5"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SJ5 <- as.data.frame(t(asv.table_SJ5[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SJ5)
+
+#[1]   39 44371
+```
+
+```{r}
+asv.table.filter_SJ5 <- asv.table.t_SJ5[ ,colSums(asv.table.t_SJ5) >= 10]
+print(c(ncol(asv.table.t_SJ5),"versus",ncol(asv.table.filter_SJ5))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "2463"
+```
+
+```{r}
+asv.cor_SJ5 <- rcorr(as.matrix(asv.table.filter_SJ5), type="spearman")
+```
+
+```{r}
+asv.pval_SJ5 <- forceSymmetric(asv.cor_SJ5$P) 
+```
+
+```{r}
+sel.tax_SJ5 <- taxa[rownames(asv.cor_SJ5$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SJ5), rownames(asv.pval_SJ5))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SJ5 <- asv.pval_SJ5<0.05
+r.val_SJ5 = asv.cor_SJ5$r # select all the correlation values
+p.yes.r_SJ5 <- r.val_SJ5*p.yes_SJ5 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SJ5 <- abs(p.yes.r_SJ5)>0.70 # output is logical vector
+p.yes.rr_SJ5 <- p.yes.r_SJ5*r.val_SJ5 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SJ5 <- as.matrix(p.yes.rr_SJ5)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SJ5=graph_from_adjacency_matrix(adjm_SJ5,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SJ5<-E(net.grph_SJ5)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SJ5<-V(net.grph_SJ5)[degree(net.grph_SJ5) == 0] 
+```
+
+```{r}
+net.grph_SJ5 <-delete_vertices(net.grph_SJ5, bad.vs_SJ5)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SJ5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ5_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edges_SJ5 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ5_edge.csv")
+
+edges_s_SJ5 <- edges_SJ5 %>% 
+  select(1)
+
+edges_t_SJ5 <- edges_SJ5 %>% 
+  select(2)
+
+edges_all_SJ5 <- edges_s_SJ5 %>% 
+  full_join(edges_t_SJ5,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SJ5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SJ5_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SJ5 <- edges_SJ5 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SJ5, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ5_positive_edge.csv")
+```
+
+# *SAN JUAN 5-15cm* {#sec-san-juan-5-15cm style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SJ15<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SJ_1C_15"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SJ15 <- as.data.frame(t(asv.table_SJ15[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SJ15)
+
+#[1]   45 44371
+```
+
+```{r}
+asv.table.filter_SJ15 <- asv.table.t_SJ15[ ,colSums(asv.table.t_SJ15) >= 10]
+print(c(ncol(asv.table.t_SJ15),"versus",ncol(asv.table.filter_SJ15))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "2507"  
+```
+
+```{r}
+asv.cor_SJ15 <- rcorr(as.matrix(asv.table.filter_SJ15), type="spearman")
+```
+
+```{r}
+asv.pval_SJ15 <- forceSymmetric(asv.cor_SJ15$P) 
+```
+
+```{r}
+sel.tax_SJ15 <- taxa[rownames(asv.cor_SJ15$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SJ15), rownames(asv.pval_SJ15))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SJ15 <- asv.pval_SJ15<0.05
+r.val_SJ15 = asv.cor_SJ15$r # select all the correlation values
+p.yes.r_SJ15 <- r.val_SJ15*p.yes_SJ15 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SJ15 <- abs(p.yes.r_SJ15)>0.70 # output is logical vector
+p.yes.rr_SJ15 <- p.yes.r_SJ15*r.val_SJ15 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SJ15 <- as.matrix(p.yes.rr_SJ15)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SJ15=graph_from_adjacency_matrix(adjm_SJ15,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SJ15<-E(net.grph_SJ15)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SJ15<-V(net.grph_SJ15)[degree(net.grph_SJ15) == 0] 
+```
+
+```{r}
+net.grph_SJ15 <-delete_vertices(net.grph_SJ15, bad.vs_SJ15)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ15_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SJ15 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ15_edge.csv")
+
+edges_s_SJ15 <- edges_SJ15 %>% 
+  select(1)
+
+edges_t_SJ15 <- edges_SJ15 %>% 
+  select(2)
+
+edges_all_SJ15 <- edges_s_SJ15 %>% 
+  full_join(edges_t_SJ15,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SJ15_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SJ15 <- edges_SJ15 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJ15_positive_edge.csv")
+```
+
+# *SAN JUAN OM* {#sec-san-juan-om style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+asv.table_SJOM<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SJ_1C_OM"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SJOM <- as.data.frame(t(asv.table_SJOM[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SJOM)
+
+#[1]   48 44371
+```
+
+```{r}
+asv.table.filter_SJOM <- asv.table.t_SJOM[ ,colSums(asv.table.t_SJOM) >= 10]
+print(c(ncol(asv.table.t_SJOM),"versus",ncol(asv.table.filter_SJOM))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "3844"
+```
+
+```{r}
+asv.cor_SJOM <- rcorr(as.matrix(asv.table.filter_SJOM), type="spearman")
+```
+
+```{r}
+asv.pval_SJOM <- forceSymmetric(asv.cor_SJOM$P) 
+```
+
+```{r}
+sel.tax_SJOM <- taxa[rownames(asv.cor_SJOM$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SJOM), rownames(asv.pval_SJOM))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SJOM <- asv.pval_SJOM<0.05
+r.val_SJOM = asv.cor_SJOM$r # select all the correlation values
+p.yes.r_SJOM <- r.val_SJOM*p.yes_SJOM # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.70, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SJOM <- abs(p.yes.r_SJOM)>0.70 # output is logical vector
+p.yes.rr_SJOM <- p.yes.r_SJOM*r.val_SJOM # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SJOM <- as.matrix(p.yes.rr_SJOM)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SJOM=graph_from_adjacency_matrix(adjm_SJOM,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SJOM<-E(net.grph_SJOM)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SJOM<-V(net.grph_SJOM)[degree(net.grph_SJOM) == 0] 
+```
+
+```{r}
+net.grph_SJOM <-delete_vertices(net.grph_SJOM, bad.vs_SJOM)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SJOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJOM_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SJOM <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJOM_edge.csv")
+
+edges_s_SJOM <- edges_SJOM %>% 
+  select(1)
+
+edges_t_SJOM <- edges_SJOM %>% 
+  select(2)
+
+edges_all_SJOM <- edges_s_SJOM %>% 
+  full_join(edges_t_SJOM,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SJOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_SJOM_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SJOM <- edges_SJOM %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SJOM, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.70_edge_SJOM_positive_edge.csv")
+```
+
+
+
+
+
+
+
+
+
+# *SAN JUAN 5-15cm* {#sec-san-juan-5-15cm style="font-family:sans-serif; color: #88B2AC"}
+# 65%
+
+```{r}
+asv.table_SJ15<-read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_coremetrics/ASCC_16S_feature_table_rarified_rem.csv", header = T,row.names = 1) %>% 
+  select(-1) %>% 
+  select(contains("_SJ_1C_15"))
+
+taxa<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv",header=T,row.names=1)
+```
+
+## 1. Transposing my feature table {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+# Assuming your data is stored in 'asv.table'
+# Step 1: Exclude the first column (GenID) and transpose the remaining data
+asv.table.t_SJ15 <- as.data.frame(t(asv.table_SJ15[,-1]))  # Transpose, skipping the first column
+
+# # Step 2: Set the GenIDs (originally in the first column) as the new column names
+# colnames(asv.table.t) <- asv.table$GenID  # Use the first column of the original table as headers
+# 
+# # Step 3: Add the sample names (originally row names) as the first column
+# asv.table.t <- cbind(GenID = rownames(asv.table.t), asv.table.t)
+# 
+# # Step 4: Remove the row names to avoid any confusion
+# rownames(asv.table.t) <- NULL
+# 
+# # Step 5: Print the resulting transposed table
+# print(asv.table.t)
+```
+
+```{r}
+dim(asv.table.t_SJ15)
+
+#[1]   45 44371
+```
+
+```{r}
+asv.table.filter_SJ15 <- asv.table.t_SJ15[ ,colSums(asv.table.t_SJ15) >= 10]
+print(c(ncol(asv.table.t_SJ15),"versus",ncol(asv.table.filter_SJ15))) #compare initial and filtered counts
+
+#[1] "44371"  "versus" "2507"  
+```
+
+```{r}
+asv.cor_SJ15 <- rcorr(as.matrix(asv.table.filter_SJ15), type="spearman")
+```
+
+```{r}
+asv.pval_SJ15 <- forceSymmetric(asv.cor_SJ15$P) 
+```
+
+```{r}
+sel.tax_SJ15 <- taxa[rownames(asv.cor_SJ15$P),,drop=FALSE]
+```
+
+## 2. Make sure your filtered tables match {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+all.equal(rownames(sel.tax_SJ15), rownames(asv.pval_SJ15))
+```
+
+## 3. Filter to retain only significant associations {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes_SJ15 <- asv.pval_SJ15<0.05
+r.val_SJ15 = asv.cor_SJ15$r # select all the correlation values
+p.yes.r_SJ15 <- r.val_SJ15*p.yes_SJ15 # only select correlation values based on p-value criterion 
+```
+
+## 4. Select ASVs based on Spearman Correlation. Here we are keeping only values with correlation coefficients higher than 0.65, but this value can be adjusted to retain stronger or weaker correlations. {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+p.yes.r_SJ15 <- abs(p.yes.r_SJ15)>0.65 # output is logical vector
+p.yes.rr_SJ15 <- p.yes.r_SJ15*r.val_SJ15 # use logical vector for subscripting.
+```
+
+## 5. Create an adjacency matrix {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+adjm_SJ15 <- as.matrix(p.yes.rr_SJ15)
+```
+
+## 6. The next step creates an object from the adjacency matrix. Weight represents the level of correlation {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+net.grph_SJ15=graph_from_adjacency_matrix(adjm_SJ15,mode="undirected",weighted=TRUE,diag=FALSE)
+```
+
+## 7. You can use this to pull out edge weights {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+edgew_SJ15<-E(net.grph_SJ15)$weight
+```
+
+## 8. Creating a vector to remove the isolated nodes (nodes with no interactions) and then remove those nodes from the object {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+bad.vs_SJ15<-V(net.grph_SJ15)[degree(net.grph_SJ15) == 0] 
+```
+
+```{r}
+net.grph_SJ15 <-delete_vertices(net.grph_SJ15, bad.vs_SJ15)
+```
+
+## 9. Write out the edge files {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+gephi_write_edges(net.grph_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.65_edge_SJ15_edge.csv")
+```
+
+```{r}
+taxa2<-read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/taxonomy_gtdb.csv")
+```
+
+## 10. Create a nodes file {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+
+edges_SJ15 <- read.csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.65_edge_SJ15_edge.csv")
+
+edges_s_SJ15 <- edges_SJ15 %>% 
+  select(1)
+
+edges_t_SJ15 <- edges_SJ15 %>% 
+  select(2)
+
+edges_all_SJ15 <- edges_s_SJ15 %>% 
+  full_join(edges_t_SJ15,by = c("Source" = "Target"))%>% 
+  distinct() %>% 
+  rename("GenID" = "Source") %>% 
+  left_join(taxa2)
+```
+
+```{r}
+write.csv(edges_all_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.65_SJ15_node.csv")
+```
+
+### Filtering Positive Connections {style="font-family:sans-serif; color: #88B2AC"}
+
+```{r}
+pos_SJ15 <- edges_SJ15 %>% 
+  filter(weight>0) %>% 
+  add_column(direction = "positive")
+write_csv(pos_SJ15, "/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/ASCC_16S_NetworkAnalysis/ASCC_ALL_16S_filtered_0.65_edge_SJ15_positive_edge.csv")
+```
