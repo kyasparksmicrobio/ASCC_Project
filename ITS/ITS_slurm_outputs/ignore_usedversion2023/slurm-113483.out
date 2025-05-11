@@ -1,0 +1,54 @@
+Usage: qiime demux emp-paired [OPTIONS]
+
+  Demultiplex paired-end sequence data (i.e., map barcode reads to sample ids)
+  for data generated with the Earth Microbiome Project (EMP) amplicon
+  sequencing protocol. Details about this protocol can be found at
+  http://www.earthmicrobiome.org/protocols-and-standards/
+
+Inputs:
+  --i-seqs ARTIFACT EMPPairedEndSequences
+                       The paired-end sequences to be demultiplexed.
+                                                                    [required]
+Parameters:
+  --m-barcodes-file METADATA
+  --m-barcodes-column COLUMN  MetadataColumn[Categorical]
+                       The sample metadata column containing the per-sample
+                       barcodes.                                    [required]
+  --p-golay-error-correction / --p-no-golay-error-correction
+                       Perform 12nt Golay error correction on the barcode
+                       reads.                                  [default: True]
+  --p-rev-comp-barcodes / --p-no-rev-comp-barcodes
+                       If provided, the barcode sequence reads will be
+                       reverse complemented prior to demultiplexing.
+                                                              [default: False]
+  --p-rev-comp-mapping-barcodes / --p-no-rev-comp-mapping-barcodes
+                       If provided, the barcode sequences in the sample
+                       metadata will be reverse complemented prior to
+                       demultiplexing.                        [default: False]
+  --p-ignore-description-mismatch / --p-no-ignore-description-mismatch
+                       If enabled, ignore mismatches in sequence record
+                       description fields.                    [default: False]
+Outputs:
+  --o-per-sample-sequences ARTIFACT 
+    SampleData[PairedEndSequencesWithQuality]
+                       The resulting demultiplexed sequences.       [required]
+  --o-error-correction-details ARTIFACT ErrorCorrectionDetails
+                       Detail about the barcode error corrections.  [required]
+Miscellaneous:
+  --output-dir PATH    Output unspecified results to a directory
+  --verbose / --quiet  Display verbose output to stdout and/or stderr during
+                       execution of this action. Or silence output if
+                       execution is successful (silence is golden).
+  --example-data PATH  Write example data and exit.
+  --citations          Show citations and exit.
+  --help               Show this message and exit.
+
+                  There were some problems with the command:                  
+ (1/4) Invalid value for '--p-rev-comp-mapping-barcodes': received < > as an
+  argument, which is incompatible with parameter type: Bool
+ (2/4) Missing option '--i-seqs'.
+ (3/4) Missing option '--o-per-sample-sequences'. ("--output-dir" may also be
+  used)
+ (4/4) Missing option '--o-error-correction-details'. ("--output-dir" may also
+  be used)
+/var/spool/slurmd/job113483/slurm_script: line 17: --p-no-golay-error-correction: command not found

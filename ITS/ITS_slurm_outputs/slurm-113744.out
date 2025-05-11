@@ -1,0 +1,10 @@
+There was an issue with loading the file /home/projects-wilkins-2/ASCC/summer_2024/ITS/ITS_metadata/ASCC_ITS_barcodes.txt as metadata:
+
+  There was an issue with loading the metadata file:
+
+  Metadata IDs must be unique. The following IDs are duplicated: 'ASCC110_1_3_0923_TP_1C_5', 'ASCC16_T3B_2_0923_SJ_1C_5', 'ASCC194_C1_5_0923_SJ_1C_OM', 'ASCC220_T1A_2_0923_SJ_1C_OM', 'ASCC299_5_0823_SF_1C_5', 'ASCC6_T4C_6_0923_SJ_1C_5', 'NA'
+
+  There may be more errors present in the metadata file. To get a full report, sample/feature metadata files can be validated with Keemei: https://keemei.qiime2.org
+
+  Find details on QIIME 2 metadata requirements here: https://docs.qiime2.org/2021.2/tutorials/metadata/
+

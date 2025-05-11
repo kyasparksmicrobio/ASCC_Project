@@ -1,0 +1,5 @@
+Plugin error from demux:
+
+  A duplicate barcode was detected. The barcode AGTCGCGAGGAC was observed for samples ASCC-36 and ASCC-36-redo.
+
+Debug info has been saved to /tmp/qiime2-q2cli-err-hoko6pi0.log

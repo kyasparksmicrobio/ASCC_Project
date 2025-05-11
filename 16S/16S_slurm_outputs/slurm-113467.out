@@ -1,0 +1,9 @@
+There was an issue with loading the file /home/projects-wilkins-2/ASCC/summer_2024/16S/16S_metadata/ASCC_16S_barcodes.txt as metadata:
+
+  Metadata file path doesn't exist, or the path points to something other than a file. Please check that the path exists, has read permissions, and points to a regular file (not a directory): /home/projects-wilkins-2/ASCC/summer_2024/16S/16S_metadata/ASCC_16S_barcodes.txt
+
+  There may be more errors present in the metadata file. To get a full report, sample/feature metadata files can be validated with Keemei: https://keemei.qiime2.org
+
+  Find details on QIIME 2 metadata requirements here: https://docs.qiime2.org/2023.9/tutorials/metadata/
+
+/var/spool/slurmd/job113467/slurm_script: line 19: --o-per-sample-sequences: command not found

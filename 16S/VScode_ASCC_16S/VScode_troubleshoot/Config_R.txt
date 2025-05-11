@@ -1,0 +1,23 @@
+Last login: Mon Jul 29 22:49:26 on ttys001
+(base) kyasparks@MacBook-Pro-358 ~ % bash
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+bash-3.2$ source ~/.zshrc
+(base) bash-3.2$ conda activate r-console
+(r-console) bash-3.2$ which radian
+/opt/homebrew/Caskroom/miniforge/base/envs/r-console/bin/radian
+(r-console) bash-3.2$ alias r="/opt/homebrew/Caskroom/miniforge/base/envs/r-console/bin/radian"
+(r-console) bash-3.2$ options(vsc.rstudioapi = TRUE)
+bash: syntax error near unexpected token `vsc.rstudioapi'
+(r-console) bash-3.2$ 
+
+
+
+
+
+
+
+
+

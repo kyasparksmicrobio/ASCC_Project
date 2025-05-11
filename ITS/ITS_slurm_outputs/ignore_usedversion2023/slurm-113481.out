@@ -1,0 +1,10 @@
+There was an issue with loading the file /home/projects-wilkins-2/ASCC/summer_2024/ITS/ITS_metadata/ASCC_ITS_barcodes.txt as metadata:
+
+  There was an issue with loading the metadata file:
+
+  Metadata IDs must be unique. The following IDs are duplicated: 'ASCC-skip'
+
+  There may be more errors present in the metadata file. To get a full report, sample/feature metadata files can be validated with Keemei: https://keemei.qiime2.org
+
+  Find details on QIIME 2 metadata requirements here: https://docs.qiime2.org/2023.9/tutorials/metadata/
+

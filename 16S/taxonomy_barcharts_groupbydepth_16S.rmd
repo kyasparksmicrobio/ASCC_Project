@@ -1,0 +1,126 @@
+```{r}
+library(ggplot2) #plotting
+library(tidyverse) #data wrangling
+library(phyloseq) #phyloseq objects
+library(dplyr) #data wrangling
+library(extrafont)
+font_import()  # only needs to be run once
+loadfonts(device = "pdf")
+names(grDevices::quartzFonts())
+```
+
+
+
+
+```{r}
+#Step 1: Load Feature Table, Metadata, and Taxonomy
+merged <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+# Step 2: Merge datasets
+data_meta <- inner_join(merged, metadata, by = c("samples" = "Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, taxa, by = c("OTUID" = "OTUID"))
+
+# Step 3: Average rel abundance per OTU
+avg_rel_abund_per_otuid <- data_meta_taxa %>%
+  filter(!is.na(Phylum) & Phylum != "") %>%
+  group_by(OTUID, Phylum, Site, Depth) %>%
+  summarize(
+    total_relative_abundance = sum(Relative_Abundance, na.rm = TRUE),
+    num_samples = n_distinct(samples),
+    avg_relative_abundance = total_relative_abundance / num_samples,
+    .groups = "drop"
+  )
+
+# Step 4: Identify top 10 Phyla across all groups
+top_10_phyla <- avg_rel_abund_per_otuid %>%
+  group_by(Phylum) %>%
+  summarize(avg_relative_abundance = mean(avg_relative_abundance, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(avg_relative_abundance)) %>%
+  slice_head(n = 10) %>%
+  pull(Phylum)
+
+# Step 5: Full dataset including "Other"
+plot_data_full <- data_meta_taxa %>%
+  mutate(
+    Phylum = ifelse(is.na(Phylum) | Phylum == "", "Other", Phylum),
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP")),
+    Phylum = ifelse(Phylum %in% top_10_phyla, Phylum, "Other")
+  )
+
+# Step 6: Average across samples → Site × Depth × Phylum
+plot_data <- plot_data_full %>%
+  group_by(Site, Depth, samples, Phylum) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance, na.rm = TRUE), .groups = "drop") %>%
+  group_by(Site, Depth, Phylum) %>%
+  summarize(Relative_Abundance = mean(Relative_Abundance), .groups = "drop")
+
+# Step 7: Ensure "Other" stacks on top (but last in legend)
+legend_phyla <- c(top_10_phyla, "Other")  # for legend
+stack_order <- c(top_10_phyla, "Other")   # for stacking order (Other last)
+
+plot_data <- plot_data %>%
+  mutate(
+    Phylum_plot = factor(Phylum, levels = stack_order),
+    Phylum = factor(Phylum, levels = legend_phyla)
+  )
+
+# Step 8: Define color palette
+phy_colors_named <- c(
+  setNames(
+    c("#3B1911", "#6D2F20", "#A8402D", "#B75347", "#DF7666",
+      "#DE6000", "#D89241", "#EDC756", "#EDE955", "#C5F08D"),
+    top_10_phyla
+  ),
+  Other = "gray70"
+)
+
+# Step 9: Add 0s for missing combos (so "Other" is always present)
+all_combos <- expand.grid(
+  Site = levels(plot_data$Site),
+  Depth = levels(plot_data$Depth),
+  Phylum_plot = levels(plot_data$Phylum_plot)
+)
+
+plot_data <- full_join(plot_data, all_combos, by = c("Site", "Depth", "Phylum_plot")) %>%
+  mutate(
+    Relative_Abundance = replace_na(Relative_Abundance, 0),
+    Depth = factor(Depth, levels = c("OM", "0_5cm", "5_15cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP")),
+    Phylum = factor(Phylum_plot, levels = legend_phyla)  # match original legend
+  )
+
+plot_data$Phylum <- gsub("p__", "", plot_data$Phylum)
+plot_data$Depth <- recode(plot_data$Depth,
+  `0_5cm` = "0-5 cm",
+  `5_15cm` = "5-15 cm"
+)
+
+# Step 10: Plot
+ggplot(plot_data, aes(x = Depth, y = Relative_Abundance, fill = Phylum_plot)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Site, nrow = 1) +
+  scale_fill_manual(values = phy_colors_named, breaks = legend_phyla, drop = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 100)) +
+  labs(x = "Depth", y = "Avg Relative Abundance (%)", fill = "Phylum") +
+  theme_bw(base_family = "Helvetica") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14, family = "Helvetica"),
+    axis.text.y = element_text(size = 14, family = "Helvetica"),
+    axis.title = element_text(size = 16, family = "Helvetica"),
+    strip.text = element_text(size = 16, family = "Helvetica"),
+    legend.text = element_text(size = 12, family = "Helvetica"),
+    legend.title = element_text(size = 14, family = "Helvetica")
+  )
+```
+
+
+
+

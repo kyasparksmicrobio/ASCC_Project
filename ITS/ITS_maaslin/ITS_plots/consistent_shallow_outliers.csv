@@ -1,0 +1,7 @@
+OTUID,taxonomy,Comparisons,Count
+2be07a8d72925262126f2a02c52dddea,k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Exophiala; s__Exophiala_radicis,SJ_v_SF; TP_v_SJ,2
+600c14bbab2e89a35844eeeb19248a9d,k__Fungi; p__Basidiomycota; c__Geminibasidiomycetes; o__Geminibasidiales; f__Geminibasidiaceae; g__Geminibasidium; s__Geminibasidium_sp,SF_v_TP; SJ_v_SF,2
+6dbf5ec45785cfbe351ebb64718e0478,k__Fungi; p__Ascomycota; c__Dothideomycetes; o__Pleosporales; f__Cucurbitariaceae; g__Pyrenochaeta; s__Pyrenochaeta_sp,SF_v_TP; TP_v_SJ,2
+72ca0a899d71f7d9023e44474c260434,k__Fungi; p__Basidiomycota; c__Microbotryomycetes; o__Microbotryales; f__unidentified; g__unidentified; s__Microbotryales_sp,SF_v_TP; SJ_v_SF,2
+cc116080ed11666e003af169a31bf77b,k__Fungi; p__Basidiomycota; c__Tremellomycetes; o__Filobasidiales; f__Piskurozymaceae; g__Solicoccozyma; s__Solicoccozyma_aeria,SJ_v_SF; TP_v_SJ,2
+daf3380c6379ff9ada580bfa3256c5c2,k__Fungi; p__Ascomycota; c__Saccharomycetes; o__Saccharomycetales; f__unidentified; g__unidentified; s__Saccharomycetales_sp,SJ_v_SF; TP_v_SJ,2

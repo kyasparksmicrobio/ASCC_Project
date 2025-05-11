@@ -1,0 +1,4 @@
+"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
+"2be07a8d72925262126f2a02c52dddea","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Exophiala; s__Exophiala_radicis","f__Herpotrichiellaceae",3.18635560116484,2.92270540175384e-12,11.5342149577663,"SJ Enriched"
+"cc116080ed11666e003af169a31bf77b","k__Fungi; p__Basidiomycota; c__Tremellomycetes; o__Filobasidiales; f__Piskurozymaceae; g__Solicoccozyma; s__Solicoccozyma_aeria","f__Piskurozymaceae",3.43234999324588,3.10770263109427e-12,11.5075605445215,"SJ Enriched"
+"12410d7307e6e4dbdae768c5c47b748d","k__Fungi",NA,-3.42275439440203,2.78857035634768e-08,7.55461839367265,"SF Enriched"

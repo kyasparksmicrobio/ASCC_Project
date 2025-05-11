@@ -1,0 +1,11 @@
+There was an issue with loading the file /home/projects-wilkins-2/ASCC/summer_2024/16S/16S_metadata/ASCC_16S_barcodes.txt as metadata:
+
+  There was an issue with loading the metadata file:
+
+  Metadata IDs must be unique. The following IDs are duplicated: 'ASCC-101', 'ASCC-114', 'ASCC-123', 'ASCC-128', 'ASCC-13', 'ASCC-137', 'ASCC-138', 'ASCC-154', 'ASCC-162', 'ASCC-171', 'ASCC-194', 'ASCC-225', 'ASCC-239', 'ASCC-247', 'ASCC-258', 'ASCC-266', 'ASCC-282', 'ASCC-29', 'ASCC-292', 'ASCC-299', 'ASCC-309', 'ASCC-31', 'ASCC-317', 'ASCC-322', 'ASCC-326', 'ASCC-332', 'ASCC-333', 'ASCC-42', 'ASCC-50', 'ASCC-60', 'ASCC-70', 'ASCC-B21', 'ASCC-B26', 'ASCC-Empty', 'ASCC-IGNORE'
+
+  There may be more errors present in the metadata file. To get a full report, sample/feature metadata files can be validated with Keemei: https://keemei.qiime2.org
+
+  Find details on QIIME 2 metadata requirements here: https://docs.qiime2.org/2023.9/tutorials/metadata/
+
+/var/spool/slurmd/job113473/slurm_script: line 19: --o-per-sample-sequences: command not found

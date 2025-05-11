@@ -1,0 +1,19 @@
+[Header]
+Local Run Manager Analysis Id,17017
+Experiment Name,2024.07.22_Wilkins_ITS_Run2
+Date,2024-07-22
+Module,GenerateFASTQ - 3.1.0
+Workflow,GenerateFASTQ
+Library Prep Kit,Custom
+Index Kit,Custom
+Chemistry,Default
+
+[Reads]
+251
+251
+
+[Settings]
+
+[Data]
+Sample_ID,Description,I7_Index_ID,index,Sample_Project
+DummyIndex,,AAAAAAAAAAAA,AAAAAAAAAAAA,

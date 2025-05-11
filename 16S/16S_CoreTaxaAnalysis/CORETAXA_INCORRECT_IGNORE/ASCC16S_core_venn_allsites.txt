@@ -1,0 +1,225 @@
+OTUID		Site	Core	0-5cm	5-15cm	OM
+a3fe6144bb655c43f48abfa8bc92709d	d__Archaea;  p__Crenarchaeota;  c__Nitrososphaeria;  o__Nitrososphaerales;  f__Nitrososphaeraceae;  g__Nitrososphaeraceae; 	SJ	5-15cm	FALSE	TRUE	FALSE
+b4bbddd577476c16df3815f40c843d94	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Acidicapsa;  s__Acidicapsa_sp.	SF	0-5cm	TRUE	FALSE	FALSE
+0484d6f9283e7460c3d7f294a0c4b744	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Acidipila; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+2390ad7fc738b23f4be2e6ec469042d6	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Acidipila; 	SF	"0-5cm, OM"	TRUE	FALSE	TRUE
+0484d6f9283e7460c3d7f294a0c4b744	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Acidipila; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+e0cf29f81749119eb9f4647ca8462f00	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Bryocella;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+1bcc1a211d6c3272f7f3ac10a3620bae	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+d8bdbb4d88ad5b3fe2106357539a53db	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+3df4806b577dcca1c55cbad8e419a24c	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	SF	OM	FALSE	FALSE	TRUE
+1bcc1a211d6c3272f7f3ac10a3620bae	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+d8bdbb4d88ad5b3fe2106357539a53db	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+3df4806b577dcca1c55cbad8e419a24c	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Granulicella; 	TP	OM	FALSE	FALSE	TRUE
+20e3fc9ceaacf533bb48079d79ebac6f	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__Acidobacteriaceae_(Subgroup_1);  g__Occallatibacter; 	SF	0-5cm	TRUE	FALSE	FALSE
+97e37a6b294e3cdb4a9977bb653171d6	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__uncultured;  g__uncultured; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+76601b6d7476b7f4d0c4a0708505a15b	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Acidobacteriales;  f__uncultured;  g__uncultured; 	SF	5-15cm	FALSE	TRUE	FALSE
+75cac7ae6fbcbb7817a14f6772f94924	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+c722a811911383bb2413ad9234fbd57f	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+75cac7ae6fbcbb7817a14f6772f94924	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	SJ	5-15cm	FALSE	TRUE	FALSE
+75cac7ae6fbcbb7817a14f6772f94924	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+91671015efac0eae99cf65d4d993b7ea	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	TP	0-5cm	TRUE	FALSE	FALSE
+ce66cfb2714ac46183591cd81238c363	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	TP	OM	FALSE	FALSE	TRUE
+d2023994f487389892bc610a3ce896f0	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter; 	TP	OM	FALSE	FALSE	TRUE
+e07af1c8d6ba26edfdf4fd4a03637b22	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Bryobacterales;  f__Bryobacteraceae;  g__Bryobacter;  s__uncultured_bacterium	SF	0-5cm	TRUE	FALSE	FALSE
+f1b7e75aee8da759aa0156b596572d9d	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+df46b6b835ccb5f1a7314aa4e15f0609	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2; 	SF	5-15cm	FALSE	TRUE	FALSE
+f1b7e75aee8da759aa0156b596572d9d	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2; 	TP	5-15cm	FALSE	TRUE	FALSE
+7cf66862181370e6c0395226dd21edc4	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2;  s__uncultured_Acidobacteria	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+d526d1a358c5c6c3cf900ce27ae9cca7	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2;  s__uncultured_Acidobacteria	SF	5-15cm	FALSE	TRUE	FALSE
+7cf66862181370e6c0395226dd21edc4	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2;  s__uncultured_Acidobacteria	TP	5-15cm	FALSE	TRUE	FALSE
+d526d1a358c5c6c3cf900ce27ae9cca7	d__Bacteria;  p__Acidobacteriota;  c__Acidobacteriae;  o__Subgroup_2;  f__Subgroup_2;  g__Subgroup_2;  s__uncultured_Acidobacteria	TP	5-15cm	FALSE	TRUE	FALSE
+c4c912015c73eb144c85dbe8719b0587	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia; ; ; ; 	SJ	5-15cm	FALSE	TRUE	FALSE
+c4c912015c73eb144c85dbe8719b0587	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia; ; ; ; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+a08ee4a8aa1ece798d78fae2b9ad0401	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__11-24;  f__11-24;  g__11-24;  s__uncultured_Acidobacteria	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+54e920999a65a173d3fc598d9df4097f	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__Pyrinomonadales;  f__Pyrinomonadaceae;  g__RB41; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+a7a0cb45da7d79ebd27889aa968d022f	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__Pyrinomonadales;  f__Pyrinomonadaceae;  g__RB41; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+bdfb970b8e1ecedffb9c0d90755ffa0d	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__Pyrinomonadales;  f__Pyrinomonadaceae;  g__RB41; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+54e920999a65a173d3fc598d9df4097f	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__Pyrinomonadales;  f__Pyrinomonadaceae;  g__RB41; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+a7a0cb45da7d79ebd27889aa968d022f	d__Bacteria;  p__Acidobacteriota;  c__Blastocatellia;  o__Pyrinomonadales;  f__Pyrinomonadaceae;  g__RB41; 	TP	5-15cm	FALSE	TRUE	FALSE
+10f0461cb8a244c14aa2fb73e127e9e5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured; 	SF	OM	FALSE	FALSE	TRUE
+10f0461cb8a244c14aa2fb73e127e9e5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured; 	SJ	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+277297d556cd1abee7d9101d84af6dc5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+10f0461cb8a244c14aa2fb73e127e9e5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+57c4f3ede08667957471c9e2025b31ae	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured; 	TP	0-5cm	TRUE	FALSE	FALSE
+e2700aefa86b128937c05f4f4dd45b71	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_Acidobacteria	SF	5-15cm	FALSE	TRUE	FALSE
+1caee876a0fe52a8ddcc6ef01c8b98a6	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_Acidobacteria	SJ	5-15cm	FALSE	TRUE	FALSE
+d62f237df97b59f411ae8f4712e319c5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_bacterium	SF	OM	FALSE	FALSE	TRUE
+2141c7953f25a1c4be8b0a47a28a157f	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_bacterium	SJ	5-15cm	FALSE	TRUE	FALSE
+eef38670da90426695b8e414b17b59ab	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+d62f237df97b59f411ae8f4712e319c5	d__Bacteria;  p__Acidobacteriota;  c__Vicinamibacteria;  o__Vicinamibacterales;  f__uncultured;  g__uncultured;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+74a26e97b02fcab82b0d346de4920f75	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ea50ab99242e77fd8d897c2c43449f84	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+ad8664f21c744d16b06f829014b5511c	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	SF	OM	FALSE	FALSE	TRUE
+29115e7bd8ef43044853d0193cf6f622	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	SJ	5-15cm	FALSE	TRUE	FALSE
+74a26e97b02fcab82b0d346de4920f75	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ea50ab99242e77fd8d897c2c43449f84	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Corynebacteriales;  f__Mycobacteriaceae;  g__Mycobacterium; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+fd0e3dfc373f1b085e28d4f38797a89b	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Frankiales;  f__Acidothermaceae;  g__Acidothermus;  s__uncultured_soil	TP	OM	FALSE	FALSE	TRUE
+6c2b1cf663513c1df67144351ebe62ad	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Frankiales;  f__Frankiaceae;  g__Jatrophihabitans; 	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+375097b560fa92e9931a2b15b838c38e	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Frankiales;  f__Frankiaceae;  g__Jatrophihabitans;  s__uncultured_actinobacterium	TP	OM	FALSE	FALSE	TRUE
+eb28b1a40981d38e6a0aab251174dae1	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Kineosporiales;  f__Kineosporiaceae;  g__Kineosporia; 	SF	OM	FALSE	FALSE	TRUE
+702af9e944edfd5a1a7f0dce0d566376	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Micrococcales;  f__Microbacteriaceae; ; 	SF	0-5cmOM	TRUE	FALSE	TRUE
+702af9e944edfd5a1a7f0dce0d566376	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Micrococcales;  f__Microbacteriaceae; ; 	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+7ff346973a282aa55de296afdb5d74af	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Micrococcales;  f__Micrococcaceae; ; 	SJ	0-5cm	TRUE	FALSE	FALSE
+fc4d567d1d0828e1fdc36916f0d53d15	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Micromonosporales;  f__Micromonosporaceae;  g__Actinoplanes; 	TP	OM	FALSE	FALSE	TRUE
+9b63aba95bcd3432d7b73099e413525e	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Propionibacteriales;  f__Nocardioidaceae;  g__Nocardioides; 	TP	OM	FALSE	FALSE	TRUE
+2a39f0b75d31d00b3136b2edbe82962e	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Pseudonocardiales;  f__Pseudonocardiaceae;  g__Actinomycetospora; 	TP	OM	FALSE	FALSE	TRUE
+51134a7e94eaa43b755fcefbcae08912	d__Bacteria;  p__Actinobacteriota;  c__Actinobacteria;  o__Pseudonocardiales;  f__Pseudonocardiaceae;  g__Crossiella; 	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+78071b43244e5ebd909b446a937d7c77	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Gaiellales;  f__Gaiellaceae;  g__Gaiella; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+00d0b30327c0d4cedc8738974f330269	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Gaiellales;  f__uncultured;  g__uncultured; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+00d0b30327c0d4cedc8738974f330269	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Gaiellales;  f__uncultured;  g__uncultured; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+922ad5ade914e0bd651cfbbc7f076edb	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Gaiellales;  f__uncultured;  g__uncultured; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+c93a6006f6eb105c8333bfd8dec75106	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Gaiellales;  f__uncultured;  g__uncultured;  s__metagenome	TP	OM	FALSE	FALSE	TRUE
+ca373a4791ebf956b0016d1241bcfc6a	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Solirubrobacterales;  f__67-14;  g__67-14;  s__uncultured_actinobacterium	TP	0-5cm	TRUE	FALSE	FALSE
+f74a23038095f558d209d451c03c9b7e	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Solirubrobacterales;  f__Solirubrobacteraceae;  g__Conexibacter;  s__uncultured_Conexibacteraceae	SF	OM	FALSE	FALSE	TRUE
+f74a23038095f558d209d451c03c9b7e	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Solirubrobacterales;  f__Solirubrobacteraceae;  g__Conexibacter;  s__uncultured_Conexibacteraceae	TP	OM	FALSE	FALSE	TRUE
+cb80be4ac2def4c41b4338fe839038be	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Solirubrobacterales;  f__Solirubrobacteraceae;  g__uncultured; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+d21e65b83b6486df09b738c4f2c5c706	d__Bacteria;  p__Actinobacteriota;  c__Thermoleophilia;  o__Solirubrobacterales;  f__Solirubrobacteraceae;  g__uncultured; 	TP	OM	FALSE	FALSE	TRUE
+dd5d6ed771dadfa88dfc1d00e17888df	d__Bacteria;  p__Armatimonadota;  c__Chthonomonadetes;  o__Chthonomonadales;  f__Chthonomonadaceae;  g__Chthonomonas;  s__uncultured_bacterium	SF	OM	FALSE	FALSE	TRUE
+43c9e86409734b832125a67753d9b6ab	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Chitinophagales;  f__Chitinophagaceae;  g__Puia;  s__metagenome	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+e4ee05bbf4ea42bb7404e560a5998628	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Chitinophagales;  f__Chitinophagaceae;  g__Puia;  s__metagenome	SF	OM	FALSE	FALSE	TRUE
+6a5199f36565fddcec40c197ffa97dfe	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Chitinophagales;  f__Chitinophagaceae;  g__uncultured; 	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+2d66d59115e5f8c6d716f72f4fc26f23	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Chitinophagales;  f__Chitinophagaceae;  g__uncultured;  s__uncultured_Ferruginibacter	SF	OM	FALSE	FALSE	TRUE
+2d66d59115e5f8c6d716f72f4fc26f23	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Chitinophagales;  f__Chitinophagaceae;  g__uncultured;  s__uncultured_Ferruginibacter	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+13ad238ff80cde86ce862692d31236d7	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Sphingobacteriales;  f__Sphingobacteriaceae;  g__Mucilaginibacter; 	SF	OM	FALSE	FALSE	TRUE
+0e55339184fe9a032b6098595b39905f	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Sphingobacteriales;  f__Sphingobacteriaceae;  g__Mucilaginibacter; 	SF	OM	FALSE	FALSE	TRUE
+5f0927bf984f286d11de39a8867c2ac7	d__Bacteria;  p__Bacteroidota;  c__Bacteroidia;  o__Sphingobacteriales;  f__Sphingobacteriaceae;  g__Mucilaginibacter; 	SF	OM	FALSE	FALSE	TRUE
+9a18b3e5b4a12118afc37eda5ffc0464	d__Bacteria;  p__Chloroflexi;  c__AD3;  o__AD3;  f__AD3;  g__AD3;  s__uncultured_bacterium	TP	0-5cm	TRUE	FALSE	FALSE
+a2204aac16893b7d9da312e2f3b59d2f	d__Bacteria;  p__Chloroflexi;  c__AD3;  o__AD3;  f__AD3;  g__AD3;  s__uncultured_Chloroflexi	SF	5-15cm	FALSE	TRUE	FALSE
+5b2529faa44a3679b887ecd91b6b4149	d__Bacteria;  p__Chloroflexi;  c__KD4-96;  o__KD4-96;  f__KD4-96;  g__KD4-96; 	SJ	0-5cm	TRUE	FALSE	FALSE
+7dd6bcd8968a583ae728f34c989d076c	d__Bacteria;  p__Chloroflexi;  c__KD4-96;  o__KD4-96;  f__KD4-96;  g__KD4-96; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+c39e15de7f8295ecfed0969cd53b2126	d__Bacteria;  p__Chloroflexi;  c__KD4-96;  o__KD4-96;  f__KD4-96;  g__KD4-96; 	SJ	5-15cm	FALSE	TRUE	FALSE
+0a403db41b0def2fadaeb309717f3ef7	d__Bacteria;  p__Gemmatimonadota;  c__Gemmatimonadetes;  o__Gemmatimonadales;  f__Gemmatimonadaceae;  g__uncultured; 	SJ	5-15cm	FALSE	TRUE	FALSE
+0a403db41b0def2fadaeb309717f3ef7	d__Bacteria;  p__Gemmatimonadota;  c__Gemmatimonadetes;  o__Gemmatimonadales;  f__Gemmatimonadaceae;  g__uncultured; 	TP	0-5cm	TRUE	FALSE	FALSE
+32935146e1792f6b87dee4909e73bca0	d__Bacteria;  p__Methylomirabilota;  c__Methylomirabilia;  o__Rokubacteriales;  f__Rokubacteriales;  g__Rokubacteriales;  s__uncultured_bacterium	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+cc4fa9a30fb72ffe2170c798191b1aba	d__Bacteria;  p__Myxococcota;  c__Polyangia;  o__Polyangiales;  f__BIrii41;  g__BIrii41;  s__metagenome	SF	OM	FALSE	FALSE	TRUE
+8b09097dfd970dee5f77a5c364c44adb	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__CPla-3_termite_group;  g__CPla-3_termite_group; 	SF	OM	FALSE	FALSE	TRUE
+615bd33c02924e045567c5a2f2e6c5f0	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__CPla-3_termite_group;  g__CPla-3_termite_group;  s__metagenome	TP	OM	FALSE	FALSE	TRUE
+6eeb0b7534f0a4bcb0b26db35f3080d2	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+affb9e5b3625cbfcbe612ea5d4558b9c	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ac05239d928345234c6539b3a6fd96e3	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__Planctomycetales_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ac05239d928345234c6539b3a6fd96e3	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__Planctomycetales_bacterium	SJ	5-15cm	FALSE	TRUE	FALSE
+ac05239d928345234c6539b3a6fd96e3	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__Planctomycetales_bacterium	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+587028418f52f49c7d579b98a996d95a	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+e84205357a065acdfc52b51f9b454efe	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+e84205357a065acdfc52b51f9b454efe	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	0-5cm	TRUE	FALSE	FALSE
+587028418f52f49c7d579b98a996d95a	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	5-15cm	FALSE	TRUE	FALSE
+61509f877dc1e07994d72e1e05f119be	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+a784af96ba200686a106d0c43fb65d01	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+501ad8d73a349eaa81ad472cdb6a3cc3	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+eea19163f36d57a415cc86158eb3c9bf	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+11d92fe454d82973eb99cbc2620b3a88	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_eubacterium	SF	0-5cm	TRUE	FALSE	FALSE
+379cf90be2267e66454a1d773f88487c	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_eubacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+e1a0903babdc5305add0c3a7561467ed	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_eubacterium	SF	5-15cm	FALSE	TRUE	FALSE
+379cf90be2267e66454a1d773f88487c	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_eubacterium	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+ecec680dfa8263d43890af65e2a608cb	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_Planctomycetales	SF	"5-15cm, OM"	FALSE	TRUE	TRUE
+63c3d3620714a70c191f7fae705d524b	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_Planctomycetales	SJ	5-15cm	FALSE	TRUE	FALSE
+ecec680dfa8263d43890af65e2a608cb	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_Planctomycetales	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+e956a425d4d403102f6db6b28ea61d7f	d__Bacteria;  p__Planctomycetota;  c__Phycisphaerae;  o__Tepidisphaerales;  f__WD2101_soil_group;  g__WD2101_soil_group;  s__uncultured_planctomycete	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+af22a0e9f3d0e33040333069b41755ce	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured; 	SF	5-15cm	FALSE	TRUE	FALSE
+c60262a210173d6a6605e298797827d3	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+af22a0e9f3d0e33040333069b41755ce	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured; 	TP	5-15cm	FALSE	TRUE	FALSE
+c60262a210173d6a6605e298797827d3	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured; 	TP	5-15cm	FALSE	TRUE	FALSE
+bc5be9baa6cd6225c9387c43c8c294b6	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured;  s__uncultured_bacterium	TP	0-5cm	TRUE	FALSE	FALSE
+954122fe2924f58e605e25177bef89ea	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured;  s__uncultured_planctomycete	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+109ab78d9a4d2486b8e7e94b9080476c	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured;  s__uncultured_planctomycete	TP	5-15cm	FALSE	TRUE	FALSE
+a7572501f9d1c90ceeabd1d99e46abf9	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Gemmatales;  f__Gemmataceae;  g__uncultured;  s__uncultured_soil	TP	5-15cm	FALSE	TRUE	FALSE
+aaeaf48251cb111740428f41dd173118	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__Aquisphaera; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+aaeaf48251cb111740428f41dd173118	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__Aquisphaera; 	TP	5-15cm	FALSE	TRUE	FALSE
+856c2f52e9359dd3b4ee1dbe2819ccf6	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__Aquisphaera; 	TP	5-15cm	FALSE	TRUE	FALSE
+76477de50a487448b95d148a9d8f2526	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__Singulisphaera; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+8e64eda72e5211d573d405b335679494	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__uncultured;  s__metagenome	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+8e64eda72e5211d573d405b335679494	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__uncultured;  s__metagenome	TP	5-15cm	FALSE	TRUE	FALSE
+ce60a6ff9d1ebb20bc5c414825cd8833	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Isosphaerales;  f__Isosphaeraceae;  g__uncultured;  s__metagenome	TP	OM	FALSE	FALSE	TRUE
+595c8b8e312c12524cc06f2b7fda2a76	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Pirellulales;  f__Pirellulaceae;  g__Pir4_lineage;  s__metagenome	SJ	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+595c8b8e312c12524cc06f2b7fda2a76	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Pirellulales;  f__Pirellulaceae;  g__Pir4_lineage;  s__metagenome	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+96a9a5266277f26897a76cc1483437a2	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Pirellulales;  f__Pirellulaceae;  g__Pir4_lineage;  s__metagenome	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+43e7568ca9f141c79b1104cc520c679f	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Pirellulales;  f__Pirellulaceae;  g__Pirellula;  s__agricultural_soil	SJ	0-5cm	TRUE	FALSE	FALSE
+5c3adc0e3d4a9ed3b695654b4fee0acd	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Planctomycetales;  f__uncultured;  g__uncultured;  s__uncultured_Planctomyces	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+5c3adc0e3d4a9ed3b695654b4fee0acd	d__Bacteria;  p__Planctomycetota;  c__Planctomycetes;  o__Planctomycetales;  f__uncultured;  g__uncultured;  s__uncultured_Planctomyces	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+98681ff2bb6380bb37ee2d4cd82a493c	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__Acidiphilium;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+500794c6e77b9f9f03c3168b168a3206	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__Acidisoma; 	SF	OM	FALSE	FALSE	TRUE
+79bbade0818e9b1532f858c484cfe52e	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__Rhodovastum;  s__uncultured_bacterium	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+66d2b628187f8fa3b00f5c3628cc161d	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__uncultured; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+66d2b628187f8fa3b00f5c3628cc161d	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__uncultured; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+40bb5d1d6d94847da5c4d1a1e8121880	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__uncultured; 	TP	OM	FALSE	FALSE	TRUE
+55beb6d681cbc18642035e17ef775689	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Acetobacterales;  f__Acetobacteraceae;  g__uncultured;  s__uncultured_soil	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+d3843642fb3c77ed98e31a35fa918c92	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Elsterales;  f__uncultured;  g__uncultured; 	TP	5-15cm	FALSE	TRUE	FALSE
+3b2cd93d269ccb3d848124cbe197a98c	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Elsterales;  f__uncultured;  g__uncultured; 	TP	5-15cm	FALSE	TRUE	FALSE
+284c506d6a39ac0fd6464da973bcd0c0	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Elsterales;  f__uncultured;  g__uncultured;  s__uncultured_proteobacterium	TP	5-15cm	FALSE	TRUE	FALSE
+96dccb53652b1339d3b3642a5876d8f1	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Micropepsales;  f__Micropepsaceae;  g__uncultured;  s__metagenome	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+151f25319c8715bb49632a77fb021ad5	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Reyranellales;  f__Reyranellaceae;  g__Reyranella; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+151f25319c8715bb49632a77fb021ad5	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Reyranellales;  f__Reyranellaceae;  g__Reyranella; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+a27686fef323630b42fc66660ad909bf	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Beijerinckiaceae; ; 	TP	OM	FALSE	FALSE	TRUE
+04963a1d71e1bbb0ba42f544a0933cc1	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Beijerinckiaceae;  g__Roseiarcus;  s__uncultured_bacterium	SF	0-5cm	TRUE	FALSE	FALSE
+a9164d01308501b576afa06256a15b0f	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Rhizobiaceae;  g__Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium; 	SF	OM	FALSE	FALSE	TRUE
+a9164d01308501b576afa06256a15b0f	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Rhizobiaceae;  g__Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium; 	SJ	5-15cm	FALSE	TRUE	FALSE
+a9164d01308501b576afa06256a15b0f	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Rhizobiaceae;  g__Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium; 	TP	0-5cm	TRUE	FALSE	FALSE
+6472eb8b1e09f892aca2f23182962903	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae; ; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+6472eb8b1e09f892aca2f23182962903	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae; ; 	SJ	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+6472eb8b1e09f892aca2f23182962903	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae; ; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+d829bee4984f82ffc2453212157caf96	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae;  g__Bradyrhizobium; 	SJ	5-15cm	FALSE	TRUE	FALSE
+d829bee4984f82ffc2453212157caf96	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae;  g__Bradyrhizobium; 	TP	5-15cm	FALSE	TRUE	FALSE
+b71bf2a5e0b0256df394ba6f20181167	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae;  g__uncultured; 	SF	5-15cm	FALSE	TRUE	FALSE
+c6f96c0b79d9a6b82fb53a5518bce977	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae;  g__uncultured; 	TP	0-5cm	TRUE	FALSE	FALSE
+ff455197e5f668acf0c4aaee9bd0812f	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Rhizobiales;  f__Xanthobacteraceae;  g__uncultured; 	TP	5-15cm	FALSE	TRUE	FALSE
+2d16d001e21717f960cf771ae879b1dd	d__Bacteria;  p__Proteobacteria;  c__Alphaproteobacteria;  o__Sphingomonadales;  f__Sphingomonadaceae;  g__Sphingomonas; 	TP	OM	FALSE	FALSE	TRUE
+87f80e1b75c17bba760e92b1f6969094	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__A21b;  g__A21b; 	SF	5-15cm	FALSE	TRUE	FALSE
+87f80e1b75c17bba760e92b1f6969094	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__A21b;  g__A21b; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+c7c02c07fb28c8730768bb76cafad3fe	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__Burkholderiaceae;  g__Burkholderia-Caballeronia-Paraburkholderia; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+c7c02c07fb28c8730768bb76cafad3fe	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__Burkholderiaceae;  g__Burkholderia-Caballeronia-Paraburkholderia; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+f8b8173289056f3442317b4669562a60	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__TRA3-20;  g__TRA3-20;  s__metagenome	SJ	0-5cm	TRUE	FALSE	FALSE
+d3908bba9d5a881e43f33ddab0213e6f	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Burkholderiales;  f__TRA3-20;  g__TRA3-20;  s__uncultured_beta	TP	0-5cm	TRUE	FALSE	FALSE
+7876a5906e5be58d068237cd0b6ebb3c	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Gammaproteobacteria_Incertae_Sedis;  f__Unknown_Family;  g__Acidibacter; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+7876a5906e5be58d068237cd0b6ebb3c	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Gammaproteobacteria_Incertae_Sedis;  f__Unknown_Family;  g__Acidibacter; 	TP	5-15cm	FALSE	TRUE	FALSE
+a1087281564dff44783f3b0247bb3dfa	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__Gammaproteobacteria_Incertae_Sedis;  f__Unknown_Family;  g__Acidibacter;  s__uncultured_bacterium	SF	5-15cm	FALSE	TRUE	FALSE
+157a7c6518a3b3e70daf62add4531002	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+197cac25851f42ea0811ba6eb3a4d044	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+b0739a7403f8d272bd84c838e0b14ddd	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+b7210d2bf84501b2a1e826808465dfed	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	SF	0-5cm	TRUE	FALSE	FALSE
+d5a1c10c46a0d737fc72a3fc23269650	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+157a7c6518a3b3e70daf62add4531002	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	TP	5-15cm	FALSE	TRUE	FALSE
+197cac25851f42ea0811ba6eb3a4d044	d__Bacteria;  p__Proteobacteria;  c__Gammaproteobacteria;  o__WD260;  f__WD260;  g__WD260;  s__uncultured_bacterium	TP	5-15cm	FALSE	TRUE	FALSE
+29abf79937c29f1d4d7d5739225d3b22	d__Bacteria;  p__RCP2-54;  c__RCP2-54;  o__RCP2-54;  f__RCP2-54;  g__RCP2-54;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+29abf79937c29f1d4d7d5739225d3b22	d__Bacteria;  p__RCP2-54;  c__RCP2-54;  o__RCP2-54;  f__RCP2-54;  g__RCP2-54;  s__uncultured_bacterium	TP	5-15cm	FALSE	TRUE	FALSE
+4ed28f7be92e2e11a3e33683e302ccd4	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+adb802d4ddc711e8b083e72e05afc772	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+b0546a8c6a38415c52d2dc916319d3fd	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SF	5-15cm	FALSE	TRUE	FALSE
+2d51eee954d47bb2f71665bd2691bb94	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+4ed28f7be92e2e11a3e33683e302ccd4	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+604636abb30a5675c8c38a5f2e2e418b	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+79fabc1f8c9b43991bd218020dc7f5a1	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+7c2811bbf4c76ca806ce4178a5ecb7fe	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+7ef6a6f0dfd650a93138c85eebf1b5c0	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+b0546a8c6a38415c52d2dc916319d3fd	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+e8accbbab64dba2fe98edb7072796cc5	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+2d51eee954d47bb2f71665bd2691bb94	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+35bcf0206288fb49b7b43480dbb5afcc	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	0-5cm	TRUE	FALSE	FALSE
+4ed28f7be92e2e11a3e33683e302ccd4	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+abae3771d5f40267f682b62f003a3d9b	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+ae4d03292a351ceb72569100d25a291c	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	0-5cm	TRUE	FALSE	FALSE
+e8accbbab64dba2fe98edb7072796cc5	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+fa67e0725395e99d85af04956443c07d	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	0-5cm	TRUE	FALSE	FALSE
+b0546a8c6a38415c52d2dc916319d3fd	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	5-15cm	FALSE	TRUE	FALSE
+95da071fb3cd4567b09e95ef22b77859	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	5-15cm	FALSE	TRUE	FALSE
+57cb542c918c06831e9b1faa9f13c04f	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter; 	TP	OM	FALSE	FALSE	TRUE
+c1a919c0a7f5072418d76d102ba6f037	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter;  s__uncultured_Prosthecobacter	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+95e7e390c3cdb823bd6aef8cae5786d1	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter;  s__uncultured_Verrucomicrobia	SJ	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+6b92eb6baa133060382597c30765828d	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter;  s__uncultured_Verrucomicrobia	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+95e7e390c3cdb823bd6aef8cae5786d1	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Candidatus_Udaeobacter;  s__uncultured_Verrucomicrobia	TP	5-15cm	FALSE	TRUE	FALSE
+496905bc7a6adfac6a783af4aca2e9e2	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Chthoniobacter; 	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+65c3268f54fb5c5e0daac1bc159bb594	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Chthoniobacter; 	SF	OM	FALSE	FALSE	TRUE
+c42d4cca470e8f087f5c34f87343909e	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Chthoniobacter;  s__bacterium_Ellin506	TP	"0-5cm, OM"	TRUE	FALSE	TRUE
+ed20cdef613605a9d1fe98d8005e91fa	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__Chthoniobacter;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+5059586d0bae0529e70b213033b8d554	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Chthoniobacteraceae;  g__LD29;  s__uncultured_bacterium	TP	OM	FALSE	FALSE	TRUE
+bace98f852162dd988162d240c66582d	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ca24cf1f0863dd16eb8dcee545c92d1e	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+2a3cd196dd8abad166c3ada50c1fefd2	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	SF	OM	FALSE	FALSE	TRUE
+ba8955d59a40e8ec83577e692ffa7d92	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	SJ	5-15cm	FALSE	TRUE	FALSE
+7c5e43b67baf767b7e3dbfc961596180	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	TP	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+ca24cf1f0863dd16eb8dcee545c92d1e	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	TP	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+bace98f852162dd988162d240c66582d	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_bacterium	TP	5-15cm	FALSE	TRUE	FALSE
+2851d4f4db34365d076ca6125dd848c4	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Chthoniobacterales;  f__Xiphinematobacteraceae;  g__Candidatus_Xiphinematobacter;  s__uncultured_Verrucomicrobia	SF	OM	FALSE	FALSE	TRUE
+5f721b0af0bafd1ff21eb1c6140c4d0f	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Methylacidiphilales;  f__Methylacidiphilaceae;  g__uncultured;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm"	TRUE	TRUE	FALSE
+cd81cf2e9cf49ed204a338825c537fb3	d__Bacteria;  p__Verrucomicrobiota;  c__Verrucomicrobiae;  o__Methylacidiphilales;  f__Methylacidiphilaceae;  g__uncultured;  s__uncultured_bacterium	SF	"0-5cm, 5-15cm, OM"	TRUE	TRUE	TRUE
+00de18386af8215012d546ccb03a69c3	d__Bacteria;  p__WPS-2;  c__WPS-2;  o__WPS-2;  f__WPS-2;  g__WPS-2;  s__uncultured_bacterium	SF	"5-15cm, OM"	FALSE	TRUE	TRUE

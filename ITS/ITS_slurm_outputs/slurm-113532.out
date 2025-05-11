@@ -1,0 +1,3 @@
+Saved FeatureTable[Frequency] to: table-ITS.qza
+Saved FeatureData[Sequence] to: rep-seqs-ITS.qza
+Saved SampleData[DADA2Stats] to: denoising-stats-ITS.qza

@@ -1,0 +1,55 @@
+QIIME is caching your current deployment for improved performance. This may take a few moments and should only happen once per deployment.
+Usage: qiime diversity alpha-rarefaction [OPTIONS]
+
+  Generate interactive alpha rarefaction curves by computing rarefactions
+  between `min_depth` and `max_depth`. The number of intermediate depths to
+  compute is controlled by the `steps` parameter, with n `iterations` being
+  computed at each rarefaction depth. If sample metadata is provided,
+  samples may be grouped based on distinct values within a metadata column.
+
+Inputs:
+  --i-table ARTIFACT FeatureTable[Frequency]
+                          Feature table to compute rarefaction curves from.
+                                                                    [required]
+  --i-phylogeny ARTIFACT  Optional phylogeny for phylogenetic metrics.
+    Phylogeny[Rooted]                                               [optional]
+Parameters:
+  --p-max-depth INTEGER   The maximum rarefaction depth. Must be greater than
+    Range(1, None)        min-depth.                                [required]
+  --p-metrics TEXT... Choices('robbins', 'ace', 'chao1',
+    'michaelis_menten_fit', 'simpson', 'doubles', 'fisher_alpha',
+    'gini_index', 'enspie', 'faith_pd', 'mcintosh_d', 'brillouin_d',
+    'shannon', 'mcintosh_e', 'dominance', 'margalef', 'heip_e', 'lladser_pe',
+    'menhinick', 'singles', 'goods_coverage', 'pielou_e', 'berger_parker_d',
+    'observed_features', 'simpson_e')
+                          The metrics to be measured. By default computes
+                          observed_features, shannon, and if phylogeny is
+                          provided, faith_pd.                       [optional]
+  --m-metadata-file METADATA...
+    (multiple arguments   The sample metadata.
+     will be merged)                                                [optional]
+  --p-min-depth INTEGER   The minimum rarefaction depth.
+    Range(1, None)                                                [default: 1]
+  --p-steps INTEGER       The number of rarefaction depths to include between
+    Range(2, None)        min-depth and max-depth.               [default: 10]
+  --p-iterations INTEGER  The number of rarefied feature tables to compute at
+    Range(1, None)        each step.                             [default: 10]
+Outputs:
+  --o-visualization VISUALIZATION
+                                                                    [required]
+Miscellaneous:
+  --output-dir PATH       Output unspecified results to a directory
+  --verbose / --quiet     Display verbose output to stdout and/or stderr
+                          during execution of this action. Or silence output
+                          if execution is successful (silence is golden).
+  --examples              Show usage examples and exit.
+  --citations             Show citations and exit.
+  --help                  Show this message and exit.
+
+                  There were some problems with the command:                  
+ (1/3) Invalid value for '--i-table': Expected an artifact of at least type
+  FeatureTable[Frequency]. An artifact of type FeatureData[Taxonomy] was
+  provided.
+ (2/3) Missing option '--p-max-depth'.
+ (3/3) Missing option '--o-visualization'.  ("--output-dir" may also be used)
+/var/spool/slurmd/job113748/slurm_script: line 14: --i-phylogeny: command not found

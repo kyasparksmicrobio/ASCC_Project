@@ -1,0 +1,3 @@
+"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
+"d27b07c3296662644178e00972cf0baa","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Cladophialophora","f__Herpotrichiellaceae",-4.23875735574281,1.43942589686196e-09,8.84181068814076,"SF Enriched"
+"72c8401fff71a78b00b765b8085a3667","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae","f__Herpotrichiellaceae",3.30117218418784,1.75243561467917e-09,8.75635792925472,"TP Enriched"

@@ -1,0 +1,8 @@
+"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
+"b942939a6a47b69e02cfda4e900df054","k__Fungi; p__Basidiomycota; c__Agaricomycetes; o__Atheliales; f__Pilodermataceae; g__Piloderma; s__Piloderma_olivaceum","f__Pilodermataceae",-1.63838327632199,7.0177817495575e-09,8.15380014230994,"SF Enriched"
+"12410d7307e6e4dbdae768c5c47b748d","k__Fungi",NA,-2.31178004305566,2.48245902036938e-08,7.60511791196625,"SF Enriched"
+"e4365801cf6b3826cb07334e580e8d0d","k__Fungi; p__Basidiomycota; c__Agaricomycetes; o__Atheliales; f__Pilodermataceae; g__Piloderma","f__Pilodermataceae",-1.47526937323282,1.33983447264727e-07,6.87294885242349,"SF Enriched"
+"88723bdf60b8d6f640bc84615e4089e1","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__unidentified; g__unidentified; s__Chaetothyriales_sp","f__unidentified",-2.87149649609131,1.33983447264727e-07,6.87294885242349,"SF Enriched"
+"d27b07c3296662644178e00972cf0baa","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Cladophialophora","f__Herpotrichiellaceae",-3.84742744147644,1.51482741364221e-07,6.81963684410718,"SF Enriched"
+"5356bdf67b724d086dd57f1ab7ab8d29","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Cladophialophora; s__Cladophialophora_sylvestris","f__Herpotrichiellaceae",-1.82617268907478,2.06949130407693e-06,5.68413639414814,"SF Enriched"
+"e7295cb1bcee5aecc048075989cd1e39","k__Fungi; p__Basidiomycota; c__Agaricomycetes; o__Russulales; f__Russulaceae; g__Russula; s__Russula_griseascens","f__Russulaceae",-2.14246736434611,3.75224003506765e-06,5.42570938709177,"SF Enriched"

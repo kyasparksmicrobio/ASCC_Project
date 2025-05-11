@@ -1,0 +1,149 @@
+Last login: Mon Jul 29 22:57:51 on ttys001
+(base) kyasparks@MacBook-Pro-358 ~ % r
+bash
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+bash-3.2$ q()
+> 
+bash-3.2$ source ~/.zshrc
+(base) bash-3.2$ conda activate r-console
+(r-console) bash-3.2$ alias r="/usr/local/Caskroom/miniforge/base/envs/r-console/bin/radian"
+(r-console) bash-3.2$ r
+bash: /usr/local/Caskroom/miniforge/base/envs/r-console/bin/radian: No such file or directory
+(r-console) bash-3.2$ which radian
+/opt/homebrew/Caskroom/miniforge/base/envs/r-console/bin/radian
+(r-console) bash-3.2$ alias r="/opt/homebrew/Caskroom/miniforge/base/envs/r-console/bin/radian"
+(r-console) bash-3.2$ r
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Platform: aarch64-apple-darwin20 (64-bit)
+
+r$> options(vsc.rstudioapi = TRUE)
+
+r$> chsh -s /bin/zsh
+Error: object 'chsh' not found
+
+
+[1]+  Stopped                 /opt/homebrew/Caskroom/miniforge/base/envs/r-console/bin/radian
+(r-console) bash-3.2$ options(vsc.rstudioapi = TRUE)
+bash: syntax error near unexpected token `vsc.rstudioapi'
+(r-console) bash-3.2$  usethis::edit_r_profile()
+> 
+(r-console) bash-3.2$ usethis::edit_r_profile()
+> ç
+(r-console) bash-3.2$ code ~/.Rprofile
+bash: code: command not found
+(r-console) bash-3.2$ zsh
+(base) kyasparks@MacBook-Pro-358 ~ % options(vsc.rstudioapi = TRUE)
+zsh: unknown file attribute: v
+(base) kyasparks@MacBook-Pro-358 ~ % bash
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+bash-3.2$ source ~/.zshrc
+(base) bash-3.2$ conda activate r-console
+(r-console) bash-3.2$ install.packages("usethis")
+bash: syntax error near unexpected token `"usethis"'
+(r-console) bash-3.2$ usethis::edit_r_profile()
+> 
+(r-console) bash-3.2$ code ~/.radian_profile
+bash: code: command not found
+(r-console) bash-3.2$ zsh
+(base) kyasparks@MacBook-Pro-358 ~ % activate conds r-console
+
+ArgumentError: activate does not accept more than one argument:
+['conds', 'r-console']
+
+
+(base) kyasparks@MacBook-Pro-358 ~ % code ~/.radian_profile
+zsh: command not found: code
+(base) kyasparks@MacBook-Pro-358 ~ % code ~/.radian_profile
+zsh: command not found: code
+(base) kyasparks@MacBook-Pro-358 ~ % bash
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+bash-3.2$ code ~/.radian_profile
+bash: code: command not found
+bash-3.2$ source ~/.radian_profile
+bash: /Users/kyasparks/.radian_profile: No such file or directory
+bash-3.2$ r
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> 
+> code ~/.radian_profile
+Error: unexpected '/' in "code ~/"
+> q()
+Save workspace image? [y/n/c]: n
+bash-3.2$ source ~/.zshrc
+(base) bash-3.2$ r
+
+R version 4.4.1 (2024-06-14) -- "Race for Your Life"
+Copyright (C) 2024 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin20
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> usethis::edit_r_profile()
+☐ Modify /Users/kyasparks/.Rprofile.
+
+options(
+    radian.insert_new_line = FALSE,
+    radian.escape_key_map = list(
+        list(key = "-", value = " <- "),
+        list(key = "m", value = " %>% ")
+    )
+)
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+~                                                                               
+

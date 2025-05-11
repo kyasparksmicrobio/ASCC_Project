@@ -1,0 +1,343 @@
+---
+title: "Maaslin_StackedBar_relabund_depth"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+** All Depths: State Forest **
+
+```{r}
+otus <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_SF_")) %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:81)
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+
+full_table <- inner_join(taxa, otus, by = "OTUID")
+full_table2 <- inner_join(full_table, metadata, by =c("samples"="Sample_ID"))
+
+full_table2 <- full_table2 %>% 
+  pivot_wider(names_from = "samples", values_from = "rel_abund")
+
+full_acido1 <- full_table2 %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 11:90)%>% 
+  select(3, 9:12) %>% 
+  group_by(Depth,samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido1$occurence <- rowSums(full_acido1[c(3:82)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres1 <- full_acido1 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 3:82) %>% 
+  mutate(Site = "SF")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres1 %>%
+  group_by(Site, Depth, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for State Forest Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for State Forest Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+** All Depths, TP only **
+
+```{r}
+otus2 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_TP_")) %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:87)
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+
+full_table3 <- inner_join(taxa, otus2, by = "OTUID")
+full_table3 <- inner_join(full_table3, metadata, by =c("samples"="Sample_ID"))
+
+full_table3 <- full_table3 %>% 
+  pivot_wider(names_from = "samples", values_from = "rel_abund")
+
+full_acido3 <- full_table3 %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 11:96)%>% 
+  select(3, 9:12) %>% 
+  group_by(Depth,samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido3$occurence <- rowSums(full_acido3[c(3:88)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres3 <- full_acido3 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 3:88) %>% 
+  mutate(Site = "TP")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres3 %>%
+  group_by(Site, Depth, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for Taylor Park Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for Taylor Park Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+
+** All Depths, SJ only **
+
+```{r}
+otus3 <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_feature_table_Maaslin_combo.xlsx", sheet = "ALL")%>%
+  select(3,contains("_SJ_")) %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:138)
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+
+full_table4 <- inner_join(taxa, otus3, by = "OTUID")
+full_table4 <- inner_join(full_table4, metadata, by =c("samples"="Sample_ID"))
+
+full_table4 <- full_table4 %>% 
+  pivot_wider(names_from = "samples", values_from = "rel_abund")
+
+full_acido4 <- full_table4 %>% 
+  pivot_longer(names_to = "samples", values_to = "counts", 11:147)%>% 
+  select(3, 9:12) %>% 
+  group_by(Depth,samples, Phylum) %>% 
+  summarise(sum = sum(counts))%>% 
+  filter(sum>0) %>% 
+  pivot_wider(names_from = "samples", values_from = "sum")
+
+
+full_acido4$occurence <- rowSums(full_acido4[c(3:138)] > 0, na.rm=TRUE)
+
+```
+
+```{r}
+full_acido_pres4 <- full_acido4 %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund", 3:138) %>% 
+  mutate(Site = "SJ")
+```
+
+```{r}
+combo_all_avg <- full_acido_pres4 %>%
+  group_by(Site, Depth, Phylum) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for San Juan Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x=Depth, y=avg_rel_abund, fill=Phylum))+
+  geom_bar(stat="identity", position = "dodge") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, size = )) +
+
+  # Add titles, axis labels, and captions
+  labs(title = "Average Relative Abundance of Phyla by Depth for San Juan Samples",
+       subtitle = "Discriminant Taxa for Combined Sites and Depths",
+       x = "Site", 
+       y = "Relative Abundance (%)",
+       color = "Phylum") +
+  
+  # Customize the axis and title text appearance
+  theme(
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text.x = element_text(size = 10),
+    axis.text.y = element_text(size = 10),
+    
+    # Customize legend appearance
+    legend.title = element_text(size = 12),
+    legend.text = element_text(size = 10)
+  )
+```

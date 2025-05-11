@@ -1,0 +1,8 @@
+There was an issue with loading the file /home/projects-wilkins-2/ASCC/summer_2024/ITS/ASCC_ITS_barcodes3.txt as metadata:
+
+  Metadata file path doesn't exist, or the path points to something other than a file. Please check that the path exists, has read permissions, and points to a regular file (not a directory): /home/projects-wilkins-2/ASCC/summer_2024/ITS/ASCC_ITS_barcodes3.txt
+
+  There may be more errors present in the metadata file. To get a full report, sample/feature metadata files can be validated with Keemei: https://keemei.qiime2.org
+
+  Find details on QIIME 2 metadata requirements here: https://docs.qiime2.org/2021.2/tutorials/metadata/
+

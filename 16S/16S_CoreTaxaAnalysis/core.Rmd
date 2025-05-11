@@ -1,0 +1,518 @@
+---
+title: "core taxa heatmap rel abund"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+library(grid)
+library(dplyr)
+library(vegan)
+library(Hmisc)
+library(readxl)
+library(viridis)
+```
+
+```{r}
+core_taxa_data_70_16S <- read_csv("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa70_16S_ASCC.csv")
+
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+```
+
+```{r}
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_16S, by =c("X"="OTUID"))
+```
+
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Site, X) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(X, Site, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(X,Site, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+ALL:
+
+```{r}
+combo_all_avg$Site <- factor(combo_all_avg$Site, levels=c('SF','TP','SJ'))
+```
+
+```{r}
+
+ggplot(combo_all_avg, aes(x = Site, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_distiller(
+    palette = "Spectral",          # Choose a continuous Brewer palette
+    direction = 1,               # Set color direction; 1 = default, -1 = reverse
+    limits = c(0, 2.3),          # Set limits of the scale
+    breaks = seq(0, 2.3, by = 0.5),  # Set breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the colorcommand:r.plot.showIndex?%5Bnull%2C%224%22%5D scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Site, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Site, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+core_taxa_data_70_5_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx",sheet = "d70_shallow")
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_5_16S, by =c("OTUID"="OTUID"))
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Site, OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Site, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Site, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+0-5cm
+
+```{r}
+ggplot(combo_all_avg, aes(x = Site, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,3),  # Set the limits of the scale
+    breaks = seq(0, 3, by = 1),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Site, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 3),  # Set the limits of the scale
+    breaks = seq(0, 3, by = 1),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Site, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 3),  # Set the limits of the scale
+    breaks = seq(0, 3, by = 1),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+
+```{r}
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+core_taxa_data_70_SF_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx",sheet = "d70_SF")
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_SF_16S, by =c("OTUID"="OTUID"))
+
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Depth,OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Depth, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Depth, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+SF:
+
+```{r}
+ggplot(combo_all_avg, aes(x = Depth, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,1),  # Set the limits of the scale
+    breaks = seq(0, 1, by = .25),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Depth, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 1),  # Set the limits of the scale
+    breaks = seq(0, 1, by = .25),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Depth, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2),  # Set the limits of the scale
+    breaks = seq(0, 2, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+core_taxa_data_70_TP_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx",sheet = "d70_TP")
+
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_TP_16S, by =c("OTUID"="OTUID"))
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Depth, OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Depth, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Depth, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+TP:
+
+```{r}
+ggplot(combo_all_avg, aes(x = Depth, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,1.9),  # Set the limits of the scale
+    breaks = seq(0, 1.9, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Depth, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 1.9),  # Set the limits of the scale
+    breaks = seq(0, 1.9, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Depth, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 1.9),  # Set the limits of the scale
+    breaks = seq(0, 1.9, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+
+```{r}
+
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+core_taxa_data_70_SJ_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx", sheet = "d70_SJ")
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_SJ_16S, by =c("OTUID"="OTUID"))
+
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Depth, OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Depth, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Depth, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+SJ:
+
+```{r}
+ggplot(combo_all_avg, aes(x = Depth, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,1.4),  # Set the limits of the scale
+    breaks = seq(0, 1.4, by = .25),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Depth, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 1.4),  # Set the limits of the scale
+    breaks = seq(0, 1.4, by = .25),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Depth, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 1.4),  # Set the limits of the scale
+    breaks = seq(0, 1.4, by = .25),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Depth", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+5-15cm:
+
+```{r}
+core_taxa_data_70_15_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx",sheet = "d70_deep")
+
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_15_16S, by =c("OTUID"="OTUID"))
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Site, OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Site, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Site, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+OM:
+
+```{r}
+ggplot(combo_all_avg, aes(x = Site, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Site, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Site, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+core_taxa_data_70_OM_16S <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_CoreTaxaAnalysis/CoreTaxa_70_16S_ASCC.xlsx",sheet = "d70_OM")
+
+merged <- read.csv("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem_RELABUND.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "rel_abund",2:304)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+
+
+data_meta <- inner_join(merged, metadata, by =c("samples"="Sample_ID"))
+data_meta_taxa <- inner_join(data_meta, core_taxa_data_70_OM_16S, by =c("OTUID"="OTUID"))
+
+```
+
+```{r}
+combo_all_avg <- data_meta_taxa %>%
+  group_by(Phyla, Site, OTUID) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>% 
+  ungroup()
+
+combo_all_avg2 <- data_meta_taxa %>%
+  group_by(OTUID, Site, Class) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+
+combo_all_avg3 <- data_meta_taxa %>%
+  group_by(OTUID,Site, Order) %>%
+  summarise(avg_rel_abund = mean(rel_abund, na.rm = TRUE)) %>%
+  ungroup()
+```
+
+
+```{r}
+ggplot(combo_all_avg, aes(x = Site, y = Phyla, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0,2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Phyla") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg2, aes(x = Site, y = Class, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Class") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(combo_all_avg3, aes(x = Site, y = Order, fill = avg_rel_abund)) +
+  geom_tile() +
+  scale_fill_gradientn(
+    colors = c("purple", "cyan", "lawngreen","yellow"),  # Customize colors
+    limits = c(0, 2.3),  # Set the limits of the scale
+    breaks = seq(0, 2.3, by = .5),  # Set the breaks for the color scale
+    name = "Relative Abundance (%)"  # Label for the color scale
+  ) +
+  theme_minimal() +
+  labs(title = "Core Taxa Heatmap", x = "Site", y = "Order") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+

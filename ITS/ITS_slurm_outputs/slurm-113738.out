@@ -1,0 +1,54 @@
+Usage: qiime diversity alpha-rarefaction [OPTIONS]
+
+  Generate interactive alpha rarefaction curves by computing rarefactions
+  between `min_depth` and `max_depth`. The number of intermediate depths to
+  compute is controlled by the `steps` parameter, with n `iterations` being
+  computed at each rarefaction depth. If sample metadata is provided,
+  samples may be grouped based on distinct values within a metadata column.
+
+Inputs:
+  --i-table ARTIFACT FeatureTable[Frequency]
+                          Feature table to compute rarefaction curves from.
+                                                                    [required]
+  --i-phylogeny ARTIFACT  Optional phylogeny for phylogenetic metrics.
+    Phylogeny[Rooted]                                               [optional]
+Parameters:
+  --p-max-depth INTEGER   The maximum rarefaction depth. Must be greater than
+    Range(1, None)        min-depth.                                [required]
+  --p-metrics TEXT... Choices('pielou_e', 'berger_parker_d', 'enspie',
+    'menhinick', 'brillouin_d', 'shannon', 'dominance', 'mcintosh_d',
+    'doubles', 'observed_features', 'gini_index', 'lladser_pe', 'heip_e',
+    'singles', 'simpson', 'robbins', 'fisher_alpha', 'ace', 'chao1',
+    'faith_pd', 'michaelis_menten_fit', 'simpson_e', 'mcintosh_e',
+    'goods_coverage', 'margalef')
+                          The metrics to be measured. By default computes
+                          observed_features, shannon, and if phylogeny is
+                          provided, faith_pd.                       [optional]
+  --m-metadata-file METADATA...
+    (multiple arguments   The sample metadata.
+     will be merged)                                                [optional]
+  --p-min-depth INTEGER   The minimum rarefaction depth.
+    Range(1, None)                                                [default: 1]
+  --p-steps INTEGER       The number of rarefaction depths to include between
+    Range(2, None)        min-depth and max-depth.               [default: 10]
+  --p-iterations INTEGER  The number of rarefied feature tables to compute at
+    Range(1, None)        each step.                             [default: 10]
+Outputs:
+  --o-visualization VISUALIZATION
+                                                                    [required]
+Miscellaneous:
+  --output-dir PATH       Output unspecified results to a directory
+  --verbose / --quiet     Display verbose output to stdout and/or stderr
+                          during execution of this action. Or silence output
+                          if execution is successful (silence is golden).
+  --examples              Show usage examples and exit.
+  --citations             Show citations and exit.
+  --help                  Show this message and exit.
+
+                  There were some problems with the command:                  
+ (1/2) Invalid value for '--i-table': '/home/projects-wilkins-2/ASCC/summer_20
+  24/16S/taxonomy/taxonomy_table_silva138_16S_no_chloro.qza' is not a QIIME 2
+  Artifact (.qza)
+ (2/2) Invalid value for '--i-phylogeny': '/home/projects-
+  wilkins-2/ASCC/summer_2024/16S/tree/rooted-tree.qza' is not a QIIME 2
+  Artifact (.qza)

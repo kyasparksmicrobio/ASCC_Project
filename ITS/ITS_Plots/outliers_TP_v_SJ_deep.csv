@@ -1,0 +1,5 @@
+"OTUID","taxonomy","LabelText","coef","qval","log_q","Enrichment"
+"2a52836cd32669f2fbe6c09e786a7f74","k__Fungi; p__Mortierellomycota; c__Mortierellomycetes; o__Mortierellales; f__Mortierellaceae","f__Mortierellaceae",4.60892554488064,2.10326737131336e-13,12.677105515471,"TP Enriched"
+"cc116080ed11666e003af169a31bf77b","k__Fungi; p__Basidiomycota; c__Tremellomycetes; o__Filobasidiales; f__Piskurozymaceae; g__Solicoccozyma; s__Solicoccozyma_aeria","f__Piskurozymaceae",-3.98240613708289,1.18403866589948e-09,8.92663411508557,"SJ Enriched"
+"9038eaddace005315f06a11e8208395a","k__Fungi; p__Ascomycota; c__Leotiomycetes; o__Helotiales; f__Mollisiaceae; g__Phialocephala","f__Mollisiaceae",2.59738505511582,1.58918936939141e-09,8.7988243487451,"TP Enriched"
+"2be07a8d72925262126f2a02c52dddea","k__Fungi; p__Ascomycota; c__Eurotiomycetes; o__Chaetothyriales; f__Herpotrichiellaceae; g__Exophiala; s__Exophiala_radicis","f__Herpotrichiellaceae",-3.23612012177499,2.75826410735919e-09,8.55936415191028,"SJ Enriched"

@@ -1,0 +1,474 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Library/Mobile Documents/com~apple~CloudDocs/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/Maaslin_allresults_COMBINED.xlsx", sheet = "SF v TP")
+```
+
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "shallow sf v sj")
+```
+
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "shallow sj v tp")
+
+```
+
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "deep sf v tp")
+
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "deep sf v sj")
+
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "deep sj v tp")
+
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "om sf v tp")
+
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "om sf v sj")
+
+```
+
+```{r}
+data <- read_excel("/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/other spreadsheets/Book1.xlsx", sheet = "om sj v tp")
+
+```
+
+
+
+```{r}
+data_filtered <- data %>% 
+  #filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q > 5 | abs(coef) > 5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q > 9 | abs(coef) > 5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q > 9 | abs(coef) > 5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SJ Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q > 3 | abs(coef) > 3, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q > 12 | abs(coef) > 4, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q >9 | abs(coef) > 3.5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SJ Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q >6 | abs(coef) > 3.5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q >6 | abs(coef) > 3.5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SF Enriched",
+      coef < 0 ~ "SJ Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+data_filtered <- data %>% 
+  filter(qval < 0.05) %>%  # Filter for significant points
+  mutate(
+    # Extract family, genus, and species if they exist
+    taxonomy_simplified = str_extract(taxonomy, "(f__[^;]+(; g__[^;]+(; s__[^;]+)?)?)$"), 
+    label = ifelse(log_q >8 | abs(coef) > 3.5, taxonomy_simplified, ""), # Label extreme outliers
+    Enrichment = case_when(
+      coef > 0 ~ "SJ Enriched",
+      coef < 0 ~ "TP Enriched",
+      TRUE ~ "No Change"
+    )
+  )
+
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "0-5 cm: Volcano Plot of Enrichment (SF vs TP)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "SJ Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "0-5 cm: Volcano Plot of Enrichment (SF vs SJ)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SJ Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "0-5 cm: Volcano Plot of Enrichment (SJ vs TP)"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "5-15 cm: Volcano Plot of Enrichment (SF vs TP)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "SJ Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "5-15 cm: Volcano Plot of Enrichment (SF vs SJ)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SJ Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "5-15 cm: Volcano Plot of Enrichment (SJ vs TP)"
+  ) +
+  theme_minimal()
+```
+
+
+
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "OM: Volcano Plot of Enrichment (SF vs TP)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SF Enriched" = "blue", "SJ Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "OM: Volcano Plot of Enrichment (SF vs SJ)"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+
+# Plot
+ggplot(data_filtered, aes(x = coef, y = log_q, color = Enrichment)) +
+  geom_point(size = 3, alpha = 0.8) +
+  geom_vline(xintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_hline(yintercept = -log10(0.05), linetype = "dotted", color = "gray50") +
+  geom_text_repel(
+    aes(label = label), 
+    size = 3, 
+    box.padding = 0.8,        # Adjust padding around labels
+    point.padding = 0.5,      # Adjust around points
+    segment.color = "gray50", # Arrow color
+    segment.size = 0.5,       # Arrow thickness
+    max.overlaps = Inf,       # Allow all labels for filtered data
+    arrow = arrow(length = unit(0.02, "npc"))
+  ) +
+  scale_color_manual(
+    values = c("SJ Enriched" = "blue", "TP Enriched" = "red", "No Change" = "gray")
+  ) +
+  labs(
+    x = "Coefficient",
+    y = "-log10(q-value)",
+    color = "Enrichment",
+    title = "OM: Volcano Plot of Enrichment (SJ vs TP)"
+  ) +
+  theme_minimal()
+```

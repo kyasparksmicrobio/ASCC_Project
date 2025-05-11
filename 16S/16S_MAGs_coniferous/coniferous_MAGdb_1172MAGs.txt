@@ -1,0 +1,1174 @@
+Name	fire	year_post_burn	severity	Completeness	Contamination	MAG_size_bp	numb_contigs	MAG_FULL_TAX
+BV_3control_bin.2	beaver	5	Control	90.53	4.13	7889847	93	d__Bacteria;p__Cyanobacteriota;c__Vampirovibrionia;o__Obscuribacterales;f__Obscuribacteraceae;g__;s__
+BV_3control_prok_bin.13	beaver	5	Control	97.12	1.64	6522188	177	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__;s__
+BV_3control_prok_bin.23	beaver	5	Control	97.71	0.69	5313292	306	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__ATCC43930;f__Stellaceae;g__;s__
+BV_3control_prok_bin.3	beaver	5	Control	87.79	0.92	2933727	113	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__Palsa-875;s__
+BV_3control_prok_bin.9	beaver	5	Control	80.28	6.53	2975414	550	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+BV_C1_S2_bin.25	beaver	5	Control	98.88	2.78	4958966	98	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__PSRF01 sp030840675
+BV_C1_S2_bin.35	beaver	5	Control	98.54	1.03	2701315	103	d__Bacteria;p__Actinomycetota;c__UBA4738;o__CADDZG01;f__WHSQ01;g__JAUJNU01;s__
+BV_C1_S2_bin.72	beaver	5	Control	80.11	1.23	1738422	222	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__QHBO01;f__QHBO01;g__CF-167;s__
+BV_C1_S2_bin.94	beaver	5	Control	79.87	8.4	2410160	318	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__;s__
+BV_C1_S2_itr_bin.64	beaver	5	Control	71.02	10.2	6001365	819	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__
+BV_C1_S2_itr_bin.81	beaver	5	Control	77.82	10.56	5922067	865	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__VAZQ01;s__
+BV_C1_S2_prok_bin.18	beaver	5	Control	95.65	3.47	7442343	679	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Caballeronia;s__
+BV_C1_S2_prok_bin.41	beaver	5	Control	92.43	5.28	4642171	287	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans;s__Jatrophihabitans sp025966255
+BV_C1_S2_prok_bin.42	beaver	5	Control	94.23	3.78	7298199	1022	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__UBA5704;s__
+BV_C1_S2_prok_bin.46	beaver	5	Control	70.2	10.88	2812993	507	d__Bacteria;p__Actinomycetota;c__UBA4738;o__UBA4738;f__HRBIN12;g__JANXVR01;s__
+BV_C1_S2_prok_bin.88	beaver	5	Control	75.86	5.16	5385169	939	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__
+BV_C1_S3_bin.101	beaver	5	Control	78.9	3.91	4385174	299	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+BV_C1_S3_bin.117	beaver	5	Control	95.26	0.88	5030630	330	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JAOBAU01;s__
+BV_C1_S3_bin.122	beaver	5	Control	95.71	6.72	4472890	175	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Phenylobacterium;s__
+BV_C1_S3_bin.136	beaver	5	Control	89.66	2.26	3962307	367	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__PALSA-610;g__PALSA-610;s__
+BV_C1_S3_bin.143	beaver	5	Control	80.84	2.54	4425178	644	d__Bacteria;p__Myxococcota;c__Polyangia;o__Fen-1088;f__Fen-1088;g__;s__
+BV_C1_S3_bin.154	beaver	5	Control	85.97	2.07	4387099	403	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__CAHJXF01;s__
+BV_C1_S3_bin.26	beaver	5	Control	86.87	6.54	6580267	317	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+BV_C1_S3_bin.30	beaver	5	Control	85.29	8.79	4343822	572	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Koribacteraceae;g__Koribacter;s__
+BV_C1_S3_bin.34	beaver	5	Control	94.58	3.22	4332800	151	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Baekduia;s__
+BV_C1_S3_bin.67	beaver	5	Control	91.66	7.44	7255681	722	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__JAFAMB01;g__;s__
+BV_C1_S3_bin.80	beaver	5	Control	95.56	3.7	6884857	521	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Rhizobiaceae;g__Rhizobium;s__
+BV_C1_S3_bin.94	beaver	5	Control	87.12	2.18	3633085	209	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Xanthomonadales;f__Rhodanobacteraceae;g__Dokdonella_A;s__
+BV_C1_S3_bin.96	beaver	5	Control	90.31	2.79	4661385	580	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Lustribacter;s__
+BV_C1_S3_itr_bin.139	beaver	5	Control	90.85	3.86	4310640	238	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+BV_C1_S3_itr_bin.44	beaver	5	Control	71.44	4.31	4296322	644	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+BV_C1_S3_itr_bin.73	beaver	5	Control	84.36	9.96	6595124	528	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__ATCC43930;f__Stellaceae;g__URHD0088;s__
+BV_C1_S3_prok_bin.107	beaver	5	Control	88.02	5.95	4085785	483	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__FEN-1191;s__
+BV_C1_S3_prok_bin.127	beaver	5	Control	74.19	8.18	9047299	1285	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+BV_C1_S3_prok_bin.13	beaver	5	Control	73.61	1.41	4059699	549	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__;s__
+BV_C1_S3_prok_bin.148	beaver	5	Control	98.68	8.54	5173382	271	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Granulicella_C;s__
+BV_C1_S3_prok_bin.169	beaver	5	Control	88.19	10.83	9738729	1097	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__
+BV_C1_S3_prok_bin.44	beaver	5	Control	74.71	0.24	2912863	332	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__SZAS-18;g__SZAS-18;s__
+BV_C1_S3_prok_bin.47	beaver	5	Control	86.74	5.42	3600992	185	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__PALSA-600;s__
+BV_C1_S3_prok_bin.5	beaver	5	Control	78.17	1.41	3061560	44	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+BV_C1_S3_prok_bin.8	beaver	5	Control	98.03	6.88	7166534	586	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__UBA2999;g__Gp6-AA45;s__
+BV_C2_S1_bin.6	beaver	5	Control	84.57	3.38	5495948	675	d__Bacteria;p__Chloroflexota;c__Ktedonobacteria;o__Ktedonobacterales;f__Ktedonobacteraceae;g__Dictyobacter;s__
+BV_C2_S1_prok_bin.11	beaver	5	Control	94.9	5.78	4753474	104	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+BV_C2_S1_prok_bin.17	beaver	5	Control	94.2	3.13	6337959	315	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+BV_C2_S1_prok_bin.9	beaver	5	Control	78.06	3.05	8002229	1160	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Bog-105;s__
+BV_C2_S2_bin.1	beaver	5	Control	78.11	5.61	2930787	100	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_bin.103	beaver	5	Control	90.52	9.3	8723666	583	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Palsa-506;s__
+BV_C2_S2_bin.104	beaver	5	Control	97.05	2.59	6276878	131	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+BV_C2_S2_bin.114	beaver	5	Control	93.84	3.45	2990488	29	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_bin.122	beaver	5	Control	91.45	9.81	6727446	292	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+BV_C2_S2_bin.125	beaver	5	Control	81.5	5.78	3042422	139	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_bin.127	beaver	5	Control	80.5	8.62	3631687	150	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-473;s__
+BV_C2_S2_bin.13	beaver	5	Control	88.81	4.63	4475195	291	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+BV_C2_S2_bin.171	beaver	5	Control	92.41	0.13	2879368	80	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Tumulicola;s__
+BV_C2_S2_bin.174	beaver	5	Control	100	0.35	2982365	115	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+BV_C2_S2_bin.182	beaver	5	Control	87.93	1.52	3154970	205	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-756;s__
+BV_C2_S2_bin.20	beaver	5	Control	94.85	1.34	2354595	57	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__RAAP-2;s__
+BV_C2_S2_bin.36	beaver	5	Control	95.39	2.26	4256306	23	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__UBA8190;g__Palsa-661;s__
+BV_C2_S2_bin.67	beaver	5	Control	88.02	2.52	4109929	173	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__Palsa-1248;s__
+BV_C2_S2_bin.70	beaver	5	Control	73.61	9.55	6092539	702	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__JALYXI01;s__
+BV_C2_S2_bin.72	beaver	5	Control	73.62	5.9	4148993	421	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+BV_C2_S2_bin.73	beaver	5	Control	92.52	1.81	4052506	458	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Palsa-295;s__
+BV_C2_S2_bin.75	beaver	5	Control	99.97	4.59	6329009	183	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+BV_C2_S2_bin.78	beaver	5	Control	90.25	1.14	6802230	588	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Gemmatales;f__Gemmataceae;g__;s__
+BV_C2_S2_bin.99	beaver	5	Control	99.78	1.35	6382485	233	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Puia;s__
+BV_C2_S2_itr_bin.104	beaver	5	Control	80.64	2.88	2480108	81	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__RAAP-2;s__
+BV_C2_S2_itr_bin.15	beaver	5	Control	88.82	9.95	9054403	1388	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Isosphaerales;f__Isosphaeraceae;g__;s__
+BV_C2_S2_itr_bin.84	beaver	5	Control	71.84	6.98	3300655	208	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Edaphobacter;s__
+BV_C2_S2_itr_bin.88	beaver	5	Control	84.64	5.18	2535481	80	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_itr_bin.95	beaver	5	Control	78.77	5.58	2874375	160	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Granulicella;s__
+BV_C2_S2_prok_bin.11	beaver	5	Control	77.93	3.3	2570494	332	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_prok_bin.121	beaver	5	Control	78.97	10.89	8686256	728	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+BV_C2_S2_prok_bin.157	beaver	5	Control	85.6	10.55	4989782	435	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+BV_C2_S2_prok_bin.163	beaver	5	Control	94.78	9.46	5170656	171	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Granulicella;s__
+BV_C2_S2_prok_bin.166	beaver	5	Control	86.71	1.94	3579823	144	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__FEN-1191;s__
+BV_C2_S2_prok_bin.168	beaver	5	Control	81.25	3.1	2824248	282	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+BV_C2_S2_prok_bin.177	beaver	5	Control	86.09	7.17	4586292	69	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Granulicella_C;s__
+BV_C2_S2_prok_bin.187	beaver	5	Control	86.58	2.11	3411428	67	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C2_S2_prok_bin.25	beaver	5	Control	95.02	2.59	8117135	531	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__;s__
+BV_C3_S1_bin.5	beaver	5	Control	94.84	2.29	2911121	49	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_C3_S1_bin.9	beaver	5	Control	92.49	4.78	3312696	257	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+BV_C3_S1_prok_bin.8	beaver	5	Control	100	0.29	4999751	29	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Gp1-AA117;g__Angelobacter;s__
+BV_H1_S2_itr_bin.4	beaver	5	High	78.34	2.38	2266826	361	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Mycetocola_A;s__Mycetocola_A sp025464835
+BV_L1_S3_bin.111	beaver	5	Low	93.9	6.88	10747899	510	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__Labilithrix;s__
+BV_L1_S3_bin.13	beaver	5	Low	79.01	9.99	5602123	566	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Baekduia;s__
+BV_L1_S3_bin.138	beaver	5	Low	98.05	1.32	6205557	131	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JAOBAU01;s__
+BV_L1_S3_bin.143	beaver	5	Low	88.93	2.02	2390808	108	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+BV_L1_S3_bin.163	beaver	5	Low	85.13	8.54	9243790	921	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__
+BV_L1_S3_bin.164	beaver	5	Low	82.62	4.41	3853623	263	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Usitatibacteraceae;g__Usitatibacter;s__
+BV_L1_S3_bin.17	beaver	5	Low	92.62	1.7	3480618	47	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+BV_L1_S3_bin.170	beaver	5	Low	97.35	1.84	4717310	73	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-41;g__;s__
+BV_L1_S3_bin.189	beaver	5	Low	88.96	6.85	7911516	837	d__Bacteria;p__Myxococcota;c__Myxococcia;o__Myxococcales;f__Myxococcaceae;g__JAGSPQ01;s__
+BV_L1_S3_bin.197	beaver	5	Low	91.38	4.86	2170792	126	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+BV_L1_S3_bin.2	beaver	5	Low	93.62	2.49	5252971	632	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Scleromatobacter;s__
+BV_L1_S3_bin.20	beaver	5	Low	99.88	1.37	4507887	93	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Caulobacter;s__
+BV_L1_S3_bin.201	beaver	5	Low	87.64	3.09	3677026	324	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Nocardioides;s__
+BV_L1_S3_bin.212	beaver	5	Low	91.03	1.83	7035602	186	d__Bacteria;p__Myxococcota;c__Polyangia;o__Palsa-1104;f__Palsa-1104;g__JAQBQH01;s__
+BV_L1_S3_bin.216	beaver	5	Low	81.93	10.79	4206351	169	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__LC5-1;s__
+BV_L1_S3_bin.219	beaver	5	Low	88.18	4.74	8072482	977	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+BV_L1_S3_bin.222	beaver	5	Low	81.32	1.49	4462316	272	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+BV_L1_S3_bin.223	beaver	5	Low	95.07	3.02	6430350	437	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__AG11;s__
+BV_L1_S3_bin.27	beaver	5	Low	89.98	0.18	3662387	229	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Edaphobacter;s__
+BV_L1_S3_bin.31	beaver	5	Low	99.67	8.44	6134137	255	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__JAUJNH01;g__JAUJNH01;s__
+BV_L1_S3_bin.34	beaver	5	Low	94.63	1.69	4046855	25	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__AV80;s__
+BV_L1_S3_bin.49	beaver	5	Low	90.1	4.03	4986254	57	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__AG11;s__
+BV_L1_S3_bin.50	beaver	5	Low	95.75	2.16	6101235	144	d__Bacteria;p__Fibrobacterota;c__Fibrobacteria;o__UBA11236;f__UBA11236;g__Chersky-265;s__
+BV_L1_S3_bin.53	beaver	5	Low	95.52	2.48	3363581	73	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__SCTD01;g__RYN-111;s__
+BV_L1_S3_bin.63	beaver	5	Low	81.8	9.29	4822815	832	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Ilumatobacteraceae;g__WLMZ01;s__
+BV_L1_S3_bin.68	beaver	5	Low	85.44	1.42	3701878	343	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Micrococcaceae;g__Paeniglutamicibacter;s__
+BV_L1_S3_bin.76	beaver	5	Low	97.47	6.19	5407503	376	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__UBA2999;g__12-FULL-67-14b;s__
+BV_L1_S3_bin.78	beaver	5	Low	89.59	5.19	3160745	237	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+BV_L1_S3_bin.85	beaver	5	Low	75.88	8.67	3543070	209	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__JACDCH01;g__VFJN01;s__
+BV_L1_S3_bin.89	beaver	5	Low	96.36	3.1	6550116	66	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__UBA5704;s__
+BV_L1_S3_itr_bin.128	beaver	5	Low	87.54	6.89	8021275	715	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__CAIYRG01;s__
+BV_L1_S3_itr_bin.17	beaver	5	Low	80.71	4.69	6781693	966	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Pirellulales;f__Pirellulaceae;g__Anatilimnocola;s__
+BV_L1_S3_itr_bin.24	beaver	5	Low	82.98	2.98	2862394	42	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__;s__
+BV_L1_S3_itr_bin.32	beaver	5	Low	83.54	5.4	4262668	505	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__
+BV_L1_S3_itr_bin.59	beaver	5	Low	87.89	8.05	3858467	193	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__SB3-54;s__
+BV_L1_S3_prok_bin.100	beaver	5	Low	91.49	5.09	3673463	326	d__Bacteria;p__Elusimicrobiota;c__Elusimicrobia;o__UBA1565;f__UBA9628;g__GWA2-66-18;s__
+BV_L1_S3_prok_bin.101	beaver	5	Low	81.29	2.18	3280513	355	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Devosiaceae;g__JAQGKB01;s__
+BV_L1_S3_prok_bin.120	beaver	5	Low	93.92	4.07	3658849	144	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Aeromicrobium;s__
+BV_L1_S3_prok_bin.121	beaver	5	Low	89.02	9.41	4560993	368	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Phenylobacterium;s__
+BV_L1_S3_prok_bin.123	beaver	5	Low	78.29	7.45	3944292	479	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__QHCC01;s__QHCC01 sp025965875
+BV_L1_S3_prok_bin.126	beaver	5	Low	84.15	1	3512684	276	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__JACQAP01;g__JACQAP01;s__
+BV_L1_S3_prok_bin.166	beaver	5	Low	91.9	7.29	4053804	156	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Nocardioides;s__
+BV_L1_S3_prok_bin.168	beaver	5	Low	77.76	3.84	2170013	260	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+BV_L1_S3_prok_bin.186	beaver	5	Low	86.98	5.45	4612820	227	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Marmoricola;s__Marmoricola sp025965195
+BV_L1_S3_prok_bin.231	beaver	5	Low	91.2	5.43	5775816	451	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__BP-133;g__BP-133;s__BP-133 sp030838785
+BV_L1_S3_prok_bin.41	beaver	5	Low	92.99	1.6	4911825	219	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-39;g__SZAS-79;s__
+BV_L1_S3_prok_bin.43	beaver	5	Low	89.85	7.87	4841241	461	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Noviherbaspirillum;s__Noviherbaspirillum sp028292565
+BV_L1_S3_prok_bin.71	beaver	5	Low	89.18	0.69	4382603	120	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__HKI-0501;g__JAVEDU01;s__JAVEDU01 sp030840805
+BV_L1_S3_prok_bin.91	beaver	5	Low	97.22	3.32	8052142	423	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Caballeronia;s__Caballeronia sp028292365
+BV_L2_S2_bin.10	beaver	5	Low	80.77	4.55	3347868	337	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__UBA4719;s__
+BV_L2_S2_bin.112	beaver	5	Low	95.03	4.17	6006113	125	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__QHVT01;s__
+BV_L2_S2_bin.129	beaver	5	Low	79.18	6.8	11639372	913	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__JADJRH01;s__
+BV_L2_S2_bin.130	beaver	5	Low	74.78	6.26	2823829	436	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+BV_L2_S2_bin.143	beaver	5	Low	77.77	2.78	3132250	113	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+BV_L2_S2_bin.144	beaver	5	Low	83.99	2.81	3820821	380	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans;s__Jatrophihabitans sp025966255
+BV_L2_S2_bin.19	beaver	5	Low	94.68	1.1	5709329	80	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__QHXN01;s__
+BV_L2_S2_bin.21	beaver	5	Low	95.33	2.1	8257176	198	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__Chthoniobacteraceae;g__;s__
+BV_L2_S2_bin.37	beaver	5	Low	90.51	2.86	6203862	359	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__JAFDVJ01;s__
+BV_L2_S2_bin.45	beaver	5	Low	87.59	2.64	5491036	230	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__QHXM01;s__
+BV_L2_S2_bin.5	beaver	5	Low	99.97	1.72	8747450	179	d__Bacteria;p__Myxococcota;c__Myxococcia;o__Myxococcales;f__Myxococcaceae;g__Hyalangium;s__
+BV_L2_S2_bin.52	beaver	5	Low	96.79	1.24	6469780	127	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__JAICTV01;s__
+BV_L2_S2_bin.77	beaver	5	Low	72.07	0.89	3869726	651	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__;s__
+BV_L2_S2_bin.91	beaver	5	Low	78.56	7.15	2921212	302	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VRUE01;s__
+BV_L2_S2_bin.96	beaver	5	Low	99.13	0	5993824	120	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JAJXWV01;s__
+BV_L2_S2_itr_bin.20	beaver	5	Low	73	4.68	2388755	279	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+BV_L2_S2_itr_bin.83	beaver	5	Low	76.8	9.01	2387285	412	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__RHKX01;s__
+BV_L2_S2_itr_bin.91	beaver	5	Low	95.37	10.29	2751790	136	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+BV_L2_S2_prok_bin.18	beaver	5	Low	70.6	4.61	3667500	397	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAVEEB01;g__;s__
+BV_L2_S2_prok_bin.35	beaver	5	Low	88.48	4.95	3672144	223	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Nocardioides;s__
+BV_L2_S2_prok_bin.5	beaver	5	Low	92.46	0.66	3672352	56	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__UBA4719;s__
+BV_L2_S2_prok_bin.51	beaver	5	Low	91.48	4.5	7396222	560	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__JAFGIB01;g__;s__
+BV_L2_S2_prok_bin.7	beaver	5	Low	90.59	3.75	2457018	108	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+BV_co3low_prok_bin.10	beaver	5	Low	99.81	0.04	4573599	66	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Sphingobacteriales;f__Sphingobacteriaceae;g__Mucilaginibacter;s__
+CP_C1_S2_bin.122	church park	11	Control	100	0.19	1029942	6	d__Bacteria;p__Patescibacteria;c__Saccharimonadia;o__Saccharimonadales;f__UBA4665;g__DAHUYJ01;s__
+CP_C1_S2_bin.134	church park	11	Control	96.71	0.89	7193112	50	d__Bacteria;p__Myxococcota;c__Myxococcia;o__Myxococcales;f__40CM-4-68-19;g__40CM-4-68-19;s__
+CP_C1_S2_bin.144	church park	11	Control	98.37	6.05	5310680	346	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Beijerinckiaceae;g__Roseiarcus;s__
+CP_C1_S2_bin.150	church park	11	Control	92.29	3.27	3682726	372	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__FEN-1250;s__
+CP_C1_S2_bin.22	church park	11	Control	88.44	3.83	5627051	79	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+CP_C1_S2_bin.28	church park	11	Control	85.31	1.25	4337417	434	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__RYN-433;s__
+CP_C1_S2_bin.66	church park	11	Control	83.99	5.06	2822898	88	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S2_bin.70	church park	11	Control	72.02	4.7	7476622	1385	d__Bacteria;p__Myxococcota;c__Polyangia;o__Haliangiales;f__Haliangiaceae;g__JABFXX01;s__
+CP_C1_S2_bin.72	church park	11	Control	93.32	6.76	2578006	160	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__RAAP-2;s__
+CP_C1_S2_bin.73	church park	11	Control	90.33	5.39	8144851	726	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Bog-105;s__
+CP_C1_S2_prok_bin.126	church park	11	Control	97.54	1.22	4249237	142	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Acidisoma;s__Acidisoma sp009765865
+CP_C1_S2_prok_bin.137	church park	11	Control	78.11	4.94	4147604	356	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__JALZAI01;s__
+CP_C1_S2_prok_bin.22	church park	11	Control	94.15	5.55	4722922	364	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAFAQI01;g__JAFAZI01;s__
+CP_C1_S2_prok_bin.3	church park	11	Control	82.16	9.44	6617927	1194	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__13-2-20CM-66-19;s__
+CP_C1_S2_prok_bin.35	church park	11	Control	87.71	2.6	3058150	434	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Angustibacteraceae;g__;s__
+CP_C1_S2_prok_bin.57	church park	11	Control	93.71	6.61	10791082	1403	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__Minicystis;s__
+CP_C1_S2_prok_bin.81	church park	11	Control	92.52	1.07	3917870	132	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+CP_C1_S2_prok_bin.90	church park	11	Control	88.13	5.42	5157303	734	d__Bacteria;p__Myxococcota;c__Polyangia;o__Fen-1088;f__Fen-1088;g__JADGRB01;s__
+CP_C1_S2_prok_bin.95	church park	11	Control	74.03	1.52	2253788	256	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S2_prok_bin.99	church park	11	Control	93.88	6.17	3855886	207	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__DAIDKA01;s__
+CP_C1_S3_bin.104	church park	11	Control	95.07	3.43	5338855	284	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Actinomycetospora;s__
+CP_C1_S3_bin.146	church park	11	Control	90.35	4.11	8002017	551	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Actinoplanes;s__
+CP_C1_S3_bin.160	church park	11	Control	88.7	3.3	5690836	475	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Palsa-881;s__
+CP_C1_S3_bin.164	church park	11	Control	93.53	10.36	3398129	157	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S3_bin.182	church park	11	Control	95.65	0.47	4801478	114	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Palsa-688;g__;s__
+CP_C1_S3_bin.185	church park	11	Control	92.41	5.08	6920698	334	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__Pseudonocardia sp025465235
+CP_C1_S3_bin.188	church park	11	Control	89.63	3.46	2949084	55	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S3_bin.193	church park	11	Control	77.4	3.54	3558545	414	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__JACDCH01;g__;s__
+CP_C1_S3_bin.194	church park	11	Control	83.42	1.56	2938906	231	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Acidothermales;f__Acidothermaceae;g__PALSA-607;s__
+CP_C1_S3_bin.199	church park	11	Control	81.79	4.62	2659276	193	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S3_bin.208	church park	11	Control	100	0.05	5592025	56	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Cytophagales;f__Cyclobacteriaceae;g__ELB16-189;s__
+CP_C1_S3_bin.209	church park	11	Control	100	1.05	4181230	125	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Phycisphaerales;f__Zrk34;g__;s__
+CP_C1_S3_bin.234	church park	11	Control	76.9	9.47	6025086	894	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__RYN-133;s__
+CP_C1_S3_bin.243	church park	11	Control	94.08	6.31	2955873	182	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__;s__
+CP_C1_S3_bin.34	church park	11	Control	74.32	8.29	5269396	430	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Lustribacter;s__
+CP_C1_S3_bin.52	church park	11	Control	88.31	3.23	4049734	122	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Palsa-360;s__
+CP_C1_S3_bin.80	church park	11	Control	93.18	2.99	4550177	336	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__2-12-FULL-66-21;g__;s__
+CP_C1_S3_bin.9	church park	11	Control	78.89	0.79	4976024	391	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+CP_C1_S3_bin.96	church park	11	Control	88.21	2.22	4618251	664	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Opitutales;f__Opitutaceae;g__Opitutus;s__
+CP_C1_S3_bin.97	church park	11	Control	81.03	2.97	1962521	32	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_C1_S3_prok_bin.14	church park	11	Control	96.37	4.37	3707751	435	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+CP_C1_S3_prok_bin.148	church park	11	Control	88.98	3.51	4955723	97	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Palsa-688;g__;s__
+CP_C1_S3_prok_bin.151	church park	11	Control	84.66	7.04	2617087	145	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VRUE01;s__
+CP_C1_S3_prok_bin.250	church park	11	Control	73.19	7.74	4754228	206	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+CP_C1_S3_prok_bin.252	church park	11	Control	82.55	4.71	3081977	277	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+CP_C1_S3_prok_bin.256	church park	11	Control	91.66	2.98	3840930	166	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+CP_C1_S3_prok_bin.266	church park	11	Control	68.96	4.59	3327818	221	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+CP_C1_S3_prok_bin.30	church park	11	Control	78.84	10.32	3276684	588	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Elarobacter;s__
+CP_C1_S3_prok_bin.61	church park	11	Control	93.68	4.89	7539087	645	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Kribbellaceae;g__Kribbella;s__
+CP_C1_S3_prok_bin.67	church park	11	Control	85.18	4.82	4129326	466	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Frankiaceae;g__JAVEDQ01;s__
+CP_C1_S3_prok_bin.88	church park	11	Control	90.61	9.23	7864634	541	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+CP_C1_S3_prok_bin.99	church park	11	Control	95.4	2.39	6680355	272	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptomycetales;f__Streptomycetaceae;g__Actinacidiphila;s__
+CP_C2_S1_prok_bin.3	church park	11	Control	86.14	4.04	6706356	1108	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Actinoallomurus;s__Actinoallomurus sp025964685
+CP_H1_S2_bin.1	church park	11	High	87.14	1.58	4097972	310	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+CP_H1_S2_bin.28	church park	11	High	82.48	8.22	4321551	346	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Thermoleophilaceae;g__;s__
+CP_H1_S2_prok_bin.24	church park	11	High	81.56	3.03	2925911	272	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__;s__
+CP_H2_S1_bin.12	church park	11	High	93.28	0.42	5376707	150	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__QHXM01;s__
+CP_H2_S1_bin.3	church park	11	High	80	0.94	3639132	601	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__QHCC01;s__
+CP_H3_S2_bin.12	church park	11	High	88.5	3.95	5497677	621	d__Bacteria;p__Armatimonadota;c__SYMT01;o__SYMT01;f__SYMT01;g__;s__
+CP_H3_S2_bin.141	church park	11	High	98.42	0.96	6321817	159	d__Bacteria;p__Myxococcota;c__Myxococcia;o__Myxococcales;f__Myxococcaceae;g__;s__
+CP_H3_S2_bin.15	church park	11	High	94.85	0	4678658	24	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Palsa-187;s__
+CP_H3_S2_bin.158	church park	11	High	97.77	0.15	5472897	99	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__CANJBX01;s__
+CP_H3_S2_bin.161	church park	11	High	78.3	4.58	3607215	217	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Thermoleophilaceae;g__;s__
+CP_H3_S2_bin.183	church park	11	High	95	2.58	6663802	140	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__SbA1;g__JAIQFF01;s__
+CP_H3_S2_bin.188	church park	11	High	92.47	0.83	2914646	29	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__;s__
+CP_H3_S2_bin.32	church park	11	High	93.8	0.7	2780920	16	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__Palsa-875;s__
+CP_H3_S2_bin.44	church park	11	High	73.39	1.15	1944480	227	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+CP_H3_S2_bin.51	church park	11	High	85.82	2.63	7102393	669	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Isosphaerales;f__Isosphaeraceae;g__CAMFLR01;s__
+CP_H3_S2_bin.52	church park	11	High	97.48	1.22	5997607	51	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Pirellulales;f__JADZDJ01;g__JADZDJ01;s__
+CP_H3_S2_bin.83	church park	11	High	79.6	3.67	2344958	287	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_H3_S2_bin.84	church park	11	High	95	2.93	2219011	56	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+CP_H3_S2_bin.95	church park	11	High	92.67	2.61	2995587	50	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_H3_S2_bin.97	church park	11	High	88.56	2.88	4612342	191	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__FEN-1250;s__
+CP_H3_S2_prok_bin.119	church park	11	High	94.54	5.38	6738622	92	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__JADGHX01;s__
+CP_H3_S2_prok_bin.12	church park	11	High	99.29	5.91	9614499	212	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Amycolatopsis;s__
+CP_H3_S2_prok_bin.131	church park	11	High	97.15	1.16	6908507	282	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Gemmatales;f__Gemmataceae;g__;s__
+CP_H3_S2_prok_bin.142	church park	11	High	79.09	4.84	2661000	69	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_H3_S2_prok_bin.16	church park	11	High	86.51	4.13	5281659	499	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__2-12-FULL-66-21;g__JALZOC01;s__
+CP_H3_S2_prok_bin.163	church park	11	High	87.68	3.13	6725105	878	d__Bacteria;p__Myxococcota;c__Polyangia;o__Haliangiales;f__Haliangiaceae;g__JABFXX01;s__
+CP_H3_S2_prok_bin.174	church park	11	High	82.76	4.2	6272034	323	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+CP_H3_S2_prok_bin.179	church park	11	High	84.83	9.34	8903860	777	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+CP_H3_S2_prok_bin.180	church park	11	High	91.66	10.22	4673306	535	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Geodermatophilaceae;g__Blastococcus;s__Blastococcus sp025965695
+CP_H3_S2_prok_bin.182	church park	11	High	83.96	9.24	3912142	131	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__Palsa-739;s__Palsa-739 sp025964535
+CP_H3_S2_prok_bin.22	church park	11	High	90.4	1.89	3798597	409	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Xanthomonadales;f__Rhodanobacteraceae;g__Dokdonella_A;s__
+CP_H3_S2_prok_bin.89	church park	11	High	86.41	2.56	3633567	553	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__
+CP_L1_S1_bin.15	church park	11	Low	87.15	4.43	5619183	577	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__Bradyrhizobium;s__
+CP_L1_S1_bin.19	church park	11	Low	86.3	5.04	4190344	522	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__UBA4719;s__
+CP_L1_S1_bin.9	church park	11	Low	92.86	2.49	3673410	176	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__UBA4720;s__
+CP_L1_S1_prok_bin.13	church park	11	Low	88.08	3.89	2900038	345	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_L1_S2_bin.10	church park	11	Low	76.72	1.43	3213946	302	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__SZAS-18;g__;s__
+CP_L1_S2_bin.110	church park	11	Low	96.56	3.95	3251147	259	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Beijerinckiaceae;g__Enterovirga;s__
+CP_L1_S2_bin.112	church park	11	Low	69.44	5.42	3992962	701	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__;s__
+CP_L1_S2_bin.117	church park	11	Low	92.16	1.52	9417309	344	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Kineosporiaceae;g__;s__
+CP_L1_S2_bin.126	church park	11	Low	95.91	4.43	4991274	189	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__JACCUS01;s__
+CP_L1_S2_bin.129	church park	11	Low	88.97	10.12	9475335	298	d__Bacteria;p__Myxococcota;c__UBA796;o__UBA796;f__SXON01;g__CAJBVW01;s__
+CP_L1_S2_bin.132	church park	11	Low	92.28	6.21	4798436	210	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__
+CP_L1_S2_bin.148	church park	11	Low	92.55	5.5	6002932	41	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__UBA8139;g__JALOLF01;s__
+CP_L1_S2_bin.155	church park	11	Low	84.6	1.6	6607981	643	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__TMP-7;s__
+CP_L1_S2_bin.156	church park	11	Low	93.86	1.46	2024277	120	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+CP_L1_S2_bin.169	church park	11	Low	94.49	3.38	3175441	118	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__PALSA-555;g__;s__
+CP_L1_S2_bin.17	church park	11	Low	96.3	0.09	2769978	37	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__JALZKA01;s__
+CP_L1_S2_bin.170	church park	11	Low	97.38	3.35	3572262	59	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_L1_S2_bin.174	church park	11	Low	97.83	9.16	6357244	197	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__
+CP_L1_S2_bin.178	church park	11	Low	89.03	0.19	2256184	103	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_L1_S2_bin.180	church park	11	Low	87.26	9.5	4377854	327	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+CP_L1_S2_bin.188	church park	11	Low	87.75	1.63	2444661	210	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__P2-11E;f__P2-11E;g__UBA4735;s__
+CP_L1_S2_bin.46	church park	11	Low	100	5.76	9153276	154	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Kineosporiaceae;g__;s__
+CP_L1_S2_bin.47	church park	11	Low	85.94	6.09	2947798	184	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__;s__
+CP_L1_S2_bin.53	church park	11	Low	85.91	7.55	6168488	779	d__Bacteria;p__Chloroflexota;c__UBA6077;o__UBA6077;f__JACCZL01;g__JADZEM01;s__
+CP_L1_S2_bin.59	church park	11	Low	92.1	3.68	3264223	183	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_L1_S2_bin.65	church park	11	Low	95.9	1.21	5279713	212	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__UBA8139;g__JALOLF01;s__
+CP_L1_S2_bin.66	church park	11	Low	85.26	1.55	2550187	315	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Hyphomicrobiaceae;g__Hyphomicrobium_B;s__
+CP_L1_S2_bin.67	church park	11	Low	96.39	2.27	6672655	150	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__;s__
+CP_L1_S2_bin.70	church park	11	Low	86.3	3.12	4927870	555	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__JAICTV01;s__
+CP_L1_S2_bin.72	church park	11	Low	78.59	2.73	5543320	687	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__Chthoniobacteraceae;g__;s__
+CP_L1_S2_bin.9	church park	11	Low	86.22	2.28	2998022	298	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__UBA4719;s__
+CP_L1_S2_bin.95	church park	11	Low	89.97	2.83	3279226	111	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__LC5-1;s__
+CP_L1_S2_bin.97	church park	11	Low	94.07	2.72	4177831	219	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__AV80;s__
+CP_L1_S2_bin.98	church park	11	Low	93.36	0.4	4839154	191	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Pseudomonadales;f__Pseudomonadaceae;g__Pseudomonas_E;s__
+CP_L1_S2_prok_bin.123	church park	11	Low	97.38	2.93	2481801	205	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__;s__
+CP_L1_S2_prok_bin.128	church park	11	Low	99.9	8.6	5357907	80	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__;s__
+CP_L1_S2_prok_bin.129	church park	11	Low	93.84	1.36	4679641	488	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Casimicrobiaceae;g__VBCG01;s__
+CP_L1_S2_prok_bin.130	church park	11	Low	93.99	5.96	3294081	213	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Kaistiaceae;g__JANQRX01;s__
+CP_L1_S2_prok_bin.146	church park	11	Low	82.43	8.33	4256091	541	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__PALSA-894;s__
+CP_L1_S2_prok_bin.156	church park	11	Low	81.42	5.98	2211537	271	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__JACPNS01;g__JACPNS01;s__
+CP_L1_S2_prok_bin.162	church park	11	Low	88.78	4.41	3160971	52	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_L1_S2_prok_bin.186	church park	11	Low	90.45	4.55	4006611	165	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__JAFATL01;g__JAFATL01;s__
+CP_L1_S2_prok_bin.48	church park	11	Low	92.92	0.62	8751437	645	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Virgisporangium;s__
+CP_L1_S2_prok_bin.55	church park	11	Low	93.18	3.13	4501667	122	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Schlegelella_A;s__
+CP_L1_S2_prok_bin.6	church park	11	Low	92.4	4.31	4607253	77	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-39;g__;s__
+CP_L1_S2_prok_bin.63	church park	11	Low	77.4	4.99	3444174	401	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__JACCUZ01;f__JACCUZ01;g__BP-173;s__BP-173 sp030841025
+CP_L1_S2_prok_bin.7	church park	11	Low	86.61	7.38	4044913	287	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-39;g__SCGC-AG-212-J23;s__
+CP_L1_S2_prok_bin.76	church park	11	Low	76.26	6.3	3601208	462	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Ilumatobacteraceae;g__Ilumatobacter;s__
+CP_L1_S3_bin.102	church park	11	Low	74.52	3.81	2806452	222	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__Limnocylindrales;f__CSP1-4;g__JALYGJ01;s__
+CP_L1_S3_bin.105	church park	11	Low	94.85	5.92	6880618	171	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__QHVT01;s__
+CP_L1_S3_bin.11	church park	11	Low	85.34	3.8	2932797	46	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__JAICJC01;g__JAICYJ01;s__
+CP_L1_S3_bin.13	church park	11	Low	74.22	3.88	5564911	610	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Rhodopila;s__
+CP_L1_S3_bin.143	church park	11	Low	89.98	0.75	3718001	122	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__OLB17;s__
+CP_L1_S3_bin.145	church park	11	Low	94.58	4.97	5229856	292	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+CP_L1_S3_bin.156	church park	11	Low	99.3	0.08	3809475	35	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans_A;s__
+CP_L1_S3_bin.164	church park	11	Low	93.28	0.06	3263126	70	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__OLB17;s__
+CP_L1_S3_bin.169	church park	11	Low	72.66	3.23	2714813	182	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_L1_S3_bin.171	church park	11	Low	100	6.4	8496568	664	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__JAFGIB01;g__;s__
+CP_L1_S3_bin.178	church park	11	Low	88.81	0.71	3193902	171	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__SCTD01;g__RYN-124;s__
+CP_L1_S3_bin.181	church park	11	Low	91.37	2.95	4828418	90	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__Bog-1198 sp028293775
+CP_L1_S3_bin.199	church park	11	Low	78.65	4.91	2450420	230	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__UBA4720;s__
+CP_L1_S3_bin.201	church park	11	Low	93.77	0.12	9178895	257	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptomycetales;f__Streptomycetaceae;g__Streptomyces;s__
+CP_L1_S3_bin.213	church park	11	Low	96.52	2.92	3560853	65	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__BP-191;g__BP-191;s__
+CP_L1_S3_bin.220	church park	11	Low	99.07	0.5	4693813	8	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__
+CP_L1_S3_bin.221	church park	11	Low	100	2.78	2861278	201	d__Bacteria;p__Actinomycetota;c__UBA4738;o__CADDZG01;f__WHSQ01;g__JAUJNU01;s__
+CP_L1_S3_bin.23	church park	11	Low	77.16	1.62	2287130	228	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__Limnocylindrales;f__CSP1-4;g__JALYGJ01;s__
+CP_L1_S3_bin.231	church park	11	Low	100	8.14	4942735	278	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__UBA2999;g__JAMQPK01;s__
+CP_L1_S3_bin.244	church park	11	Low	92.63	3.48	3553717	72	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__Limnocylindrales;f__CSP1-4;g__;s__
+CP_L1_S3_bin.254	church park	11	Low	96.62	7.03	2245442	70	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+CP_L1_S3_bin.27	church park	11	Low	91.33	2.06	7306505	389	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__BOG-234;s__
+CP_L1_S3_bin.41	church park	11	Low	98.85	1.18	3897303	29	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans_A;s__
+CP_L1_S3_bin.58	church park	11	Low	92.99	1.08	5754071	70	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+CP_L1_S3_bin.67	church park	11	Low	82.01	0.33	3011824	240	d__Bacteria;p__Armatimonadota;c__Abditibacteriia;o__Abditibacteriales;f__Abditibacteriaceae;g__;s__
+CP_L1_S3_bin.82	church park	11	Low	87.64	6.96	4059009	350	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__VAYN01 sp025964255
+CP_L1_S3_bin.99	church park	11	Low	90.43	3.99	4247578	323	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Albitalea;s__
+CP_L1_S3_prok_bin.218	church park	11	Low	78.94	7.3	4134691	268	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__;s__
+CP_L1_S3_prok_bin.234	church park	11	Low	90.07	2.97	4696883	224	d__Bacteria;p__Chloroflexota;c__Chloroflexia;o__QHBQ01;f__JADMIH01;g__JADMIH01;s__
+CP_L1_S3_prok_bin.241	church park	11	Low	91	2.06	3847734	200	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Phenylobacterium;s__
+CP_L1_S3_prok_bin.30	church park	11	Low	91.36	5.45	6940486	641	d__Bacteria;p__Myxococcota;c__Polyangia;o__Palsa-1104;f__Palsa-1104;g__JAQBQH01;s__
+CP_L1_S3_prok_bin.34	church park	11	Low	83.36	7.18	3616733	393	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Propionibacteriaceae;g__Friedmanniella;s__
+CP_L1_S3_prok_bin.4	church park	11	Low	88.17	6.95	6994101	484	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__UBA2999;g__Gp6-AA45;s__
+CP_L1_S3_prok_bin.77	church park	11	Low	92.41	10.21	4541076	364	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Marmoricola;s__
+CP_L1_S3_prok_bin.8	church park	11	Low	73.99	0.34	2667899	83	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__Pedococcus;s__
+CP_L1_S3_prok_bin.85	church park	11	Low	77.7	8.94	4388571	253	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Baekduia;s__
+CP_L1_S3_prok_bin.87	church park	11	Low	75.73	2.43	5729796	493	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Bog-532;s__
+CP_L1_S3_prok_bin.9	church park	11	Low	97.25	2.63	4544073	215	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__JADGHE01;s__
+CP_L1_S3_prok_bin.90	church park	11	Low	99.96	0	3242851	139	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Cryobacterium;s__
+CP_L2_S1_bin.18	church park	11	Low	90.89	4.51	2923912	328	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_L2_S1_prok_bin.3	church park	11	Low	88.34	4.2	3217732	214	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+CP_L2_S1_prok_bin.4	church park	11	Low	88.18	1.9	3342998	325	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Dermatophilaceae;g__UBA4719;s__
+CP_L3_S1_bin.4	church park	11	Low	95.47	1.77	7742814	141	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__
+CP_L3_S1_bin.8	church park	11	Low	87.83	2.83	2150183	76	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Thermoleophilaceae;g__JAAYBF01;s__
+CP_L3_S2_bin.11	church park	11	Low	88.19	0.83	4276802	49	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__;s__
+CP_L3_S2_bin.111	church park	11	Low	85.69	1.62	4452061	290	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__;s__
+CP_L3_S2_bin.118	church park	11	Low	86.26	8.24	7763147	656	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__UBA5704;s__
+CP_L3_S2_bin.23	church park	11	Low	97.43	0.71	2784344	21	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Pseudolysinimonas;s__
+CP_L3_S2_bin.29	church park	11	Low	95.39	3.56	4291486	55	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__CAIKUF01;s__
+CP_L3_S2_bin.30	church park	11	Low	95.17	4.68	6877189	62	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__UBA5704;s__
+CP_L3_S2_bin.43	church park	11	Low	89.43	7.46	6220381	748	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Fen-336;f__Fen-336;g__AA29;s__
+CP_L3_S2_bin.54	church park	11	Low	87.41	3.48	6143513	368	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__QHVT01;s__
+CP_L3_S2_bin.58	church park	11	Low	89.21	8.48	3930758	301	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+CP_L3_S2_bin.62	church park	11	Low	81.49	3.02	4103030	512	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__PALSA-610;g__;s__
+CP_L3_S2_bin.63	church park	11	Low	89.41	2.25	3632022	321	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Micrococcaceae;g__Arthrobacter_H;s__
+CP_L3_S2_bin.81	church park	11	Low	95.99	0.41	5917890	48	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__
+CP_L3_S2_bin.84	church park	11	Low	95.89	0.33	3514855	67	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Afifellaceae;g__Faunimonas;s__
+CP_L3_S2_bin.9	church park	11	Low	71.34	8.25	7376205	1419	d__Bacteria;p__Myxococcota;c__Polyangia;o__Haliangiales;f__Haliangiaceae;g__JABFXX01;s__
+CP_L3_S2_bin.97	church park	11	Low	84.99	1.13	3409356	298	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__
+CP_L3_S2_bin.98	church park	11	Low	73.72	5.98	2577346	150	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+CP_L3_S2_prok_bin.19	church park	11	Low	95.14	0.36	4508448	422	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__Pseudonocardia sp025465255
+CP_L3_S2_prok_bin.45	church park	11	Low	82.26	6.61	6339392	300	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__QHVT01;s__
+CP_L3_S2_prok_bin.7	church park	11	Low	86.95	7.36	2787384	114	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VRUE01;s__
+CP_L3_S2_prok_bin.83	church park	11	Low	77.84	3.54	4580319	599	d__Bacteria;p__Myxococcota;c__Polyangia;o__Fen-1088;f__Fen-1088;g__FEN-1088;s__
+CP_co3C_bin.21	church park	11	Control	100	0.13	4269704	89	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Ferruginibacter;s__
+CP_co3H_bin.142	church park	11	High	90.83	9.83	10860068	292	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+CP_co3H_bin.144	church park	11	High	93.27	2.4	3165645	68	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__CF-121;f__;g__;s__
+CP_co3H_bin.169	church park	11	High	90.29	3.87	7008086	226	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Actinoallomurus;s__Actinoallomurus sp025964685
+CP_co3H_bin.17	church park	11	High	82.31	2.97	4302315	158	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Frankiaceae;g__JAVEDQ01;s__
+CP_co3H_bin.174	church park	11	High	96.23	0.27	3418531	30	d__Bacteria;p__Armatimonadota;c__Fimbriimonadia;o__Fimbriimonadales;f__Fimbriimonadaceae;g__JAMLGR01;s__
+CP_co3H_bin.177	church park	11	High	93.46	0.63	3978427	117	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__JACMJD01;s__
+CP_co3H_bin.182	church park	11	High	95.45	0.11	2282875	175	d__Bacteria;p__Bacillota;c__Bacilli;o__Alicyclobacillales;f__Alicyclobacillaceae;g__Alicyclobacillus_A;s__Alicyclobacillus_A pomorum
+CP_co3H_bin.194	church park	11	High	83.99	1.49	3407477	68	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__;s__
+CP_co3H_bin.201	church park	11	High	94.86	0.34	2862323	13	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__CF-121;f__;g__;s__
+CP_co3H_bin.206	church park	11	High	79.21	2.09	3911425	311	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+CP_co3H_bin.236	church park	11	High	94.78	0.28	3428033	14	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__OLB17;s__
+CP_co3H_bin.37	church park	11	High	96.73	1.11	3433035	117	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__JAUTXP01;g__JAUTXP01;s__
+CP_co3H_bin.43	church park	11	High	94.52	7.9	2907693	168	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+CP_co3H_bin.63	church park	11	High	100	4.04	7199923	242	d__Bacteria;p__Myxococcota;c__Polyangia;o__Fen-1088;f__Fen-1088;g__JADGRB01;s__
+CP_co3H_bin.94	church park	11	High	98.5	2.86	10682658	103	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Pirellulales;f__JAICIG01;g__;s__
+CP_co3H_prok_bin.105	church park	11	High	88.87	2.3	4558378	305	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Koribacteraceae;g__Koribacter;s__
+CP_co3H_prok_bin.121	church park	11	High	92.44	1.12	3912931	324	d__Bacteria;p__Actinomycetota;c__UBA4738;o__JAHWKV01;f__JAOPZY01;g__JAOPZY01;s__JAOPZY01 sp025963875
+CP_co3H_prok_bin.168	church park	11	High	88.17	1.02	2788740	40	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAFAQI01;g__JAFAQI01;s__
+CP_co3H_prok_bin.240	church park	11	High	90.52	0.8	3254432	362	d__Bacteria;p__Desulfobacterota_B;c__Binatia;o__Binatales;f__Binataceae;g__Binatus;s__
+CP_co3H_prok_bin.244	church park	11	High	79.36	4.46	2936173	125	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+CP_co3H_prok_bin.91	church park	11	High	90.53	4.14	8265513	701	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Gemmatales;f__Gemmataceae;g__JAIOQJ01;s__
+CP_co3L_prok_bin.101	church park	11	Low	77.53	1.44	3876707	327	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Elarobacter;s__
+CP_co3L_prok_bin.105	church park	11	Low	75.32	2.18	4937125	415	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Palsa-89;s__
+CP_co3L_prok_bin.116	church park	11	Low	71.81	10.27	2991600	523	d__Bacteria;p__Chloroflexota;c__Limnocylindria;o__Limnocylindrales;f__CSP1-4;g__;s__
+CP_co3L_prok_bin.13	church park	11	Low	86.25	6.2	2606999	168	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+CP_co3L_prok_bin.146	church park	11	Low	97.18	2.1	5193784	134	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Gp1-AA117;g__Angelobacter;s__
+CP_co3L_prok_bin.163	church park	11	Low	89.71	5.19	7157621	352	d__Bacteria;p__Myxococcota;c__Polyangia;o__Fen-1088;f__Fen-1088;g__;s__
+CP_co3L_prok_bin.169	church park	11	Low	74.91	6.55	3887645	740	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__;g__;s__
+CP_co3L_prok_bin.186	church park	11	Low	83.68	2.74	2746425	82	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+CP_co3L_prok_bin.187	church park	11	Low	99.61	3.94	8681432	48	d__Bacteria;p__Acidobacteriota;c__Vicinamibacteria;o__Vicinamibacterales;f__;g__;s__
+CP_co3L_prok_bin.19	church park	11	Low	73.87	2	3085968	366	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAFAQI01;g__;s__
+CP_co3L_prok_bin.194	church park	11	Low	97.83	1.59	7921861	176	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__JAEZGP01;s__
+CP_co3L_prok_bin.204	church park	11	Low	81.1	2.39	4325039	370	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+CP_co3L_prok_bin.212	church park	11	Low	94.81	1.19	5636101	53	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								
+R_C1_S2_prok_bin.56	ryan	3	Control	81.83	6.93	7226156	719	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Palsa-506;s__
+R_C1_S2_prok_bin.57	ryan	3	Control	93.03	2.68	4400917	469	d__Bacteria;p__Chloroflexota;c__UBA5177;o__UBA5177;f__UBA5177;g__JANWJD01;s__
+R_C1_S2_prok_bin.58	ryan	3	Control	72.03	4.92	3536804	441	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__AV80;s__
+R_C1_S3_bin.1	ryan	3	Control	94.75	5.91	6165641	218	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__SbA1;g__QIAJ01;s__
+R_C1_S3_bin.125	ryan	3	Control	99.64	3.23	3301035	32	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_C1_S3_bin.14	ryan	3	Control	92.73	2.87	3042956	187	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__JAICJC01;g__JAICJC01;s__
+R_C1_S3_bin.152	ryan	3	Control	71.92	2.47	4670112	462	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+R_C1_S3_bin.154	ryan	3	Control	80.53	5.28	3089967	337	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_C1_S3_bin.16	ryan	3	Control	91.63	6.66	4387880	332	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__AV80;s__
+R_C1_S3_bin.162	ryan	3	Control	87.06	4.91	9795077	593	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Actinoplanes;s__
+R_C1_S3_bin.166	ryan	3	Control	81.79	0.48	2209692	14	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__Palsa-875;s__
+R_C1_S3_bin.17	ryan	3	Control	99.51	3.41	3562374	61	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+R_C1_S3_bin.171	ryan	3	Control	79.29	1.4	3750695	589	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+R_C1_S3_bin.185	ryan	3	Control	90.94	7.33	7756603	265	d__Bacteria;p__Chloroflexota;c__Ktedonobacteria;o__Ktedonobacterales;f__Ktedonobacteraceae;g__;s__
+R_C1_S3_bin.73	ryan	3	Control	98.25	1.99	7769823	106	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__;s__
+R_C1_S3_bin.85	ryan	3	Control	88.99	3.07	4490270	652	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Palsa-187;s__
+R_C1_S3_bin.94	ryan	3	Control	91.71	2.71	5086438	91	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+R_C1_S3_itr_bin.122	ryan	3	Control	90.63	3.88	2662501	37	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__Palsa-875;s__
+R_C1_S3_prok_bin.101	ryan	3	Control	83.57	5.35	5046782	206	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+R_C1_S3_prok_bin.111	ryan	3	Control	86.71	2.5	3026958	51	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_C1_S3_prok_bin.115	ryan	3	Control	84.07	8.85	5635082	692	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+R_C1_S3_prok_bin.131	ryan	3	Control	90.93	3.47	2755734	63	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_C1_S3_prok_bin.161	ryan	3	Control	96.18	9.42	3056315	76	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VRUE01;s__
+R_C1_S3_prok_bin.172	ryan	3	Control	90.3	1.67	6228027	299	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Puia;s__
+R_C1_S3_prok_bin.192	ryan	3	Control	89	2.77	3316774	82	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__Galbitalea sp025463785
+R_C1_S3_prok_bin.35	ryan	3	Control	81.9	2.4	2554192	215	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-756;s__
+R_C1_S3_prok_bin.40	ryan	3	Control	80.84	3.37	4735083	120	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__BOG-931;s__
+R_C1_S3_prok_bin.46	ryan	3	Control	61.36	0.63	2398550	156	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__Palsa-851;s__
+R_C1_S3_prok_bin.55	ryan	3	Control	83.51	3.74	5421448	190	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Palsa-688;g__JALYXV01;s__
+R_C1_S3_prok_bin.63	ryan	3	Control	79.17	2.19	6385873	1080	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__CAJCJE01;s__
+R_C1_S3_prok_bin.65	ryan	3	Control	83.07	2.68	3995643	435	d__Bacteria;p__Desulfobacterota_B;c__Binatia;o__Binatales;f__Binataceae;g__Binatus;s__
+R_C1_S3_prok_bin.68	ryan	3	Control	85.24	5.3	4433921	181	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-473;s__
+R_C1_S3_prok_bin.71	ryan	3	Control	91.37	2.02	4841621	361	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__JAFAMB01;g__JAFAMB01;s__
+R_C1_S3_prok_bin.73	ryan	3	Control	95.64	3.73	4144339	117	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__Bog-1198;s__
+R_C1_S3_prok_bin.76	ryan	3	Control	82.71	3.36	2735280	413	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+R_C1_S3_prok_bin.78	ryan	3	Control	70.5	9.91	4802151	654	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Gp1-AA117;g__Angelobacter;s__
+R_C1_S3_prok_bin.89	ryan	3	Control	85.47	3.15	7676695	1126	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Isosphaerales;f__Isosphaeraceae;g__;s__
+R_C2_S2_bin.107	ryan	3	Control	96.69	0.5	4169943	103	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Palsa-187;s__
+R_C2_S2_bin.108	ryan	3	Control	93.82	3.57	4757691	71	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Elarobacter;s__
+R_C2_S2_bin.15	ryan	3	Control	96.14	9.32	6959122	163	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__;s__
+R_C2_S2_bin.19	ryan	3	Control	90.61	9.12	7291957	191	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Multivoradales;f__UBA5704;g__;s__
+R_C2_S2_bin.25	ryan	3	Control	85.43	5.93	4321390	344	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__PSRF01;s__
+R_C2_S2_bin.33	ryan	3	Control	93.45	1.39	5031172	210	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomonas;s__
+R_C2_S2_bin.38	ryan	3	Control	95.52	9.28	2655453	68	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+R_C2_S2_bin.57	ryan	3	Control	97.03	0.31	3881527	34	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__JAJPGZ01;s__
+R_C2_S2_bin.6	ryan	3	Control	94.35	3.25	5636342	56	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+R_C2_S2_bin.68	ryan	3	Control	70.52	0.5	2955897	190	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__QHCC01;s__
+R_C2_S2_bin.74	ryan	3	Control	87.19	1.39	2142664	291	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__CF-121;f__CF-121;g__JALYYC01;s__
+R_C2_S2_bin.78	ryan	3	Control	88.52	4.71	4082472	151	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_C2_S2_bin.82	ryan	3	Control	97.91	0.06	3929922	65	d__Bacteria;p__Armatimonadota;c__Fimbriimonadia;o__Fimbriimonadales;f__Fimbriimonadaceae;g__JANYLD01;s__
+R_C2_S2_bin.84	ryan	3	Control	97.63	3.19	5013045	39	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__UBA11740;s__
+R_C2_S2_bin.87	ryan	3	Control	79.97	7.98	5278080	678	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__JADGNZ01;s__
+R_C2_S2_bin.89	ryan	3	Control	91.2	5.68	2826060	143	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VAYN01;s__
+R_C2_S2_itr_bin.15	ryan	3	Control	92.82	4.05	2287319	76	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__;s__
+R_C2_S2_itr_bin.19	ryan	3	Control	88.38	2.88	4925527	384	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__ATCC43930;f__Stellaceae;g__AP-15;s__
+R_C2_S2_prok_bin.19	ryan	3	Control	96.36	1.19	2474339	52	d__Bacteria;p__Actinomycetota;c__UBA4738;o__CADDZG01;f__WHSQ01;g__;s__
+R_C2_S2_prok_bin.21	ryan	3	Control	97.01	0.86	3418975	184	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__UBA10450;g__CADDYX01;s__
+R_C2_S2_prok_bin.28	ryan	3	Control	92.68	2.22	3509520	191	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__JAICMS01;s__
+R_C2_S2_prok_bin.72	ryan	3	Control	89.65	3.28	3679642	370	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__Dormibacterales;f__Dormibacteraceae;g__;s__
+R_C2_S2_prok_bin.77	ryan	3	Control	80.52	2.74	3898072	108	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_C3_S1_bin.4	ryan	3	Control	93.61	6.8	2794340	83	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__70-9;g__VRUE01;s__
+R_H1_S1_bin.3	ryan	3	High	98.8	6.82	2893416	206	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+R_H1_S2_prok_bin.1	ryan	3	High	89.01	7.36	4082670	258	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Gaiellales;f__Gaiellaceae;g__PALSA-600;s__
+R_H2_S1_bin.117	ryan	3	High	89.89	2.58	5612427	225	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__AG11;s__
+R_H2_S1_bin.118	ryan	3	High	78.5	1.08	6787866	420	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__RYN-433;s__
+R_H2_S1_bin.141	ryan	3	High	91.65	4.49	4684869	280	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__Pseudolabrys;s__
+R_H2_S1_bin.151	ryan	3	High	97.1	0.12	1643671	24	d__Bacteria;p__Patescibacteria;c__Gracilibacteria;o__Peribacterales;f__Peribacteraceae;g__JAQBQQ01;s__
+R_H2_S1_bin.185	ryan	3	High	96.64	4.48	7048371	456	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__Mycobacterium sp025965555
+R_H2_S1_bin.187	ryan	3	High	94.13	4.06	5456467	336	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__ATCC43930;f__Stellaceae;g__URHD0088;s__
+R_H2_S1_bin.36	ryan	3	High	100	0	4359683	30	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__DSPA01;g__JAICLA01;s__
+R_H2_S1_bin.43	ryan	3	High	92.88	3.44	6525072	275	d__Bacteria;p__Chloroflexota;c__UBA6077;o__UBA6077;f__CF-72;g__CF-72;s__
+R_H2_S1_bin.63	ryan	3	High	88.86	3.65	3179553	171	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Thermoleophilaceae;g__JACVRW01;s__
+R_H2_S1_bin.65	ryan	3	High	90.07	3.91	9864769	554	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Dactylosporangium;s__
+R_H2_S1_bin.70	ryan	3	High	92.48	5.52	5130791	407	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Ilumatobacteraceae;g__WLMZ01;s__
+R_H2_S1_bin.8	ryan	3	High	97.41	4.39	10418312	336	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__Labilithrix;s__
+R_H2_S1_itr_bin.102	ryan	3	High	80.01	4.76	3806338	439	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Phenylobacterium;s__
+R_H2_S1_itr_bin.104	ryan	3	High	78.71	5.67	3770959	555	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Marmoricola;s__Marmoricola sp025965085
+R_H2_S1_itr_bin.106	ryan	3	High	87.32	5.06	4394688	537	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__CADCVQ01;s__
+R_H2_S1_itr_bin.27	ryan	3	High	94.28	6.09	4470676	314	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__;s__
+R_H2_S1_itr_bin.37	ryan	3	High	72.93	8.53	2322153	381	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_H2_S1_itr_bin.60	ryan	3	High	90	10.54	8589106	286	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__JANXXV01;s__
+R_H2_S1_itr_bin.84	ryan	3	High	87.47	6.57	4166142	520	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__HKI-0501;g__JAVEDU01;s__
+R_H2_S1_prok_bin.112	ryan	3	High	87.06	4.52	6938203	779	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Rhodopila;s__
+R_H2_S1_prok_bin.12	ryan	3	High	79.62	6.74	4245144	257	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAFAQI01;g__BP-197;s__
+R_H2_S1_prok_bin.128	ryan	3	High	80.79	4.13	3005892	457	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__FEN-1250;s__FEN-1250 sp028287205
+R_H2_S1_prok_bin.134	ryan	3	High	87.65	5.29	5061655	533	d__Bacteria;p__Chloroflexota;c__UBA5177;o__JANWHV01;f__JANWHV01;g__JANWHV01;s__JANWHV01 sp028287725
+R_H2_S1_prok_bin.136	ryan	3	High	95.75	2.52	3834436	319	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__JAQGLW01;s__
+R_H2_S1_prok_bin.143	ryan	3	High	84.46	5.63	5132676	501	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__;s__
+R_H2_S1_prok_bin.162	ryan	3	High	86.48	3.32	6388733	290	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Reyranellales;f__Reyranellaceae;g__Reyranella;s__
+R_H2_S1_prok_bin.177	ryan	3	High	99.96	0.46	3170675	80	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Nitrosomonadaceae;g__Nitrosospira;s__
+R_H2_S1_prok_bin.182	ryan	3	High	93.95	4.61	4536493	332	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Leifsonia;s__
+R_H2_S1_prok_bin.36	ryan	3	High	88.16	4.26	7389893	325	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Limisphaerales;f__Pedosphaeraceae;g__JAQGOT01;s__
+R_H2_S1_prok_bin.46	ryan	3	High	80.01	0.01	2342478	20	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Xanthomonadales;f__Xanthomonadaceae;g__Luteimonas_B;s__
+R_H2_S1_prok_bin.53	ryan	3	High	88.49	2.51	3181977	218	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__BP-191;g__BP-191;s__
+R_H2_S1_prok_bin.7	ryan	3	High	95.35	5.31	3672975	361	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__CADCTF01;g__;s__
+R_H2_S1_prok_bin.79	ryan	3	High	98.07	5.44	7741523	330	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-41;g__JAQGMV01;s__JAQGMV01 sp028291945
+R_H2_S1_prok_bin.92	ryan	3	High	95.69	7.46	9799722	928	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Isosphaerales;f__Isosphaeraceae;g__;s__
+R_H3_S2_bin.133	ryan	3	High	69.72	8.19	4452878	784	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Ilumatobacteraceae;g__JAODBQ01;s__
+R_H3_S2_bin.158	ryan	3	High	81.79	0.3	2774373	279	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Acidocella;s__
+R_H3_S2_bin.161	ryan	3	High	85.12	3.54	3349287	343	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__Tardiphaga;s__Tardiphaga sp028290325
+R_H3_S2_bin.167	ryan	3	High	77.07	3.62	3572240	485	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Subtercola;s__
+R_H3_S2_bin.176	ryan	3	High	92.7	5.23	3570834	62	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Lacisediminihabitans;s__
+R_H3_S2_bin.180	ryan	3	High	88.37	2.84	9017323	645	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Steroidobacterales;f__Steroidobacteraceae;g__13-2-20CM-66-19;s__
+R_H3_S2_bin.199	ryan	3	High	81.72	7.17	3501897	193	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__BOG-938;s__
+R_H3_S2_bin.74	ryan	3	High	96.77	0.47	5524075	322	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Pseudomonadales;f__Pseudomonadaceae;g__Pseudomonas_E;s__Pseudomonas_E sp028293835
+R_H3_S2_bin.83	ryan	3	High	85.82	10.72	3646031	182	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Lacisediminihabitans;s__Lacisediminihabitans sp025463565
+R_H3_S2_itr_bin.1	ryan	3	High	82.13	10.66	5078440	740	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__Ramlibacter sp028291745
+R_H3_S2_itr_bin.108	ryan	3	High	71.88	10.54	3091566	172	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Amnibacterium;s__
+R_H3_S2_itr_bin.13	ryan	3	High	89.55	8.87	7206316	1112	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+R_H3_S2_itr_bin.135	ryan	3	High	74.86	1.44	3524830	175	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Sphingobacteriales;f__Sphingobacteriaceae;g__Mucilaginibacter;s__
+R_H3_S2_itr_bin.179	ryan	3	High	64.58	1.26	2586267	449	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__Tardiphaga;s__Tardiphaga sp028290325
+R_H3_S2_itr_bin.6	ryan	3	High	70.67	2.17	3704078	633	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Variovorax;s__Variovorax sp028292285
+R_H3_S2_prok_bin.120	ryan	3	High	79.95	4.23	3092816	111	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Leifsonia;s__
+R_H3_S2_prok_bin.140	ryan	3	High	73.39	6.85	5093856	680	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Xylophilus;s__
+R_H3_S2_prok_bin.183	ryan	3	High	89.74	6	3670554	118	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__UBA5005;s__
+R_H3_S2_prok_bin.205	ryan	3	High	84.72	3.87	6494239	596	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Puia;s__
+R_H3_S2_prok_bin.219	ryan	3	High	90.51	9.63	4533700	143	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Phenylobacterium;s__
+R_H3_S2_prok_bin.33	ryan	3	High	87.3	1.72	3395264	187	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+R_H3_S2_prok_bin.36	ryan	3	High	72.87	9.98	4141110	729	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+R_H3_S2_prok_bin.47	ryan	3	High	83.42	1.23	3748443	311	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Beijerinckiaceae;g__Methylobacterium;s__Methylobacterium sp028290105
+R_H3_S2_prok_bin.52	ryan	3	High	87.04	2.29	4467688	350	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__;s__
+R_H3_S2_prok_bin.54	ryan	3	High	80.51	4.04	4166025	527	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Variovorax;s__Variovorax sp028292285
+R_H3_S2_prok_bin.61	ryan	3	High	88.06	3.98	3155911	384	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomonas_N;s__
+R_H3_S2_prok_bin.80	ryan	3	High	93.13	2.28	6683678	292	d__Bacteria;p__Armatimonadota;c__Chthonomonadetes;o__Chthonomonadales;f__Chthonomonadaceae;g__JANXLO01;s__
+R_H3_S2_prok_bin.88	ryan	3	High	82.29	2.64	3157468	175	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+R_L2_S2_bin.103	ryan	3	Low	96.39	0.65	4773713	57	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Edaphobacter;s__
+R_L2_S2_bin.105	ryan	3	Low	75.99	9.41	3566634	443	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Thermoleophilaceae;g__;s__
+R_L2_S2_bin.106	ryan	3	Low	91.01	2.29	5216543	417	d__Bacteria;p__Chloroflexota;c__Anaerolineae;o__Caldilineales;f__Caldilineaceae;g__QEUY01;s__
+R_L2_S2_bin.127	ryan	3	Low	100	2.67	4071332	202	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Schlegelella_A;s__
+R_L2_S2_bin.139	ryan	3	Low	82.99	2.09	4481188	486	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Casimicrobiaceae;g__VBCG01;s__
+R_L2_S2_bin.148	ryan	3	Low	93.41	0.56	3901210	159	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__SXVE01;s__
+R_L2_S2_bin.149	ryan	3	Low	72.16	6.79	6566473	1280	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__Polyangiaceae;g__;s__
+R_L2_S2_bin.18	ryan	3	Low	81.91	0.96	3682931	517	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Nakamurellaceae;g__Nakamurella;s__
+R_L2_S2_bin.188	ryan	3	Low	91.44	1.61	4549031	98	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Ilumatobacteraceae;g__VFMC01;s__
+R_L2_S2_bin.19	ryan	3	Low	100	6.9	3897136	84	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Afifellaceae;g__Faunimonas;s__
+R_L2_S2_bin.201	ryan	3	Low	85.06	4	5626161	418	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__JAUJNJ01;s__
+R_L2_S2_bin.204	ryan	3	Low	96.79	1.99	5194277	54	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__Chthoniobacteraceae;g__Chthoniobacter;s__
+R_L2_S2_bin.21	ryan	3	Low	91.9	2.3	8943191	501	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__Humisphaera;s__
+R_L2_S2_bin.214	ryan	3	Low	92.77	5.69	5352048	86	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-41;g__JAQGMV01;s__
+R_L2_S2_bin.219	ryan	3	Low	89.63	3.68	6971531	692	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Isosphaerales;f__Isosphaeraceae;g__JANXSX01;s__
+R_L2_S2_bin.220	ryan	3	Low	92.77	0.43	6518081	45	d__Bacteria;p__Planctomycetota;c__Planctomycetia;o__Pirellulales;f__JALHPA01;g__JALHPA01;s__
+R_L2_S2_bin.242	ryan	3	Low	90.53	1.4	6624169	536	d__Bacteria;p__Verrucomicrobiota;c__Verrucomicrobiae;o__Chthoniobacterales;f__Chthoniobacteraceae;g__SXWH01;s__
+R_L2_S2_bin.247	ryan	3	Low	100	7.42	5723089	499	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Roseococcus;s__Roseococcus sp028291485
+R_L2_S2_bin.260	ryan	3	Low	99.94	1.87	3409606	55	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__CADCTF01;g__JAHWJQ01;s__
+R_L2_S2_bin.265	ryan	3	Low	99.28	2.11	5699112	198	d__Bacteria;p__Acidobacteriota;c__Thermoanaerobaculia;o__Gp7-AA8;f__Gp7-AA8;g__QHVT01;s__
+R_L2_S2_bin.27	ryan	3	Low	91.86	1.42	4408088	201	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Flavitalea;s__
+R_L2_S2_bin.277	ryan	3	Low	80.37	1.09	4572400	467	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Ferruginibacter;s__
+R_L2_S2_bin.287	ryan	3	Low	96.64	1	2550171	255	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomonas_N;s__
+R_L2_S2_bin.33	ryan	3	Low	93.31	6.06	7103260	336	d__Bacteria;p__Myxococcota;c__Polyangia;o__Polyangiales;f__;g__;s__
+R_L2_S2_bin.44	ryan	3	Low	95.37	2.88	4396831	104	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-41;g__JAQGMV01;s__
+R_L2_S2_bin.45	ryan	3	Low	87.14	1.83	3649265	281	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Polaromonas;s__Polaromonas sp028292345
+R_L2_S2_bin.49	ryan	3	Low	81.43	0.37	3586825	158	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__Iamiaceae;g__JAOBWM01;s__
+R_L2_S2_bin.52	ryan	3	Low	99.27	3.79	3622037	360	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Ferruginibacter;s__
+R_L2_S2_bin.57	ryan	3	Low	92.04	0.08	3141154	348	d__Bacteria;p__Bacteroidota;c__Rhodothermia;o__Rhodothermales;f__Rubricoccaceae;g__;s__
+R_L2_S2_bin.73	ryan	3	Low	89.99	0.85	5450028	701	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Longimicrobiales;f__Longimicrobiaceae;g__Longimicrobium;s__
+R_L2_S2_bin.74	ryan	3	Low	94.13	2.4	4337875	190	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Rhizobacter;s__
+R_L2_S2_bin.75	ryan	3	Low	84.55	1.95	4802571	485	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Longimicrobiales;f__Longimicrobiaceae;g__JAHWJV01;s__
+R_L2_S2_bin.8	ryan	3	Low	100	4.45	5136256	133	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Sporichthyales;f__Sporichthyaceae;g__;s__
+R_L2_S2_bin.99	ryan	3	Low	88.81	7.86	4373946	318	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Ramlibacter;s__
+R_L2_S2_itr_bin.181	ryan	3	Low	95.33	3.16	2812724	73	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__SCTD01;g__;s__
+R_L2_S2_itr_bin.200	ryan	3	Low	72.24	10.46	2993874	500	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Marmoricola;s__Marmoricola sp025965085
+R_L2_S2_itr_bin.236	ryan	3	Low	70.84	1.59	3590604	580	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Schlegelella_A;s__
+R_L2_S2_itr_bin.79	ryan	3	Low	95.05	2.62	3700141	162	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Capillimicrobium;s__Capillimicrobium sp025964175
+R_L2_S2_prok_bin.112	ryan	3	Low	96.2	0.99	3448521	117	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Cryobacterium;s__Cryobacterium sp025463825
+R_L2_S2_prok_bin.119	ryan	3	Low	84.45	3.03	6884184	673	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__JAUJNJ01;s__
+R_L2_S2_prok_bin.147	ryan	3	Low	90.86	8.68	4587658	151	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+R_L2_S2_prok_bin.16	ryan	3	Low	91.48	2.28	3890586	179	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Nocardioidaceae;g__Marmoricola_A;s__
+R_L2_S2_prok_bin.188	ryan	3	Low	73.81	2.82	3607276	581	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Aquabacterium;s__
+R_L2_S2_prok_bin.26	ryan	3	Low	81.12	3.32	4974346	104	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__SCTD01;g__RYN-111;s__
+R_L2_S2_prok_bin.265	ryan	3	Low	70.83	2.39	6062866	719	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__RYN-150;s__
+R_L2_S2_prok_bin.44	ryan	3	Low	79.28	6.68	6516817	937	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__RYN-428;s__RYN-428 sp028288775
+R_L2_S2_prok_bin.55	ryan	3	Low	98.87	5.91	4027641	190	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__SG8-39;g__JADLDQ01;s__
+R_L2_S2_prok_bin.70	ryan	3	Low	89.9	3.7	4571962	305	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__Gemmatimonas;s__
+R_L2_S2_prok_bin.87	ryan	3	Low	83.03	0.21	2007530	112	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Gallionellaceae;g__;s__
+R_L3_S3_bin.102	ryan	3	Low	81.97	3.88	6706980	770	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__Rhodopila;s__Rhodopila sp028291505
+R_L3_S3_bin.103	ryan	3	Low	85.54	2.11	3314155	353	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__;s__
+R_L3_S3_bin.11	ryan	3	Low	83.12	3.88	2962692	187	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+R_L3_S3_bin.113	ryan	3	Low	88.92	4.14	4520668	212	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_L3_S3_bin.115	ryan	3	Low	90.61	0.81	4140100	161	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+R_L3_S3_bin.119	ryan	3	Low	95.57	1.89	3922327	120	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Palsa-881;s__
+R_L3_S3_bin.124	ryan	3	Low	91.58	3.97	8573089	776	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__RYN-230;s__
+R_L3_S3_bin.135	ryan	3	Low	84.41	2.62	3636916	266	d__Bacteria;p__Bdellovibrionota;c__UBA1018;o__UBA1018;f__UBA1018;g__;s__
+R_L3_S3_bin.150	ryan	3	Low	89.82	1.27	2473458	57	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_L3_S3_bin.160	ryan	3	Low	81.35	6.44	2788276	50	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_L3_S3_bin.179	ryan	3	Low	91.02	1.24	9054899	270	d__Bacteria;p__Myxococcota;c__Polyangia;o__Palsa-1104;f__Palsa-1104;g__JAQBQH01;s__
+R_L3_S3_bin.2	ryan	3	Low	86.38	2.82	4446186	439	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_L3_S3_bin.24	ryan	3	Low	78.8	4.58	6570194	409	d__Bacteria;p__Planctomycetota;c__Phycisphaerae;o__Tepidisphaerales;f__Tepidisphaeraceae;g__RYN-428;s__RYN-428 sp028288775
+R_L3_S3_bin.26	ryan	3	Low	90.34	1.14	2092853	165	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__CAIKPM01;s__
+R_L3_S3_bin.30	ryan	3	Low	83.03	1.9	2968088	394	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Herbaspirillum;s__
+R_L3_S3_bin.31	ryan	3	Low	92.52	4.26	3949119	436	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__Palsa-881;s__
+R_L3_S3_bin.32	ryan	3	Low	99.21	10.86	6235020	381	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__VAZQ01;s__
+R_L3_S3_bin.52	ryan	3	Low	91.88	10.33	10452437	222	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptomycetales;f__Catenulisporaceae;g__Catenulispora;s__
+R_L3_S3_bin.6	ryan	3	Low	100	0.77	3385008	59	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Rhizorhabdus;s__
+R_L3_S3_bin.68	ryan	3	Low	77.6	0.83	1973692	223	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__RAAP-2;s__
+R_L3_S3_bin.69	ryan	3	Low	92.31	1.29	4420672	50	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Acidoferrales;f__UBA7541;g__Acidoferrum;s__
+R_L3_S3_bin.77	ryan	3	Low	87.63	6.43	7411295	921	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__Pseudonocardia;s__
+R_L3_S3_bin.88	ryan	3	Low	80.17	6.04	2276521	292	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__RAAP-2;s__
+R_L3_S3_itr_bin.101	ryan	3	Low	90.24	7.64	7349419	950	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+R_L3_S3_itr_bin.131	ryan	3	Low	88.66	5.76	2611041	380	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+R_L3_S3_itr_bin.19	ryan	3	Low	75.99	2.2	4854460	911	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Pseudonocardiaceae;g__CAJCJE01;s__
+R_L3_S3_itr_bin.32	ryan	3	Low	92.07	9.92	3169397	53	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_L3_S3_itr_bin.39	ryan	3	Low	87.85	1.04	2868877	287	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__JAKAAZ01;s__
+R_L3_S3_itr_bin.51	ryan	3	Low	91.34	7.79	7012927	518	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+R_L3_S3_itr_bin.81	ryan	3	Low	83.57	9.65	3778694	365	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-756;s__
+R_L3_S3_prok_bin.103	ryan	3	Low	70.11	8.83	3276613	343	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-473;s__
+R_L3_S3_prok_bin.123	ryan	3	Low	87.61	1.04	6999953	843	d__Bacteria;p__Myxococcota;c__Polyangia;o__Haliangiales;f__Haliangiaceae;g__JABFXX01;s__
+R_L3_S3_prok_bin.16	ryan	3	Low	82.93	3.14	2426943	404	d__Bacteria;p__Desulfobacterota_B;c__Binatia;o__Binatales;f__Binataceae;g__JAKAVN01;s__
+R_L3_S3_prok_bin.164	ryan	3	Low	95.36	2.76	4125632	101	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-465;s__
+R_L3_S3_prok_bin.21	ryan	3	Low	92.14	2.26	3855906	173	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__RAAP-2;g__Bog-756;s__
+R_L3_S3_prok_bin.29	ryan	3	Low	96.07	1.97	4391977	289	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Sphingobacteriales;f__Sphingobacteriaceae;g__Mucilaginibacter;s__Mucilaginibacter sp028287865
+R_L3_S3_prok_bin.65	ryan	3	Low	99.58	1.31	5247688	322	d__Bacteria;p__Chloroflexota;c__Dormibacteria;o__UBA8260;f__UBA8260;g__CF-96;s__CF-96 sp028287605
+R_L3_S3_prok_bin.66	ryan	3	Low	82.08	5.1	4122656	370	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Caulobacterales;f__Caulobacteraceae;g__BOG-935;s__
+R_co2H2_bin.136	ryan	3	High	92.22	0.68	4112465	99	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Usitatibacteraceae;g__Usitatibacter;s__
+R_co2H2_bin.144	ryan	3	High	86.37	4.59	3972331	179	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__Gemmatimonadaceae;g__AG11;s__
+R_co2H2_bin.210	ryan	3	High	95.84	9.82	10750594	1192	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Actinoplanes;s__
+R_co2H2_bin.216	ryan	3	High	87.28	8.93	5906261	635	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__CAIYRG01;s__
+R_co2H2_bin.51	ryan	3	High	99.82	1.15	8764837	491	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Bryobacterales;f__Bryobacteraceae;g__Solibacter;s__Solibacter sp025463045
+R_co2H2_bin.56	ryan	3	High	99.89	10.41	6332130	711	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Telluria;s__
+R_co2H2_bin.71	ryan	3	High	67.48	7.96	4019998	426	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Xanthobacteraceae;g__CANKHA01;s__
+R_co2H2_bin.77	ryan	3	High	97.05	0.93	7745912	125	d__Bacteria;p__Acidobacteriota;c__Blastocatellia;o__Pyrinomonadales;f__Pyrinomonadaceae;g__;s__
+R_co2H2_bin.87	ryan	3	High	93.76	5.23	3251567	219	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+R_co2H2_bin.89	ryan	3	High	97.28	4.36	8421015	499	d__Bacteria;p__Myxococcota;c__Polyangia;o__Palsa-1104;f__Palsa-1104;g__JAQBQH01;s__
+R_co2H2_prok_bin.10	ryan	3	High	88	4.82	4491768	407	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__CADCVQ01;s__
+R_co2H2_prok_bin.114	ryan	3	High	87.98	2.97	3478744	160	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+R_co2H2_prok_bin.135	ryan	3	High	81.11	0.77	5728511	392	d__Bacteria;p__Armatimonadota;c__Chthonomonadetes;o__Chthonomonadales;f__CAJBBX01;g__;s__
+R_co2H2_prok_bin.139	ryan	3	High	75.06	2.47	3029767	409	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Palsa-744;s__
+R_co2H2_prok_bin.192	ryan	3	High	99.16	3.06	2402900	161	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Sphingomicrobium;s__
+R_co2H2_prok_bin.225	ryan	3	High	76.49	9.29	3149231	434	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Allosphingosinicella;s__
+R_co2H2_prok_bin.36	ryan	3	High	95.35	6.38	6194669	778	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__BP-133;g__BP-133;s__BP-133 sp030838815
+R_co2H2_prok_bin.37	ryan	3	High	87.93	10.9	3301910	291	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Micropepsales;f__Micropepsaceae;g__Rhizomicrobium;s__
+R_co2H2_prok_bin.56	ryan	3	High	84.54	6.15	3393343	213	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__Acidimicrobiales;f__CADCSY01;g__JAEKLB01;s__
+R_co2H2_prok_bin.71	ryan	3	High	87.07	2.18	7628404	856	d__Bacteria;p__Myxococcota;c__Polyangia;o__Haliangiales;f__Haliangiaceae;g__JABFXX01;s__
+R_co2H2_prok_bin.76	ryan	3	High	86.67	0.1	3288462	194	d__Bacteria;p__Gemmatimonadota;c__Gemmatimonadetes;o__Gemmatimonadales;f__GWC2-71-9;g__JACDDX01;s__
+R_co2H3_bin.117	ryan	3	High	83.68	3.95	4209094	658	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Propionibacteriaceae;g__CADCUO01;s__CADCUO01 sp025965155
+R_co2H3_bin.129	ryan	3	High	84.91	7.28	4406662	330	d__Bacteria;p__Actinomycetota;c__Thermoleophilia;o__Solirubrobacterales;f__Solirubrobacteraceae;g__Baekduia;s__
+R_co2H3_bin.148	ryan	3	High	91.65	6.3	5104596	374	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Sphingobacteriales;f__Sphingobacteriaceae;g__Mucilaginibacter;s__
+R_co2H3_bin.204	ryan	3	High	91.96	1.65	3943717	240	d__Bacteria;p__Bdellovibrionota;c__Bdellovibrionia;o__Bdellovibrionales;f__Bdellovibrionaceae;g__JACMRP01;s__
+R_co2H3_bin.261	ryan	3	High	74.05	5.79	3782391	459	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Beijerinckiaceae;g__28-YEA-48;s__
+R_co2H3_bin.270	ryan	3	High	84.04	8.47	4685049	409	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Rhizobiaceae;g__Mesorhizobium;s__
+R_co2H3_bin.271	ryan	3	High	98.13	0.9	4176919	218	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Rhizobiales;f__Rhizobiaceae;g__Rhizobium;s__
+R_co2H3_bin.277	ryan	3	High	81.67	3.97	4161976	490	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Telluria;s__
+R_co2H3_bin.39	ryan	3	High	94.73	2.61	3404454	124	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Sphingomonadales;f__Sphingomonadaceae;g__Rhizorhabdus;s__
+R_co2H3_bin.46	ryan	3	High	88.76	7.74	7940266	710	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Streptosporangiales;f__Streptosporangiaceae;g__Trebonia;s__
+R_co2H3_bin.54	ryan	3	High	94.6	2.21	3694747	49	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Galbitalea;s__
+R_co2H3_bin.59	ryan	3	High	88.94	0.62	4172866	145	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__Burkholderiaceae;g__Herbaspirillum;s__
+R_co2H3_prok_bin.113	ryan	3	High	92.94	3.95	5685479	150	d__Bacteria;p__Acidobacteriota;c__Terriglobia;o__Terriglobales;f__Acidobacteriaceae;g__Granulicella_C;s__
+R_co2H3_prok_bin.127	ryan	3	High	96.89	7.66	6067490	375	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__70-18;s__
+R_co2H3_prok_bin.142	ryan	3	High	93.32	1.84	6777781	208	d__Bacteria;p__Armatimonadota;c__Armatimonadia;o__Armatimonadales;f__Capsulimonadaceae;g__Capsulimonas;s__Capsulimonas sp025963815
+R_co2H3_prok_bin.194	ryan	3	High	91.38	3.65	5766537	400	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Mycobacteriaceae;g__Mycobacterium;s__
+R_co2H3_prok_bin.226	ryan	3	High	88.06	10.76	3512271	163	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__Lacisediminihabitans;s__
+R_co2H3_prok_bin.42	ryan	3	High	80.25	3.35	3580938	559	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans_A;s__
+R_co3H_prok_bin.14	ryan	3	High	93.97	0.7	4148353	144	d__Bacteria;p__Pseudomonadota;c__Gammaproteobacteria;o__Burkholderiales;f__JACQAP01;g__JACQAP01;s__
+R_co3H_prok_bin.188	ryan	3	High	85.82	3.44	4516541	619	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Propionibacteriales;f__Propionibacteriaceae;g__CADCUO01;s__CADCUO01 sp025965155
+R_co3H_prok_bin.3	ryan	3	High	89.26	4.78	3565098	188	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__JAFAQI01;g__JAFAQI01;s__
+R_co3H_prok_bin.64	ryan	3	High	89.35	3.73	3960972	369	d__Bacteria;p__Eremiobacterota;c__Eremiobacteria;o__Baltobacterales;f__Baltobacteraceae;g__Elarobacter;s__
+R_co3high_bin.115	ryan	3	High	76.4	1.54	2946529	370	d__Bacteria;p__Bdellovibrionota;c__UBA1018;o__UBA1018;f__UBA1018;g__;s__
+R_co3high_bin.116	ryan	3	High	91.27	3.04	6102026	305	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Micromonosporaceae;g__Planosporangium;s__Planosporangium sp025965915
+R_co3high_bin.27	ryan	3	High	84.55	2.77	2554618	275	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Actinomycetales;f__Microbacteriaceae;g__RYN-84;s__RYN-84 sp025464095
+R_co3high_bin.31	ryan	3	High	90.45	2.25	4422558	648	d__Bacteria;p__Bacteroidota;c__Bacteroidia;o__Chitinophagales;f__Chitinophagaceae;g__Ferruginibacter;s__Ferruginibacter sp028288465
+R_co3high_bin.79	ryan	3	High	92.68	5.67	5015939	423	d__Bacteria;p__Actinomycetota;c__Acidimicrobiia;o__IMCC26256;f__PALSA-555;g__;s__
+R_co3high_bin.82	ryan	3	High	97.56	2.88	4390723	275	d__Bacteria;p__Pseudomonadota;c__Alphaproteobacteria;o__Acetobacterales;f__Acetobacteraceae;g__PALSA-911;s__
+R_co3high_bin.95	ryan	3	High	93.59	2.13	4944787	193	d__Bacteria;p__Actinomycetota;c__UBA4738;o__JAHWKV01;f__JAOPZY01;g__JAOPZY01;s__
+R_co3high_bin.99	ryan	3	High	82.11	5.38	6348214	1221	d__Bacteria;p__Actinomycetota;c__Actinomycetes;o__Mycobacteriales;f__Jatrophihabitantaceae;g__Jatrophihabitans_A;s__Jatrophihabitans_A sp030840295
+								d__Bacteria; p__Verrucomicrobiota; c__Verrucomicrobiae; o__Chthoniobacterales; f__Xiphinematobacteraceae;g__Candidatus_Xiphinematobacter;s__uncultured_bacterium

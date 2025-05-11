@@ -1,0 +1,229 @@
+---
+title: "Maaslin_16S_redo"
+author: "Kya Sparks"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(Hmisc)
+```
+
+
+```{r}
+# maaslin <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_Maaslin2_finalresultscombined.xlsx",sheet = "all")
+# 
+# data2 <- read_excel("/Users/kyasparks/Library/Mobile Documents/com~apple~CloudDocs/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/16S_Maaslin_TP.xlsx", sheet = "TP")%>%
+#   pivot_longer(names_to = "samples", values_to = "Relative Abundance",2:304)
+```
+
+
+```{r}
+data <- read_csv("/Users/kyasparks/Desktop/16S_Maaslin_combined.csv")
+
+```
+
+
+```{r}
+#data <- read_delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem.txt")
+```
+
+
+```{r}
+# maaslin <- inner_join(maaslin, data, by = "OTUID") %>% 
+#   pivot_longer(names_to = "samples", values_to = "Number_of_ASVs",10:3)
+```
+
+
+```{r}
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt") 
+```
+
+
+```{r}
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt")
+
+data <-inner_join(taxa, data, by = "OTUID") %>% 
+  pivot_longer(names_to = "samples", values_to = "Number_of_ASVs",9:311)
+```
+
+
+```{r}
+data_meta <- inner_join(data, metadata, by =c("samples"="Sample_ID"))
+```
+
+
+```{r}
+#data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
+```
+
+
+```{r}
+sample_count_per_site <- data_meta %>%
+  group_by(Site) %>%
+  summarise(Total_Samples = n_distinct(samples))
+
+otu_count_per_phylum <- data_meta %>%
+  group_by(Site,Phylum) %>%
+  summarise(OTUID_count = n_distinct(OTUID))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  left_join(sample_count_per_site, by = c("Site" = "Site"))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  mutate(Relative_Abundance= OTUID_count / Total_Samples)
+
+
+```
+
+
+```{r}
+otu_count_per_phylum <-  inner_join(data_meta, otu_count_per_phylum, by = c("Site", "Phylum"))
+```
+
+
+```{r}
+# Step 1: Count occurrences of each Phylum for each sample
+phylum_count_per_sample_site <- data_meta %>%
+  group_by(Site, samples, Phylum,OTUID) %>%
+  summarise(Phylum_count = n(), .groups = 'drop')
+
+# Step 2: Calculate total counts per sample
+total_counts_per_sample <- phylum_count_per_sample_site %>%
+  group_by(Site,samples) %>%
+  summarise(Total_Counts = sum(Phylum_count), .groups = 'drop')
+
+# Step 3: Join the total counts back to the phylum counts
+phylum_count_per_sample_site <- phylum_count_per_sample_site %>%
+  left_join(total_counts_per_sample_site, by = c("Site", "samples"))
+
+# Step 4: Calculate Relative Abundance for each Phylum within each sample
+phylum_count_per_sample <- phylum_count_per_sample %>%
+  mutate(Relative_Abundance = Phylum_count / Total_Counts)
+```
+
+```{r}
+phylum_count_per_sample <- inner_join(phylum_count_per_sample,data_meta, by = "samples")
+```
+
+```{r}
+# ggplot(otu_count_per_phylum, aes(x = Relative_Abundance, y = Phylum, color = Site)) +
+#   geom_pointrange(aes(xmin = Proportion_min, xmax = Proportion_max), size = .3, position = position_dodge(width = 1)) +  # Position dodge for separation
+#   theme_minimal() +
+#   labs(title = "Phylum Proportions by Site", x = "Proportion", y = "Phylum") +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#   scale_color_manual(values = c("blue", "red", "green"))  # Customize colors for 3 sites
+
+
+
+ggplot(otu_count_per_phylum, aes(y=Phylum, x=Relative_Abundance, color =Site))+
+  stat_summary(fun.data = median_hilow, geom = "pointrange",
+               fun.args = list(conf.int=.25),
+               position = position_dodge(width=.5), size=.3)
+
+```
+
+
+
+
+```{r}
+ggplot(otu_count_per_phylum, aes(x=Site, y=`Relative_Abundance`, fill=Phylum))+
+geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1))
+```
+
+
+```{r}
+# Create a summary dataset with median and confidence intervals
+summary_data <- otu_count_per_phylum %>%
+  group_by(Phylum, Site) %>%
+  summarize(median_abundance = median(Relative_Abundance, na.rm = TRUE),
+            lower_ci = quantile(Relative_Abundance, 0.25, na.rm = TRUE),  # Lower quartile
+            upper_ci = quantile(Relative_Abundance, 0.75, na.rm = TRUE),  # Upper quartile
+            .groups = 'drop')
+
+# Plot using geom_pointrange
+ggplot(summary_data, aes(y = Phylum, x = median_abundance, color = Site)) +
+  geom_pointrange(aes(xmin = lower_ci, xmax = upper_ci),
+                  position = position_dodge(width = 0.6),
+                  size = 1.2) +  # Thickness of the lines
+  geom_point(data = otu_count_per_phylum, aes(x = Relative_Abundance),
+             position = position_jitterdodge(dodge.width = 0.6), size = 2, alpha = 0.5) +  # Jitter for visibility
+  theme_minimal() +
+  labs(x = "Relative Abundance", y = "Phylum")  # Optional: Label axes for clarity
+```
+
+
+
+
+
+
+```{r}
+shallow <- subset(data_meta_taxa, Depth == "0_5cm")
+```
+
+
+```{r}
+otu_count_per_phylum <- shallow %>%
+  group_by(Site,Phylum) %>%
+  summarise(OTUID_count = n_distinct(OTUID))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  left_join(sample_count_per_site, by = c("Site" = "Site2"))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  mutate(Relative_Abundance= OTUID_count / Total_Samples)
+```
+
+
+```{r}
+deep <- subset(data_meta_taxa, Depth == "5_15cm")
+OM <- subset(data_meta_taxa, Depth == "OM")
+
+SF <- subset(data_meta_taxa, Site == "SF")
+TP <- subset(data_meta_taxa, Site == "TP")
+SJ <- subset(data_meta_taxa, Site == "SJ")
+```
+
+
+
+
+```{r}
+maaslin <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/ASCC_16S_Maaslin2_finalresultscombined.xlsx",sheet = "all")
+```
+
+```{r}
+
+sample_count_per_site <- data %>%
+  group_by(Site) %>%
+  summarise(Total_Samples = n_distinct(samples))
+
+otu_count_per_phylum <- data_meta_taxa %>%
+  group_by(Site,Phylum) %>%
+  summarise(OTUID_count = n_distinct(OTUID))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  left_join(sample_count_per_site, by = c("Site" = "Site"))
+
+otu_count_per_phylum <- otu_count_per_phylum %>%
+  mutate(Relative_Abundance= OTUID_count / Total_Samples)
+```
+
+```{r}
+ggplot(otu_count_per_phylum, aes(x=Site, y=`Relative_Abundance`, fill=Phylum)) +
+  geom_bar(stat="identity") +
+  #facet_wrap(~Site, nrow = 1, scales = "free_x")+
+  guides(fill=guide_legend(ncol = 1))+
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
