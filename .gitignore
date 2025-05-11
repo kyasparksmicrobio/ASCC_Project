@@ -1,36 +1,31 @@
-# === MAGs and 16S_Maaslin-specific ignores ===
+# === RStudio / R junk ===
+.Rproj.user/
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj
 
-# Ignore images in MAGs and 16S_Maaslin folders
-MAGs/*.jpg
-MAGs/*.jpeg
-MAGs/*.png
-MAGs/*.webp
-MAGs/*.svg
-MAGs/*.ai
+# === macOS junk ===
+.DS_Store
 
-16S_Maaslin/*.jpg
-16S_Maaslin/*.jpeg
-16S_Maaslin/*.png
-16S_Maaslin/*.webp
-16S_Maaslin/*.svg
+# === Large or intermediate microbiome data files ===
+*.qza
+*.qzv
+*.fastq
+*.bam
+*.rds
+*.log
+*.gz
+*.zip
+*.tar
+*_files/
 
-# Ignore PowerPoint or Keynote slides
-MAGs/*.ppt
-MAGs/*.pptx
-MAGs/*.key
+# === Outputs and results directories ===
+output/
+results/
 
-16S_Maaslin/*.ppt
-16S_Maaslin/*.pptx
-16S_Maaslin/*.key
-
-# Keep useful files
-!MAGs/*.xlsx
-!MAGs/*.csv
-!MAGs/*.tsv
-!MAGs/*.html
-
-!16S_Maaslin/*.xlsx
-!16S_Maaslin/*.csv
-!16S_Maaslin/*.tsv
-!16S_Maaslin/*.html
-
+# === Optional: ignore large tables globally (optional) ===
+# *.csv
+# *.tsv
+# *.xlsx
+# *.html
