@@ -1,101 +1,125 @@
-# ASCC Project: Soil Microbiome Analysis
+# ASCC\_Project: Adaptive Silviculture for Climate Change (ASCC) Soil Microbiome Analyses
 
-This repository contains data processing, analysis scripts, and results for the **Adaptive Silviculture for Climate Change (ASCC)** soil microbiome study. The project includes 16S rRNA and ITS amplicon data, soil chemical metadata, and code used for bioinformatics and statistical analysis.
-
----
-
-## Project Structure
-
-```
-ASCC_Project/
-├── 16S/                     # 16S rRNA analysis
-│   ├── 16S_Rscripts/        # Alpha, beta diversity, MaAsLin2, taxonomy
-│   ├── 16S_metadata/        # Feature tables and metadata
-│   └── 16S_slurm_scripts/   # SLURM scripts for cluster jobs
-│
-├── ITS/                     # ITS fungal analysis
-│   ├── ITS_Rscripts/        # Scripts for diversity, guilds, core taxa
-│   ├── ITS_metadata/        # ITS-specific metadata and feature tables
-│   └── ITS_slurm_scripts/   # SLURM scripts for ITS
-│
-├── MAGs/                    # DRAM outputs and genome annotations
-├── Soil_Chemistry_TimFegelRMRS/   # Soil chemical data and analyses
-├── maaslin_files_probwrong/       # Debugging/test MaAsLin2 files
-├── Manuscript_2025/        # Manuscript drafts and supporting figures
-├── .gitattributes          # Git LFS configuration
-├── .gitignore              # Ignore rules for untracked files
-└── README.md               # Project overview
-```
+This repository contains all scripts, metadata, outputs, and visualizations for 16S and ITS rRNA gene sequencing analyses associated with the **Adaptive Silviculture for Climate Change (ASCC)** soil microbial project. The project spans coniferous forest sites in Colorado and involves bioinformatic and statistical workflows for understanding microbial community structure and function in response to climate-adaptive forest management.
 
 ---
 
-## Summary
+## Repository Structure
 
-This project examines bacterial and fungal community responses across different depths and sites in forest soils under climate-adapted silvicultural treatments. It includes:
+### `16S/`
 
-- **16S**: bacterial/archaeal community profiling  
-- **ITS**: fungal community profiling  
-- **MAGs**: metagenome-assembled genomes & DRAM annotation  
-- **Soil chemistry**: pH, nutrients, and other abiotic drivers
+Contains all analyses related to bacterial and archaeal 16S rRNA gene sequencing.
+
+Subdirectories:
+
+* `16S_alpha_diversity/`: Alpha diversity metrics, rarefaction, and plots.
+* `16S_beta_diversity/`: NMDS, PCoA, PERMANOVA, and environmental vector fitting.
+* `16S_coremetrics/`: Qiime2-generated metrics.
+* `16S_CoreTaxaAnalysis/`: Core taxa identification and ternary plots.
+* `16S_MAGs_coniferous/`: Mapping ASVs to MAGs and associated results.
+* `16S_Maaslin/`: MaAsLin2 differential abundance analyses, heatmaps, point-range plots.
+* `16S_metadata/`: Cleaned and formatted metadata, barcode files.
+* `16S_Rscripts/`: R scripts used for analysis and plotting.
+* `16S_slurm_outputs/`: Cluster output logs.
+* `16S_slurm_scripts/`: All bash scripts used for SLURM-based Qiime2 pipeline.
+* `16S_taxonomy/`: Taxonomic classification and barcharts.
+* `16S_barcodes/`: Barcode mapping files.
+
+### `ITS/`
+
+Contains analyses of fungal ITS rRNA gene sequencing data.
+
+Subdirectories:
+
+* `ITS_alpha_diversity/`: Rarefaction, diversity comparisons.
+* `ITS_beta_diversity/`: NMDS and PCoA with depth/site comparisons.
+* `ITS_coremetrics/`: Core metrics and EM fungal detection.
+* `ITS_CoreTaxaAnalysis/`: Dominant/consistent taxa analysis.
+* `ITS_FUNguild/`: Functional guild parsing and results.
+* `ITS_maaslin/`: Differential abundance outputs.
+* `ITS_metadata/`: ITS-specific metadata files.
+* `ITS_reads_OG/`: Raw read sample sheet.
+* `ITS_Plots/`: Barcharts, volcano plots, and exploratory graphics.
+* `ITS_Rscripts/`: R scripts for diversity, guild, and plotting.
+* `ITS_slurm_outputs/`: SLURM output files.
+* `ITS_slurm_scripts/`: ITS pipeline bash scripts for Qiime2.
+* `ITS_taxonomy/`: Taxonomy classification and barcharts.
+
+### `MAGs/`
+
+Contains metagenome-assembled genome (MAG) analysis outputs.
+
+* `outputs_versionDRAM2/` and `outputs_versionDRAM1.4.4/`: Annotated metabolism summaries, genome stats, product tables.
+* All `.tsv`, `.csv`, `.html`, and `.xlsx` files from DRAM are tracked.
+
+### `Soil_Chemistry_TimFegelRMRS/`
+
+Processed soil chemistry data provided by Tim Fegel (USFS RMRS). Includes:
+
+* Water extractable chemistry
+* Mineral/organic soil fractions
+* Soil texture and bulk density
+* PERMANOVA results and ordinations
+
+### `Manuscript_2025/`
+
+Draft text and figures supporting the ASCC 2025 manuscript.
+
+### `maaslin_files_probwrong/`
+
+A scratch folder for potentially incorrect or early versions of MaAsLin2 outputs.
 
 ---
 
-## Getting Started
+## Notebooks and Reports
 
-### 1. Clone the repository
+* `.Rmd`, `.R`, and `.md` files throughout the repo document analytical decisions and steps.
+* All heatmaps, stacked barplots, and point-range visualizations for MaAsLin2 are included in `geom_point_range` and `stacked_bar_maaslin` folders.
+
+---
+
+## Git LFS Usage
+
+Some files exceed GitHub's default 100 MB limit. [Git LFS](https://git-lfs.github.com/) is used to track large:
+
+* `.csv` output tables from ITS-FUNGuild
+* DRAM2 `.tsv` annotation tables
+* Feature tables for taxonomy and abundance
+
+Make sure Git LFS is installed before cloning:
 
 ```bash
-git clone https://github.com/kyasparksmicrobio/ASCC_Project.git
-cd ASCC_Project
-```
+brew install git-lfs
+# or
+sudo apt install git-lfs
 
-### 2. Install Git LFS (for large file support)
-
-```bash
-brew install git-lfs   # macOS
+# Then
 git lfs install
 ```
 
 ---
 
-## Key Tools and Pipelines
+## .gitignore Summary
 
-| Component     | Tools Used                              |
-|---------------|------------------------------------------|
-| Amplicon QC   | Qiime2, DADA2                            |
-| Diversity     | `vegan`, `phyloseq`, custom `ggplot2`    |
-| Differential Abundance | MaAsLin2                        |
-| Functional Analysis | DRAM (MAGs)                        |
-| Guild Analysis | FUNGuild, custom R scripts              |
+This repository tracks only the necessary text files and figures. Images, PowerPoint slides, and intermediate outputs are ignored globally **except** where explicitly preserved in `MAGs/` and `Maaslin/` folders.
 
 ---
 
-## Data Notes
+## Citation
 
-- Large files (e.g., `.csv`, `.xlsx`, `.tsv`) are tracked with **Git LFS**.
-- Intermediate `.qza`, `.fastq`, and `.pptx` files are excluded via `.gitignore`.
-- Sensitive raw sequencing data is stored on [external drive/cluster path].
+If you use any part of this repository in your work, please cite:
 
----
-
-## Git LFS Warnings
-
-GitHub may warn about large files (>50MB), but these are safely managed with Git LFS. If you clone this repo, make sure you run:
-
-```bash
-git lfs install
-git lfs pull
-```
+> Sparks, K. et al. (2025). Soil microbial responses to adaptive silviculture for climate change in western coniferous forests. *In prep.*
 
 ---
 
 ## Contact
 
-Maintained by **Kya Sparks** (kyasparks@colostate.edu)  
-Colorado State University, Soil & Crop Sciences / Wilkins Lab
+Kya Sparks — Soil Microbiology PhD Student, Colorado State University
+[kya.sparks@colostate.edu](mailto:kya.sparks@colostate.edu)
+GitHub: [kyasparksmicrobio](https://github.com/kyasparksmicrobio)
 
 ---
 
-## License
+Let me know if you'd like this broken into sub-README files by folder.
 
-[MIT License](LICENSE) — open for academic use and collaboration.
