@@ -1,0 +1,85 @@
+Notes:
+
+Its good to check that all bins copied from the loop when running the slurm script followed by the text file containg all of the bins!
+How to check:;
+    created a list containing all files with .fa (so we used *fa) to count, and create a list called list_all.txt, then counted them 
+    
+    ls *fa > list_all.txt
+    wc -l list_all.txt
+
+we got, 50 list_all.txt!
+
+NOTE: if you dont include an argument and create a list it will include that list in the count!
+
+MAGs location on server:
+
+/home/projects-wilkins-2/ASCC/summer_2024/link_16S_to_MAGs/MAGs
+
+/home/projects-wilkins-2/fire/biogeo_KKA/coniferous/all_coniferous_bins/dereplicated_genomes
+
+1. Copy bins list into directory
+2. Setup DRAM
+
+header:
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=50gb
+#SBATCH --time=24:00:00
+#SBATCH --job-name=copy
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kysparks@colostate.edu
+#SBATCH --partition=wilkins-hi,wilkins-low
+#SBATCH --nodelist=marmot
+
+
+
+for element in $(<$1)
+do
+cp /home/projects-wilkins-2/fire/biogeo_KKA/coniferous/all_coniferous_bins/dereplicated_genomes/"$element".fa /home/projects-wilkins-2/ASCC/summer_2024/link_16S_to_MAGs/MAGs
+done
+echo
+exit 0
+
+
+more "bin name" 
+
+shows us first contig in the bibn
+
+
+
+We are working with DRAM 2:
+dram2 -h shows you help page!
+prodigal will tell youb genes, but not annotate
+.faa = amino acid file, usally correlated witg called geenes as well 
+keep memory at 160gb 
+-d flag directory-t threads / processors 
+use use_dbset for KEGG!
+
+1. Call (argument): turn into AA file .faa
+2. Annotate (argument) with multiple databases
+3. Distill - summarize output
+
+#!/bin/bash
+#SBATCH --nodes=1
+#SBATCH --ntasks=15
+#SBATCH --mem=160gb
+#SBATCH --time=336:00:00
+#SBATCH --job-name=dram2
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=kysparks@colostate.edu
+#SBATCH --partition=wilkins-hi,wilkins-low
+
+source /opt/Miniconda2/miniconda2/bin/activate DRAM2BETA
+
+dram2 -d DRAM2/ -t 15 call ./*.fa
+
+dram2 -d DRAM2/ -t 15 annotate --use_dbset adjectives_kegg --use_db fegenie --use_db camper --use_db methyl --use_db cant_hyd --use_db stats
+
+dram2 -d DRAM2/ distill
+
+
+
+I started running DRAM2 on 10/18/24 at ~4pm!!!
+running on marmot, using 15 processors / ntasks
+

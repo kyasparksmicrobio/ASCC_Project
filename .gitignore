@@ -1,4 +1,4 @@
-# RStudio junk
+# R and RStudio
 .Rproj.user/
 .Rhistory
 .RData
@@ -8,64 +8,49 @@
 # macOS
 .DS_Store
 
-# Large/intermediate microbiome files
+# Large/intermediate bioinformatics files
 *.qza
 *.qzv
 *.fastq
 *.bam
-*.RData
+*.sam
 *.rds
+*.RData
 *.log
 *.gz
 *.zip
 *.tar
-*.tsv
-*_files/
-output/
-results/
-.Rproj.user/
-.Rhistory
-.RData
-*.qza
-*.qzv
-*.fastq
-*.RData
-*.rds
-*.log
-*.gz
-*.zip
-*.tar
+*.yml
+*.yaml
 
-# Ignore screenshots, figures, and large media
-*.jpg
-*.png
-*.svg
-*.webp
-*.xlsx
-*.pdf
-Screenshot*
-*_transition*
-*_resilience*
-*_scaled-resistance*
+# Excel files — keep these
+!*.xlsx
 
-# Ignore photos and presentation files
+# Data tables — keep these
+!*.csv
+!*.tsv
+!*.html
+
+# Image files
 *.jpg
 *.jpeg
 *.png
 *.webp
 *.svg
-*.gif
-*.tif
-*.tiff
-*.bmp
 
-# Ignore PowerPoint and Keynote
+# Presentations
 *.ppt
 *.pptx
 *.key
 
-# Ignore screenshots by name
-Screenshot*
-*_transition*
-*_resilience*
-*_scaled-resistance*
+# Slurm/cluster logs
+slurm-*
+*.out
+*.err
+
+# Output/scratch folders
+outputs/
+results/
+*_output/
+*_outputs/
+*/__pycache__/
