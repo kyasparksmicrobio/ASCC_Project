@@ -36,11 +36,10 @@ custom_warm_palette <- c(
 
 # Final Hokusai-inspired gradient
 custom_hokusai_gradient <- c(
-  "#FFFFFF",   # White for 0 (overridden below)
+  "#FFFFFF",   # White for low (or NA)
   "#F6E3A1",   # Soft yellow
-  "#DE6000",   # Rich orange
-  "#B75347",   # Coral/clay
-  "#DE7666"    # Dusty pink
+  "#DE6000",   # Rich orange   # Coral/clay
+  "#A8402D"    # Dusty pink
 )
 
 # Step 1: Load and label each depth
@@ -114,7 +113,7 @@ heatmap_plot <- ggplot(heatmap_data, aes(x = Depth, y = Phyla)) +
   ) +
   theme_minimal() +
   labs(
-    title = "Number of Discriminant OTUs (SF vs Other)",
+    title = "SF vs Other",
     x = "Depth",
     y = "Phylum"
   ) +
@@ -306,11 +305,10 @@ custom_warm_palette <- c(
 
 # Final Hokusai-inspired gradient
 custom_hokusai_gradient <- c(
-  "#FFFFFF",   # White for 0 (overridden below)
+  "#FFFFFF",   # White for low (or NA)
   "#F6E3A1",   # Soft yellow
-  "#DE6000",   # Rich orange
-  "#B75347",   # Coral/clay
-  "#DE7666"    # Dusty pink
+  "#DE6000",   # Rich orange   # Coral/clay
+  "#A8402D"    # Dusty pink
 )
 
 # Step 1: Load and label each depth
@@ -382,7 +380,7 @@ heatmap_plot <- ggplot(heatmap_data, aes(x = Depth, y = Phyla)) +
       barheight = unit(5, "cm"))) +
   theme_minimal() +
   labs(
-    title = "Number of Discriminant OTUs (TP vs Other)",
+    title = "TP vs Other",
     x = "Depth",
     y = "Phylum"
   ) +
@@ -431,11 +429,10 @@ custom_warm_palette <- c(
 
 # Final Hokusai-inspired gradient
 custom_hokusai_gradient <- c(
-  "#FFFFFF",   # White for 0 (overridden below)
+  "#FFFFFF",   # White for low (or NA)
   "#F6E3A1",   # Soft yellow
-  "#DE6000",   # Rich orange
-  "#B75347",   # Coral/clay
-  "#DE7666"    # Dusty pink
+  "#DE6000",   # Rich orange   # Coral/clay
+  "#A8402D"    # Dusty pink
 )
 
 # Step 1: Load and label each depth
@@ -576,11 +573,10 @@ custom_warm_palette <- c(
 
 # Final Hokusai-inspired gradient
 custom_hokusai_gradient <- c(
-  "#FFFFFF",   # White for 0 (overridden below)
+  "#FFFFFF",   # White for low (or NA)
   "#F6E3A1",   # Soft yellow
-  "#DE6000",   # Rich orange
-  "#B75347",   # Coral/clay
-  "#DE7666"    # Dusty pink
+  "#DE6000",   # Rich orange   # Coral/clay
+  "#A8402D"    # Dusty pink
 )
 
 # Step 1: Load and label each depth
@@ -665,7 +661,7 @@ heatmap_plot <- ggplot(heatmap_data, aes(x = Depth, y = Phyla)) +
   ) +
   theme_minimal() +
   labs(
-    title = "Number of Discriminant OTUs (SJ vs Other)",
+    title = "SJ vs Other",
     x = "Depth",
     y = "Phylum"
   ) +
@@ -842,26 +838,36 @@ final_plot3
 
 
 ```{r}
+# Get full phylum set
+all_phyla <- union(union(levels(droplevels(sf_data$Phyla)), 
+                         levels(droplevels(tp_data$Phyla))), 
+                   levels(droplevels(sj_data$Phyla)))
 
+# Calculate total OTUs across sites for phylum ordering
+phylum_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
+  group_by(Phyla) %>%
+  summarise(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
+  arrange(desc(total_OTUs))
 
-# Determine full list of unique phyla across all sites
-all_phyla <- union(union(levels(droplevels(sf_data$Phyla)), levels(droplevels(tp_data$Phyla))), levels(droplevels(sj_data$Phyla)))
+# Store phylum levels from most to least OTUs
+phylum_order <- phylum_totals$Phyla
 
 # Ensure all phyla appear in each dataset (even if with zero OTUs)
-expand_phylum_grid <- function(data, all_phyla) {
-  depths <- unique(data$Depth)
+expand_phylum_grid <- function(data, all_phyla, phylum_order) {
+  depths <- c("OM", "0-5cm", "5-15cm")
   expanded <- expand.grid(Phyla = all_phyla, Depth = depths, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
   data <- full_join(expanded, data, by = c("Phyla", "Depth"))
-  data$Phyla <- factor(data$Phyla, levels = rev(sort(unique(all_phyla))))
+  data$Phyla <- factor(data$Phyla, levels = rev(phylum_order))  # 💥 Reverse order here
+  data$Depth <- factor(data$Depth, levels = depths)
   data$fill_val[is.na(data$fill_val)] <- NA
   data$n_OTUs[is.na(data$n_OTUs)] <- 0
   data$label[is.na(data$label)] <- "0"
   return(data)
 }
 
-sf_data <- expand_phylum_grid(sf_data, all_phyla)
-tp_data <- expand_phylum_grid(tp_data, all_phyla)
-sj_data <- expand_phylum_grid(sj_data, all_phyla)
+sf_data <- expand_phylum_grid(sf_data, all_phyla, phylum_order)
+tp_data <- expand_phylum_grid(tp_data, all_phyla, phylum_order)
+sj_data <- expand_phylum_grid(sj_data, all_phyla, phylum_order)
 
 
 # Create each plot without legends
@@ -933,3 +939,230 @@ final_combined_plot <- (plot_sf + plot_tp + plot_sj + plot_layout(widths = c(1, 
 # Display the combined plot
 final_combined_plot
 ```
+
+
+
+
+```{r}
+
+# Get full phylum set
+all_phyla <- union(union(levels(droplevels(sf_data$Phyla)), 
+                         levels(droplevels(tp_data$Phyla))), 
+                   levels(droplevels(sj_data$Phyla)))
+
+# Calculate total OTUs across sites for phylum ordering
+phylum_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
+  group_by(Phyla) %>%
+  summarise(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
+  arrange(desc(total_OTUs))
+
+# Store phylum levels from most to least OTUs
+phylum_order <- phylum_totals$Phyla
+
+# Ensure all phyla appear in each dataset (even if with zero OTUs)
+expand_phylum_grid <- function(data, all_phyla, phylum_order) {
+  depths <- c("OM", "0-5cm", "5-15cm")
+  expanded <- expand.grid(Phyla = all_phyla, Depth = depths, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+  data <- full_join(expanded, data, by = c("Phyla", "Depth"))
+  data$Phyla <- factor(data$Phyla, levels = rev(phylum_order))  # 💥 Reverse order here
+  data$Depth <- factor(data$Depth, levels = depths)
+  data$fill_val[is.na(data$fill_val)] <- NA
+  data$n_OTUs[is.na(data$n_OTUs)] <- 0
+  data$label[is.na(data$label)] <- "0"
+  return(data)
+}
+
+sf_data <- expand_phylum_grid(sf_data, all_phyla, phylum_order)
+tp_data <- expand_phylum_grid(tp_data, all_phyla, phylum_order)
+sj_data <- expand_phylum_grid(sj_data, all_phyla, phylum_order)
+
+
+# Create each plot without legends
+shared_limits <- c(0, max(c(sf_data$n_OTUs, tp_data$n_OTUs, sj_data$n_OTUs), na.rm = TRUE))
+
+shared_theme <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.x.top = element_text(angle = 0, hjust = 0.5),  # <-- fixed here
+    axis.text.x.bottom = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(0, "pt"),
+    panel.grid = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+plot_sf <- ggplot(sf_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4, fontface = "bold") +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    guide = "none",  # No legend here
+    na.value = "black"
+  ) +
+  labs(title = "SF vs Other", y = "Phylum") +
+  shared_theme +
+  theme(axis.title.y = element_text(angle = 90, vjust = 0.5))
+
+plot_tp <- ggplot(tp_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4, fontface = "bold") +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    guide = "none",  # No legend here
+    na.value = "black"
+  ) +
+  labs(title = "TP vs Other") +
+  shared_theme +
+  theme(axis.text.y = element_blank())
+
+plot_sj <- ggplot(sj_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4, fontface = "bold") +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    name = "# of\nDiscriminant OTUs",
+    na.value = "black",
+    breaks = c(1, 6, 12, 18),
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barwidth = unit(0.5, "cm"),
+      barheight = unit(5, "cm"),
+      ticks.colour = "black",
+      frame.colour = "black"
+    )
+  ) +
+  labs(title = "SJ vs Other") +
+  shared_theme +
+  theme(axis.text.y = element_blank())
+
+
+library(patchwork)
+
+final_combined_plot <- plot_sf + plot_tp + plot_sj +
+  plot_layout(ncol = 3, widths = c(1, 1, 1), guides = "collect") &
+  theme(legend.position = "right", plot.margin = margin(5, 5, 5, 5))
+
+final_combined_plot
+```
+
+
+
+```{r}
+# Get full phylum set
+all_phyla <- union(union(levels(droplevels(sf_data$Phyla)), 
+                         levels(droplevels(tp_data$Phyla))), 
+                   levels(droplevels(sj_data$Phyla)))
+
+# Calculate total OTUs across sites for phylum ordering
+phylum_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
+  group_by(Phyla) %>%
+  summarise(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
+  arrange(desc(total_OTUs))
+
+# Store phylum levels from most to least OTUs
+phylum_order <- phylum_totals$Phyla
+
+# Ensure all phyla appear in each dataset (even if with zero OTUs)
+expand_phylum_grid <- function(data, all_phyla, phylum_order) {
+  depths <- c("OM", "0-5cm", "5-15cm")
+  expanded <- expand.grid(Phyla = all_phyla, Depth = depths, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
+  data <- full_join(expanded, data, by = c("Phyla", "Depth"))
+  data$Phyla <- factor(data$Phyla, levels = rev(phylum_order))
+  data$Depth <- factor(data$Depth, levels = depths)
+  data$fill_val[is.na(data$fill_val)] <- NA
+  data$n_OTUs[is.na(data$n_OTUs)] <- 0
+  data$label[is.na(data$label)] <- "0"
+  return(data)
+}
+
+# Apply to all datasets
+sf_data <- expand_phylum_grid(sf_data, all_phyla, phylum_order)
+tp_data <- expand_phylum_grid(tp_data, all_phyla, phylum_order)
+sj_data <- expand_phylum_grid(sj_data, all_phyla, phylum_order)
+
+# Determine scale limits
+shared_limits <- c(0, max(c(sf_data$n_OTUs, tp_data$n_OTUs, sj_data$n_OTUs), na.rm = TRUE))
+
+# Shared theme
+shared_theme <- theme_minimal(base_size = 13) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    axis.text.x.top = element_text(angle = 0, hjust = 0.5),
+    axis.text.x.bottom = element_blank(),
+    axis.title.x = element_blank(),
+    axis.ticks.length = unit(0, "pt"),
+    panel.grid = element_blank(),
+    axis.title.y = element_blank()
+  )
+
+# SF plot
+plot_sf <- ggplot(sf_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4) +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    na.value = "black",
+    guide = "none"
+  ) +
+  labs(title = "SF vs Other", y = "Phylum") +
+  shared_theme +
+  theme(axis.title.y = element_text(angle = 90, vjust = 0.5))
+
+# TP plot
+plot_tp <- ggplot(tp_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4) +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    na.value = "black",
+    guide = "none"
+  ) +
+  labs(title = "TP vs Other") +
+  shared_theme +
+  theme(axis.text.y = element_blank())
+
+# SJ plot with legend
+plot_sj <- ggplot(sj_data, aes(x = Depth, y = Phyla)) +
+  geom_tile(aes(fill = fill_val), color = "white") +
+  geom_text(aes(label = label), size = 4) +
+  scale_x_discrete(position = "top") +
+  scale_fill_gradientn(
+    colors = custom_hokusai_gradient,
+    limits = shared_limits,
+    breaks = c(1, 6, 12, 18),
+    name = "# of\nDiscriminant OTUs",
+    na.value = "black",
+    guide = guide_colorbar(
+      title.position = "top",
+      title.hjust = 0.5,
+      barwidth = unit(0.5, "cm"),
+      barheight = unit(5, "cm"),
+      ticks.colour = "black",
+      frame.colour = "black"
+    )
+  ) +
+  labs(title = "SJ vs Other") +
+  shared_theme +
+  theme(axis.text.y = element_blank())
+
+# Combine all plots
+library(patchwork)
+final_combined_plot <- plot_sf + plot_tp + plot_sj +
+  plot_layout(ncol = 3, widths = c(1, 1, 1), guides = "collect") &
+  theme(legend.position = "right", plot.margin = margin(5, 5, 5, 5))
+
+# Display
+final_combined_plot
+```
+
