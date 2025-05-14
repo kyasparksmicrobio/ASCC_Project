@@ -24,7 +24,6 @@
 # === Ignore all images ===
 *.jpg
 *.jpeg
-*.png
 *.webp
 *.svg
 *.gif
