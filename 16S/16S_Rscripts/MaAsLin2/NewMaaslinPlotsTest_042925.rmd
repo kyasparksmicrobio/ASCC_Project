@@ -542,14 +542,18 @@ plot_sj <- ggplot(sj_data, aes(x = Depth, y = Phyla)) +
 # Combine all plots
 library(patchwork)
 final_combined_plot <- plot_sf + plot_tp + plot_sj +
-  plot_layout(ncol = 3, widths = c(1, 1, 1), guides = "collect") &
-  theme(legend.position = "right", plot.margin = margin(5, 5, 5, 5))
+  plot_layout(widths = c(1, 1, 1), ncol = 3, guides = "collect") &
+  theme(
+    legend.position = "right",
+    plot.margin = margin(5, 5, 5, 5),
+    axis.text.x.top = element_text(size = 9, margin = margin(b = 3))  # 👈 smaller text, space below
+  )
 
 # Display
 final_combined_plot
 
 ggsave("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_Maaslin/figures/16S_maaslin_heatmap.png", 
        plot = final_combined_plot, 
-       width = 10, height = 6, dpi = 300)
+       width = 8, height = 8, dpi = 300)
 ```
 
