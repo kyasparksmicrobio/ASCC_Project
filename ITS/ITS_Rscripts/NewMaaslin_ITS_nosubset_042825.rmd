@@ -1,0 +1,444 @@
+# 1. Load libraries
+
+```{r}
+library(Maaslin2) # maaslin program!
+library(devtools) # package including a suite of> development tools
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+library(openxlsx) 
+```
+
+## 2.  Data Import and Transformation
+### Imports OTU table (otus), metadata, and taxonomy file.
+### Transposes otus so samples are in rows (MaAsLin2’s required format), storing it as transposed_table1.
+### Replaces the transposed OTU table’s column names with taxonomy labels
+
+    - Read in your OTU table, metadata, and taxonomy table
+
+```{r}
+# this is an OTU matrix, removed blanks / dupes, and formatted with samples as the columns and features as the rows
+
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_rem_RELABUND.txt", row.names=1,header=TRUE)
+
+# loading in the metadata I'm interested in, make sure the sample names match from your OTU table we just read in, should be formatted so sample names will be the first column followed by the metdata columns
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem_formaaslinheatmap.txt",row.names=1) 
+
+# reading in taxonomy datadframe, should be 2 cols, 1 for OTU / asv id number, and another column for a concatenated taxonomy string
+# can remove / ignore the 'confidence' column here
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC_maaslin_cleaned.txt",row.names=1)
+```
+
+
+    - Transpose OTU table 
+
+```{r}
+# must transposed because the required format for the  Maaslin to run is when  SAMPLES are in ROWS, and OTU ID number is across the top as the columm names, create a new object called 'transpose_tabel1'
+transposed_table <- t(otus)
+transposed_table1 <- as.data.frame(transposed_table)
+```
+
+    - Replace OTU col names (which is currently OTU ID's) to the correlating taxonomy string 
+
+```{r}
+# need to replace OTU column names with taxonomy labels because they are currently in ASV number form which is harder to interpret when visualizing the output, replacing with taxonomy will make filtering / subsetting easier down the line.
+
+# if you were not to do this, it's okay but you will need to perform a vlookup with your OTU IDs to match to taxonomy after the fact to see which taxa are discriminant from each other
+
+# extract the 'taxonomy' column from 'taxa'
+
+new_colnames <- taxa[, "taxonomy"]
+
+# assign these values (taxonomy col names, 'new_colnames' as the new column names for 'transposed_table1'
+
+colnames(transposed_table1) <- as.character(new_colnames)
+```
+
+```{r}
+# Splits metadata based on depth to create subsets for different soil layers.
+
+meta_shallow_subset <- subset(metadata, Depth == "0_5cm")
+meta_deep_subset <- subset(metadata, Depth == "5_15cm")
+meta_OM_subset <- subset(metadata, Depth == "OM")
+```
+
+```{r}
+sample_names1 <- rownames(meta_shallow_subset)
+sample_names2 <- rownames(meta_deep_subset)
+sample_names3 <- rownames(meta_OM_subset)
+```
+
+```{r}
+otus_shallow <- transposed_table1[sample_names1, ]
+otus_deep <- transposed_table1[sample_names2, ]
+otus_OM <- transposed_table1[sample_names3, ]
+```
+
+```{r}
+#Run maaslin again but change 'input_data' and 'input_metadata' to each of the subsetted data frames we made earlier
+Maaslin2(input_data = otus_shallow,
+          input_metadata = meta_shallow_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_shallow_sf",
+          fixed_effects = "StateF",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_shallow,
+          input_metadata = meta_shallow_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_shallow_tp",
+          fixed_effects = "TayP",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_shallow,
+          input_metadata = meta_shallow_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_shallow_sj",
+          fixed_effects = "SanJ",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_deep,
+          input_metadata = meta_deep_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_deep_sf",
+          fixed_effects = "StateF",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_deep,
+          input_metadata = meta_deep_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_deep_tp",
+          fixed_effects = "TayP",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_deep,
+          input_metadata = meta_deep_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_deep_sj",
+          fixed_effects = "SanJ",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_OM,
+          input_metadata = meta_OM_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_OM_sf",
+          fixed_effects = "StateF",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_OM,
+          input_metadata = meta_OM_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_OM_tp",
+          fixed_effects = "TayP",
+          max_significance = 0.05)
+
+Maaslin2(input_data = otus_OM,
+          input_metadata = meta_OM_subset,
+          output = "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/output_ITS_OM_sj",
+          fixed_effects = "SanJ",
+          max_significance = 0.05)
+```
+
+ 
+
+
+
+
+
+
+## Cleaning output
+
+### Load necessary libraries
+```{r}
+library(openxlsx)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+# Set file paths
+input_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_051425.xlsx"
+output_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+
+# Get all sheet names
+sheets <- excel_sheets(input_file)
+
+# Create new workbook
+wb <- createWorkbook()
+
+# Loop through each sheet, clean, and add to workbook
+for (sheet in sheets) {
+  df <- read_excel(input_file, sheet = sheet)
+  if ("feature" %in% colnames(df)) {
+    df <- df %>%
+      filter(!str_detect(feature, "\\.\\d$")) %>%
+      mutate(feature = feature %>%
+               str_replace_all("\\.\\.", "; ") %>%
+               str_replace_all("\\.([a-z]__)", "\\1") %>%
+               str_remove_all("\\s*;\\s*$") %>%
+               str_remove("\\.\\d+$") %>%
+               str_trim()
+             )
+  }
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+# Save the workbook
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+```{r}```{r}
+library(openxlsx)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+# File paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+output_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+
+# Get all sheet names
+sheets <- excel_sheets(maaslin_file)
+
+# Create a new workbook
+wb <- createWorkbook()
+
+for (sheet in sheets) {
+  df <- read_excel(maaslin_file, sheet = sheet)
+
+  # If "feature" exists, rename it to "taxonomy"
+  if ("feature" %in% colnames(df)) {
+    df <- df %>% rename(taxonomy = feature)
+  }
+
+  # NOW: remove rows where taxonomy is exactly "d__Bacteria; ; ; ; ; ;"
+  if ("taxonomy" %in% colnames(df)) {
+    df <- df %>% filter(taxonomy != "d__Bacteria; ; ; ; ; ;")
+  }
+
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+# Save the cleaned workbook
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+
+### Merge OTUIDs from taxonomy file into MaAsLin results
+
+```{r}
+# File paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+taxonomy_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC_maaslin_cleaned.txt"
+output_file <-  "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx"
+
+# Load taxonomy reference
+taxonomy_ref <- read.delim(taxonomy_file, sep = "\t", header = TRUE) %>%  
+mutate(taxonomy = str_trim(taxonomy)) %>%  
+distinct(taxonomy, .keep_all = TRUE)
+
+# Log sheet names
+
+sheet_names <- excel_sheets(maaslin_file)
+print(paste("Sheets to process:", paste(sheet_names, collapse = ", ")))
+
+# Create workbook
+wb <- createWorkbook()
+for (sheet in sheet_names) {
+  message(paste("Processing sheet:", sheet))
+  df <- read_excel(maaslin_file, sheet = sheet)
+  if (!"taxonomy" %in% colnames(df)) {
+    warning(paste("Sheet", sheet, "does not contain 'taxonomy' column. Skipping."))
+    next  }
+  df <- df %>%    mutate(taxonomy = str_trim(taxonomy)) %>%    inner_join(taxonomy_ref, by = "taxonomy")
+  message(paste("Matched rows in", sheet, ":", nrow(df)))
+  if (nrow(df) > 0) {
+    df <- relocate(df, OTUID, .before = taxonomy)
+  }
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+
+
+## Step 1: Load the required Libraries
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+library(readxl)
+library(ggrepel)
+library(openxlsx)
+```
+
+## Checking for discriminant OTUs consistently across sites
+
+## Step 2: Load the data
+### Note: Read in all comparisons from the Excel file. The data is organized by shallow, deep, and OM samples. Each comparison is stored in a separate sheet within the Excel file.
+
+```{r}
+shallow_sj <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "shallow_sj")
+shallow_sf <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "shallow_sf")
+shallow_tp <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "shallow_tp")
+deep_sj <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "deep_sj")
+deep_sf <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "deep_sf")
+deep_tp <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "deep_tp")
+OM_sj <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "OM_sj")
+OM_sf <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "OM_sf")
+OM_tp <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED_withOTUid.xlsx", sheet = "OM_tp")
+```
+
+
+## Step 3: Create functions to classify discriminant OTUs
+### Note: The function `classify_discriminant` takes a data frame and two group names as input. It filters the data for significant OTUs (qval < 0.05) and classifies them based on the sign of the coefficient. If the coefficient is negative, it assigns the first group name; if positive, it assigns the second group name.
+```{r}
+# Function to clasfsify discriminant OTUs
+classify_discriminant <- function(data, group1, group2) {
+  data %>%
+    filter(qval < 0.05) %>%  # Consider only significant OTUs
+    mutate(discriminant_for = ifelse(coef < 0, group1, group2))
+}
+```
+
+## Step 4: Apply the classification function to each dataset
+
+```{r}
+# Apply classification
+data_shallow_sj <- classify_discriminant(shallow_sj, "other", "SJ")
+data_shallow_tp <- classify_discriminant(shallow_tp, "other", "TP")
+data_shallow_sf <- classify_discriminant(shallow_sf, "other", "SF")
+
+data_deep_sj <- classify_discriminant(deep_sj, "other", "SJ")
+data_deep_tp <- classify_discriminant(deep_tp, "other", "TP")
+data_deep_sf <- classify_discriminant(deep_sf, "other", "SF")
+
+data_OM_sj <- classify_discriminant(OM_sj, "other", "SJ")
+data_OM_tp <- classify_discriminant(OM_tp, "other", "TP")
+data_OM_sf <- classify_discriminant(OM_sf, "other", "SF")
+```
+
+## Step 5: Filter and select relevant columns
+### Note: The `filter` function is used to select only the rows where the discriminant is for a specific group. The `select` function is used to keep only the relevant columns (OTUID and taxonomy). This filters the discriminant OTUs for each group and selects the relevant columns (OTUID and taxonomy).
+```{r}
+data_shallow_sj_filt <- data_shallow_sj %>%
+  filter(discriminant_for == "SJ") %>% 
+  select(OTUID,taxonomy)
+
+data_shallow_tp_filt <- data_shallow_tp %>%
+  filter(discriminant_for == "TP") %>% 
+  select(OTUID,taxonomy)
+
+data_shallow_sf_filt <- data_shallow_sf %>%
+  filter(discriminant_for == "SF") %>% 
+  select(OTUID,taxonomy)
+  
+shallow_consistent <- data_shallow_sj_filt %>%
+  inner_join(data_shallow_sf_filt, by = "OTUID") %>%
+  inner_join(data_shallow_tp_filt, by = "OTUID")
+```
+
+```{r}
+data_deep_sj_filt <- data_deep_sj %>%
+  filter(discriminant_for == "SJ") %>% 
+  select(OTUID, taxonomy)
+
+data_deep_sf_filt <- data_deep_sf %>%
+  filter(discriminant_for == "SF") %>% 
+  select(OTUID, taxonomy)
+
+data_deep_tp_filt <- data_deep_tp %>%
+  filter(discriminant_for == "TP") %>% 
+  select(OTUID, taxonomy)
+
+deep_discrim <- data_deep_sj_filt %>%
+  inner_join(data_deep_sf_filt, by = "OTUID") %>%
+  inner_join(data_deep_tp_filt, by = "OTUID")
+```
+
+```{r}
+# OM
+data_OM_sj_filt <- data_OM_sj %>%
+  filter(discriminant_for == "SJ") %>% 
+  select(OTUID, taxonomy)
+
+data_OM_sf_filt <- data_OM_sf %>%
+  filter(discriminant_for == "SF") %>% 
+  select(OTUID, taxonomy)
+
+data_OM_tp_filt <- data_OM_tp %>%
+  filter(discriminant_for == "TP") %>% 
+  select(OTUID, taxonomy)
+
+OM_discrim <- data_OM_sj_filt %>%
+  inner_join(data_OM_sf_filt, by = "OTUID") %>%
+  inner_join(data_OM_tp_filt, by = "OTUID")
+```
+
+
+
+# consistent OTUs across shallow
+```{r}
+# OTU ids in SF v all 0-5, TP v all 0-5, SJ v all 0-5.
+unique(shallow_consistent$OTUID)
+# [1] "0064721928ceeb91e7a056d127cf6b36" "003e8bc5de7a220fcef5541dd6ce3e2d"
+# [3] "002df0ec70d44158b3fb0d31e2a6d8ec"
+```
+
+# consistent OTUs across deep
+```{r}
+# OTU ids in SF v all 5-15, TP v all 5-15, SJ v all 5-15.
+unique(deep_discrim$OTUID)
+# [1] "002df0ec70d44158b3fb0d31e2a6d8ec" "003e8bc5de7a220fcef5541dd6ce3e2d"
+# [3] "0064721928ceeb91e7a056d127cf6b36"
+```
+
+
+# considering OTUs across OM
+```{r}
+# OTU ids in SF v all OM, TP v all OM, SJ v all OM.
+unique(OM_discrim$OTUID)
+# [1] "002df0ec70d44158b3fb0d31e2a6d8ec" "003e8bc5de7a220fcef5541dd6ce3e2d"
+# [3] "0064721928ceeb91e7a056d127cf6b36" "0007101761886f26c16aa8cbc7793c6b"
+```
+
+```{r}
+# Save results to Excel
+wb <- createWorkbook()
+
+# Add sheets
+addWorksheet(wb, "data_shallow_sf_filt")
+addWorksheet(wb, "data_shallow_tp_filt")
+addWorksheet(wb, "data_shallow_sj_filt")
+addWorksheet(wb, "data_deep_sf_filt")
+addWorksheet(wb, "data_deep_tp_filt")
+addWorksheet(wb, "data_deep_sj_filt")
+addWorksheet(wb, "data_OM_sf_filt")
+addWorksheet(wb, "data_OM_tp_filt")
+addWorksheet(wb, "data_OM_sj_filt")
+addWorksheet(wb, "shallow_consistent")
+addWorksheet(wb, "deep_discrim")
+addWorksheet(wb, "OM_discrim")
+```
+
+```{r}
+# Write data
+writeData(wb, "data_shallow_sf_filt", data_shallow_sf_filt)
+writeData(wb, "data_shallow_tp_filt", data_shallow_tp_filt)
+writeData(wb, "data_shallow_sj_filt", data_shallow_sj_filt)
+writeData(wb, "data_deep_sf_filt", data_deep_sf_filt)
+writeData(wb, "data_deep_tp_filt", data_deep_tp_filt)
+writeData(wb, "data_deep_sj_filt", data_deep_sj_filt)
+writeData(wb, "data_OM_sf_filt", data_OM_sf_filt)
+writeData(wb, "data_OM_tp_filt", data_OM_tp_filt)
+writeData(wb, "data_OM_sj_filt", data_OM_sj_filt)
+writeData(wb, "shallow_consistent", shallow_consistent)
+writeData(wb, "deep_discrim", deep_discrim)
+writeData(wb, "OM_discrim", OM_discrim)
+```
+
+```{r}
+saveWorkbook(wb, "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_discrimcomparisons_new_042925.xlsx", overwrite = TRUE)
+```

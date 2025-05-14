@@ -1,0 +1,182 @@
+---
+title: "Cleaning OG MaAsLin Output"
+---
+** NOT WORKING YET **
+** This is a work in progress. **
+
+## Cleaning output
+
+### Load necessary libraries
+```{r}
+library(openxlsx)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+# Set file paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx"
+output_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+
+# Get all sheet names
+sheets <- excel_sheets(maaslin_file)
+
+# Create new workbook
+wb <- createWorkbook()
+
+# Loop through each sheet, clean, and add to workbook
+for (sheet in sheets) {
+  df <- read_excel(maaslin_file, sheet = sheet)
+  if ("taxonomy.x" %in% colnames(df)) {
+    df <- df %>%
+      filter(!str_detect(taxonomy.x, "\\.\\d$")) %>%
+      mutate(taxonomy.x = taxonomy.x %>%
+               str_replace_all("\\.\\.", "; ") %>%
+               str_replace_all("\\.([a-z]__)", "\\1") %>%
+               str_remove_all("\\s*;\\s*$") %>%
+               str_remove("\\.\\d+$") %>%
+               str_trim()
+             )
+  }
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+# Save the workbook
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+
+
+```{r}```{r}
+library(openxlsx)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+# File paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+output_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+
+# Get all sheet names
+sheets <- excel_sheets(maaslin_file)
+
+# Create a new workbook
+wb <- createWorkbook()
+
+for (sheet in sheets) {
+  df <- read_excel(maaslin_file, sheet = sheet)
+
+  # If "feature" exists, rename it to "taxonomy"
+  if ("taxonomy.x" %in% colnames(df)) {
+    df <- df %>% rename(taxonomy = taxonomy.x)
+  }
+
+  # NOW: remove rows where taxonomy is exactly "k__Fungi; ; ; ; ; ;"
+  if ("taxonomy" %in% colnames(df)) {
+    df <- df %>% filter(taxonomy != "k__Fungi; ; ; ; ; ;")
+  }
+
+    # NOW: remove rows where taxonomy is exactly "k__Fungi; ; ;"
+  if ("taxonomy" %in% colnames(df)) {
+    df <- df %>% filter(taxonomy != "k__Fungi; ; ;")
+  }
+
+    # NOW: remove rows where taxonomy is exactly "k__Fungi; ;"
+  if ("taxonomy" %in% colnames(df)) {
+    df <- df %>% filter(taxonomy != "k__Fungi; ;")
+  }
+
+
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+# Save the cleaned workbook
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+
+### Merge OTUIDs from taxonomy file into MaAsLin results
+
+```{r}
+# File paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResultsCombined_16S_new_042925_CLEANED.xlsx"
+taxonomy_file <- "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/ASCC_16S_taxonomy_forprocessing.txt"
+output_file <-  "/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/MaaslineResultsCombined_16S_new_042925_CLEANED_withOTUid.xlsx"
+
+# Load taxonomy reference
+taxonomy_ref <- read.delim(taxonomy_file, sep = "\t", header = TRUE) %>%  
+mutate(taxonomy = str_trim(taxonomy)) %>%  
+distinct(taxonomy, .keep_all = TRUE)
+
+# Log sheet names
+
+sheet_names <- excel_sheets(maaslin_file)
+print(paste("Sheets to process:", paste(sheet_names, collapse = ", ")))
+
+# Create workbook
+wb <- createWorkbook()
+for (sheet in sheet_names) {
+  message(paste("Processing sheet:", sheet))
+  df <- read_excel(maaslin_file, sheet = sheet)
+  if (!"taxonomy" %in% colnames(df)) {
+    warning(paste("Sheet", sheet, "does not contain 'taxonomy' column. Skipping."))
+    next  }
+  df <- df %>%    mutate(taxonomy = str_trim(taxonomy)) %>%    inner_join(taxonomy_ref, by = "taxonomy")
+  message(paste("Matched rows in", sheet, ":", nrow(df)))
+  if (nrow(df) > 0) {
+    df <- relocate(df, OTUID, .before = taxonomy)
+  }
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
+
+
+```{r}
+library(openxlsx)
+library(readxl)
+library(dplyr)
+library(stringr)
+
+# Set file paths
+maaslin_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/Maaslin_ITS_discrimcomparisons_040725.xlsx"
+output_file <- "/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/MaaslineResultsCombined_ITS_new_042925_CLEANED.xlsx"
+
+# Debugging: Confirm file paths
+message("Reading file: ", maaslin_file)
+stopifnot(file.exists(maaslin_file))  # Stop if the file does not exist
+
+# Get all sheet names
+sheets <- excel_sheets(maaslin_file)
+message("Sheets found: ", paste(sheets, collapse = ", "))
+
+# Create new workbook
+wb <- createWorkbook()
+
+# Loop through each sheet, clean, and add to workbook
+for (sheet in sheets) {
+  message("Processing sheet: ", sheet)
+  df <- read_excel(maaslin_file, sheet = sheet)
+  
+  if ("taxonomy.x" %in% colnames(df)) {
+    df <- df %>%
+      filter(!str_detect(taxonomy.x, "\\.\\d$")) %>%
+      mutate(taxonomy.x = taxonomy.x %>%
+               str_replace_all("\\.\\.", "; ") %>%
+               str_replace_all("\\.([a-z]__)", "\\1") %>%
+               str_remove_all("\\s*;\\s*$") %>%
+               str_remove("\\.\\d+$") %>%
+               str_trim()
+             )
+  }
+  addWorksheet(wb, sheet)
+  writeData(wb, sheet, df)
+}
+
+# Save the workbook
+message("Saving cleaned workbook to: ", output_file)
+saveWorkbook(wb, output_file, overwrite = TRUE)
+```
