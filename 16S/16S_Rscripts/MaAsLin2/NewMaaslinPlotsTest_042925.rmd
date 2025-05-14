@@ -449,15 +449,15 @@ phylum_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
   summarise(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
   arrange(desc(total_OTUs))
 
-# Store phylum levels from most to least OTUs
-phylum_order <- phylum_totals$Phyla
+# Store phylum levels from most to least OTUs (reversed so most OTUs at top)
+phylum_order <- rev(phylum_totals$Phyla)
 
-# Ensure all phyla appear in each dataset (even if with zero OTUs)
+## Ensure all phyla appear in each dataset (even if with zero OTUs)
+# This version does NOT override factor order for Phyla
 expand_phylum_grid <- function(data, all_phyla, phylum_order) {
   depths <- c("OM", "0-5cm", "5-15cm")
   expanded <- expand.grid(Phyla = all_phyla, Depth = depths, KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE)
   data <- full_join(expanded, data, by = c("Phyla", "Depth"))
-  data$Phyla <- factor(data$Phyla, levels = rev(phylum_order))
   data$Depth <- factor(data$Depth, levels = depths)
   data$fill_val[is.na(data$fill_val)] <- NA
   data$n_OTUs[is.na(data$n_OTUs)] <- 0
@@ -469,6 +469,11 @@ expand_phylum_grid <- function(data, all_phyla, phylum_order) {
 sf_data <- expand_phylum_grid(sf_data, all_phyla, phylum_order)
 tp_data <- expand_phylum_grid(tp_data, all_phyla, phylum_order)
 sj_data <- expand_phylum_grid(sj_data, all_phyla, phylum_order)
+
+# Reapply correct factor ordering for Phyla
+sf_data$Phyla <- factor(sf_data$Phyla, levels = phylum_order)
+tp_data$Phyla <- factor(tp_data$Phyla, levels = phylum_order)
+sj_data$Phyla <- factor(sj_data$Phyla, levels = phylum_order)
 
 # Determine scale limits
 shared_limits <- c(0, max(c(sf_data$n_OTUs, tp_data$n_OTUs, sj_data$n_OTUs), na.rm = TRUE))
