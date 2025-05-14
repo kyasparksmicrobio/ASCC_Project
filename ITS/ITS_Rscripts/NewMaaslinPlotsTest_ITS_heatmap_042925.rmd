@@ -262,7 +262,7 @@ legend_plot <- cowplot::ggdraw(legend)
 legend_stack <- legend_plot
 
 # Final plot assembly
-final_plot1 <- heatmap_nolegend | legend_stack +
+final_plot2 <- heatmap_nolegend | legend_stack +
   plot_layout(widths = c(5, 1)) &
   theme(plot.margin = margin(5, 5, 5, 5))
 
@@ -427,20 +427,25 @@ sf_data <- sf_data %>% filter(Genus %in% shared_Genus)
 tp_data <- tp_data %>% filter(Genus %in% shared_Genus)
 sj_data <- sj_data %>% filter(Genus %in% shared_Genus)
 
-# STEP 4: Calculate genus order
-phylum_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
+ # STEP 4: Calculate genus order
+genus_totals <- bind_rows(sf_data, tp_data, sj_data) %>%
   group_by(Genus) %>%
   summarise(total_OTUs = sum(n_OTUs, na.rm = TRUE)) %>%
   arrange(desc(total_OTUs))
 
-phylum_order <- phylum_totals$Genus
+# Assign genus factor order to each dataset
+genus_order <- rev(genus_totals$Genus)
+
+sf_data$Genus <- factor(sf_data$Genus, levels = genus_order)
+tp_data$Genus <- factor(tp_data$Genus, levels = genus_order)
+sj_data$Genus <- factor(sj_data$Genus, levels = genus_order)
 
 # STEP 5: Define expansion function to fill missing Depth/Genus pairs
-expand_genus_grid <- function(data, all_Genus, phylum_order) {
+expand_genus_grid <- function(data, all_Genus, genus_order) {
   depths <- c("OM", "0-5cm", "5-15cm")
   expanded <- expand.grid(Genus = all_Genus, Depth = depths, stringsAsFactors = FALSE)
   data <- full_join(expanded, data, by = c("Genus", "Depth"))
-  data$Genus <- factor(data$Genus, levels = rev(phylum_order))
+  # data$Genus <- factor(data$Genus, levels = rev(phylum_order)) # <-- removed to preserve assigned order
   data$Depth <- factor(data$Depth, levels = depths)
   data$fill_val[is.na(data$fill_val)] <- NA
   data$n_OTUs[is.na(data$n_OTUs)] <- 0
@@ -448,10 +453,16 @@ expand_genus_grid <- function(data, all_Genus, phylum_order) {
   return(data)
 }
 
+
 # STEP 6: Expand each dataset so every Genus-Depth combo exists
-sf_data <- expand_genus_grid(sf_data, shared_Genus, phylum_order)
-tp_data <- expand_genus_grid(tp_data, shared_Genus, phylum_order)
-sj_data <- expand_genus_grid(sj_data, shared_Genus, phylum_order)
+sf_data <- expand_genus_grid(sf_data, shared_Genus, genus_order)
+tp_data <- expand_genus_grid(tp_data, shared_Genus, genus_order)
+sj_data <- expand_genus_grid(sj_data, shared_Genus, genus_order)
+
+# Reapply genus order after expansion
+sf_data$Genus <- factor(sf_data$Genus, levels = genus_order)
+tp_data$Genus <- factor(tp_data$Genus, levels = genus_order)
+sj_data$Genus <- factor(sj_data$Genus, levels = genus_order)
 
 # STEP 7: Set gradient scale limits
 shared_limits <- c(0, max(c(sf_data$n_OTUs, tp_data$n_OTUs, sj_data$n_OTUs), na.rm = TRUE))
@@ -524,13 +535,17 @@ plot_sj <- ggplot(sj_data, aes(x = Depth, y = Genus)) +
 
 # STEP 12: Combine all plots
 final_combined_plot <- plot_sf + plot_tp + plot_sj +
-  plot_layout(ncol = 3, widths = c(1, 1, 1), guides = "collect") &
-  theme(legend.position = "right", plot.margin = margin(5, 5, 5, 5))
+  plot_layout(widths = c(1, 1, 1), ncol = 3, guides = "collect") &
+  theme(
+    legend.position = "right",
+    plot.margin = margin(5, 5, 5, 5),
+    axis.text.x.top = element_text(size = 9, margin = margin(b = 3))  # 👈 smaller text, space below
+  )
 
 # Display
 final_combined_plot
 
 ggsave("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_maaslin/ITS_plots/ITS_maaslin_heatmap.png", 
        plot = final_combined_plot, 
-       width = 10, height = 6, dpi = 300)
+       width = 8, height = 8, dpi = 300)
 ```
