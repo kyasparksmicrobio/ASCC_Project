@@ -1,0 +1,424 @@
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(phyloseq)
+library(dplyr)
+```
+
+## ECM taxonomic barcharts, grouped by depth and genus instead
+
+```{r}
+# Load libraries
+library(tidyverse)
+library(ggplot2)
+library(readr)
+
+# === Load and prepare data ===
+
+ECM_feature <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_FUNguild/ECMonly_featuretable.csv") %>%
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt")
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+
+data_meta <- inner_join(ECM_feature, metadata, by = "samples")
+data_meta_taxa <- inner_join(data_meta, taxa, by = "OTUID")
+
+# === Identify Top 10 Genera ===
+
+top_Genus <- data_meta_taxa %>%
+  filter(!is.na(Genus) & Genus != "") %>%
+  group_by(Genus) %>%
+  summarize(total_abundance = sum(Relative_Abundance), .groups = "drop") %>%
+  arrange(desc(total_abundance)) %>%
+  slice_head(n = 10) %>%
+  pull(Genus)
+
+# === Clean and format ===
+
+data_meta_taxa <- data_meta_taxa %>%
+  mutate(
+    Genus = ifelse(is.na(Genus) | Genus == "", "unidentified", Genus),
+    Genus = ifelse(Genus %in% top_Genus, Genus, "Other"),
+    Depth = recode(Depth, `0_5cm` = "0-5 cm", `5_15cm` = "5-15 cm"),
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP"))
+  )
+
+# === Aggregate per sample ===
+
+per_sample <- data_meta_taxa %>%
+  group_by(Site, Depth, samples, Genus) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance), .groups = "drop")
+
+sample_combos <- expand.grid(
+  Site = unique(per_sample$Site),
+  Depth = unique(per_sample$Depth),
+  samples = unique(per_sample$samples),
+  Genus = c(top_Genus, "Other")
+)
+
+per_sample <- full_join(per_sample, sample_combos, by = c("Site", "Depth", "samples", "Genus")) %>%
+  mutate(Relative_Abundance = replace_na(Relative_Abundance, 0))
+
+# === Step: Compute means and patch rounding error to "Other" ===
+
+plot_data <- per_sample %>%
+  group_by(Site, Depth, Genus) %>%
+  summarize(Relative_Abundance = mean(Relative_Abundance), .groups = "drop") %>%
+  group_by(Site, Depth) %>%
+  mutate(Relative_Abundance = Relative_Abundance / sum(Relative_Abundance, na.rm = TRUE) * 100)
+
+# Patch: Add rounding gap to "Other"
+plot_data <- plot_data %>%
+  mutate(total = sum(Relative_Abundance)) %>%
+  mutate(missing = 100 - total) %>%
+  mutate(Relative_Abundance = ifelse(Genus == "Other", Relative_Abundance + missing, Relative_Abundance)) %>%
+  select(-total, -missing) %>%
+  ungroup()
+
+# === Sort Genus within each Site × Depth and assign stacking positions ===
+
+plot_data <- plot_data %>%
+  group_by(Site, Depth) %>%
+  arrange(Site, Depth, Genus != "Other", desc(Relative_Abundance)) %>%
+  mutate(
+    ymin = c(0, head(cumsum(Relative_Abundance), -1)),
+    ymax = cumsum(Relative_Abundance)
+  ) %>%
+  ungroup()
+
+# === Assign numeric position for Depth axis (within facet) ===
+
+plot_data <- plot_data %>%
+  mutate(
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    x = as.numeric(Depth),
+    xmin = x - 0.4,
+    xmax = x + 0.4
+  )
+
+# === Define custom genus colors ===
+
+gen_colors_named <- c(
+  setNames(
+    c(
+      "#3B1911", "#6D2F20", "#B75347", "#DF7666", "#E09351",
+      "#EDC775", "#94B594", "#6D928F", "#224B5E", "#11252E"
+    ),
+    top_Genus
+  ),
+  Other = "gray70"
+)
+
+plot_data$Genus <- factor(plot_data$Genus, levels = names(gen_colors_named))
+
+# === Final plot ===
+
+ggplot(plot_data) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = Genus),
+    color = NA
+  ) +
+  scale_fill_manual(values = gen_colors_named, drop = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 100)) +
+  scale_x_continuous(
+    breaks = 1:3,
+    labels = c("OM", "0–5 cm", "5–15 cm"),
+    expand = expansion(mult = c(0.05, 0.05))
+  ) +
+  facet_wrap(~Site, nrow = 1) +
+  labs(x = "Depth", y = "Avg Relative Abundance (%)", fill = "Genus") +
+  theme_bw(base_family = "Helvetica") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "black", linewidth = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    strip.text = element_text(size = 16),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
+  )
+```
+
+```{r}
+# Load and merge data
+ECM_feature <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_FUNguild/ECMonly_featuretable.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+```
+
+
+
+```{r}
+data_meta <- inner_join(ECM_feature, metadata, by = "samples")
+data_meta_taxa <- inner_join(data_meta, taxa, by = "OTUID")
+```
+
+
+```{r}
+# Top 3 Phyla by total abundance
+top_Genus <- data_meta_taxa %>%
+  filter(!is.na(Genus) & Genus != "") %>%
+  group_by(Genus) %>%
+  summarize(total_abundance = sum(Relative_Abundance), .groups = "drop") %>%
+  arrange(desc(total_abundance)) %>%
+  slice_head(n = 10) %>%
+  pull(Genus)
+```
+
+```{r}
+# Label others
+data_meta_taxa <- data_meta_taxa %>%
+  mutate(
+    Genus = ifelse(is.na(Genus) | Genus == "", "unidentified", Genus),
+    Genus = ifelse(Genus %in% top_Genus, Genus, "Other"),
+    Depth = recode(Depth, `0_5cm` = "0-5 cm", `5_15cm` = "5-15 cm"),
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP"))
+  )
+```
+
+```{r}
+# Step 1: Aggregate per sample × site × depth × phylum
+per_sample <- data_meta_taxa %>%
+  group_by(Site, Depth, samples, Genus) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance), .groups = "drop")
+
+# Step 2: Fill in missing phyla for each sample
+sample_combos <- expand.grid(
+  Site = unique(per_sample$Site),
+  Depth = unique(per_sample$Depth),
+  samples = unique(per_sample$samples),
+  Genus = c(top_Genus, "Other")
+)
+
+per_sample <- full_join(per_sample, sample_combos, by = c("Site", "Depth", "samples", "Genus")) %>%
+  mutate(Relative_Abundance = replace_na(Relative_Abundance, 0))
+```
+
+```{r}
+# Step 3: Average across samples per Site × Depth × Phylum
+plot_data <- per_sample %>%
+  group_by(Site, Depth, Genus) %>%
+  summarize(Relative_Abundance = mean(Relative_Abundance), .groups = "drop") %>%
+  group_by(Site, Depth) %>%
+  mutate(Relative_Abundance = Relative_Abundance / sum(Relative_Abundance) * 100) %>%
+  ungroup()
+```
+
+```{r}
+# Plotting
+
+
+gen_colors_named <- c(
+  setNames(
+    c(
+      "#3B1911",  # Dark Brown
+      "#6D2F20",  # Red-Brown
+      "#B75347",  # Light Red
+      "#DF7666",  # Soft Red
+      "#E09351",  # Orange-Brown
+      "#EDC775",  # Yellow
+      "#94B594",  # Soft Green
+      "#6D928F",  # Blue-Green
+      "#224B5E",  # Deep Blue
+      "#11252E"   # Dark Blue
+    ),
+    top_Genus
+  ),
+  Other = "gray70"
+)
+
+plot_data <- plot_data %>%
+  mutate(Genus = factor(Genus, levels = c(top_Genus, "Other")))
+
+ggplot(plot_data, aes(x = Depth, y = Relative_Abundance, fill = Genus)) +
+  geom_bar(stat = "identity", position = "stack") +
+  facet_wrap(~Site, nrow = 1) +
+  scale_fill_manual(values = gen_colors_named, drop = FALSE) +
+  scale_y_continuous(labels = scales::percent_format(scale = 1), limits = c(0, 100)) +
+  labs(x = "Depth", y = "Avg Relative Abundance (%)", fill = "Genus") +
+  theme_bw(base_family = "Helvetica") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    strip.text = element_text(size = 16),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
+  )
+```
+
+
+
+
+
+
+
+
+
+
+
+
+//** Load ECM only feature table and metadata **//
+
+```{r}
+# Load and merge data
+ECM_feature <- read_csv("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_FUNguild/ECMonly_featuretable.csv") %>% 
+  pivot_longer(names_to = "samples", values_to = "Relative_Abundance", 2:305)
+
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt") 
+
+taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt")
+```
+
+
+//** Join feature table with metadata, then join that merged data with the taxa **//
+
+```{r}
+data_meta <- inner_join(ECM_feature, metadata, by = "samples")
+data_meta_taxa <- inner_join(data_meta, taxa, by = "OTUID")
+```
+
+```{r}
+# Step 1: Calculate the top 10 genera by total abundance
+top_Genus <- data_meta_taxa %>%
+  filter(!is.na(Genus) & Genus != "") %>%
+  group_by(Genus) %>%
+  summarize(total_abundance = sum(Relative_Abundance, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(total_abundance)) %>%
+  slice_head(n = 10) %>%
+  pull(Genus)
+```
+
+```{r}
+
+# Step 2: Assign "Other" to genera not in the top 10
+data_meta_taxa <- data_meta_taxa %>%
+  mutate(
+    Genus = ifelse(is.na(Genus) | Genus == "", "unidentified", Genus),
+    Genus = ifelse(Genus %in% top_Genus, Genus, "Other"),
+    Depth = recode(Depth, `0_5cm` = "0-5 cm", `5_15cm` = "5-15 cm"),
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    Site = factor(Site, levels = c("SF", "SJ", "TP"))
+  )
+```
+
+
+
+```{r}
+# Step 3: Aggregate per sample × site × depth × genus
+per_sample <- data_meta_taxa %>%
+  group_by(Site, Depth, samples, Genus) %>%
+  summarize(Relative_Abundance = sum(Relative_Abundance, na.rm = TRUE), .groups = "drop")
+
+# Step 4: Fill in missing genera for each sample
+sample_combos <- expand.grid(
+  Site = unique(per_sample$Site),
+  Depth = unique(per_sample$Depth),
+  samples = unique(per_sample$samples),
+  Genus = c(top_Genus, "Other")
+)
+
+per_sample <- full_join(per_sample, sample_combos, by = c("Site", "Depth", "samples", "Genus")) %>%
+  mutate(Relative_Abundance = replace_na(Relative_Abundance, 0))
+```
+
+
+```{r}
+# Step 5: Average across samples per Site × Depth × Genus
+plot_data <- per_sample %>%
+  group_by(Site, Depth, Genus) %>%
+  summarize(Relative_Abundance = mean(Relative_Abundance, na.rm = TRUE), .groups = "drop")
+```
+
+
+```{r}
+# Step 6: Plotting
+gen_colors_named <- c(
+  setNames(
+    c(
+      "#3B1911",  # Dark Brown
+      "#6D2F20",  # Red-Brown
+      "#B75347",  # Light Red
+      "#DF7666",  # Soft Red
+      "#E09351",  # Orange-Brown
+      "#EDC775",  # Yellow
+      "#94B594",  # Soft Green
+      "#6D928F",  # Blue-Green
+      "#224B5E",  # Deep Blue
+      "#11252E"   # Dark Blue
+    ),
+    top_Genus
+  ),
+  Other = "gray70"
+)
+# Step 5.5: Compute ymin/ymax for each genus in each Site × Depth, ordered by abundance
+
+plot_data <- plot_data %>%
+  group_by(Site, Depth) %>%
+  arrange(Site, Depth, Genus != "Other", desc(Relative_Abundance)) %>%
+  mutate(
+    ymin = c(0, head(cumsum(Relative_Abundance), -1)),
+    ymax = cumsum(Relative_Abundance)
+  ) %>%
+  ungroup()
+
+# Convert Depth to numeric for x-axis positioning
+plot_data <- plot_data %>%
+  mutate(
+    Depth = factor(Depth, levels = c("OM", "0-5 cm", "5-15 cm")),
+    x = as.numeric(Depth),
+    xmin = x - 0.4,
+    xmax = x + 0.4
+  )
+
+# Set Genus factor levels for consistent color mapping
+plot_data$Genus <- factor(plot_data$Genus, levels = c(top_Genus, "Other"))
+
+# === Final Plot with Correct Stack Order ===
+ggplot(plot_data) +
+  geom_rect(
+    aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = Genus),
+    color = NA
+  ) +
+  facet_wrap(~Site, nrow = 1) +
+  scale_fill_manual(values = gen_colors_named, drop = FALSE) +
+  scale_x_continuous(
+    breaks = 1:3,
+    labels = c("OM", "0–5 cm", "5–15 cm"),
+    expand = expansion(mult = c(0.05, 0.05))
+  ) +
+  labs(x = "Depth", y = "Avg Relative Abundance", fill = "Genus") +
+  theme_bw(base_family = "Helvetica") +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_rect(color = "black", linewidth = 0.5),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 14),
+    axis.text.y = element_text(size = 14),
+    axis.title = element_text(size = 16),
+    strip.text = element_text(size = 16),
+    legend.text = element_text(size = 12),
+    legend.title = element_text(size = 14)
+  )
+```
+
+
+
+
+
+
+
+
+
+

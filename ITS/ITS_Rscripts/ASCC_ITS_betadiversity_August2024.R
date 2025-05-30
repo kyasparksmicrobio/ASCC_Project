@@ -42,20 +42,22 @@ library(reshape2)
 
 #### this is to check for missing samples between files.
 ## IGNORE UNLESS NEEDED
-# sample_names_meta <- metadata %>% pull(X.OTU_ID)
-# column_names_otus <- colnames(otus)
-# missing_in_otus <- setdiff(sample_names_meta, column_names_otus)
-# unexpected_in_otus <- setdiff(column_names_otus, sample_names_meta)
-# list(
-#   missing_in_otus = missing_in_otus,
-#   unexpected_in_otus = unexpected_in_otus
-# )
+sample_names_meta <- metadata %>% 
+pull(samples)
+
+column_names_otus <- colnames(otus)
+missing_in_otus <- setdiff(sample_names_meta, column_names_otus)
+unexpected_in_otus <- setdiff(column_names_otus, sample_names_meta)
+list(
+  missing_in_otus = missing_in_otus,
+  unexpected_in_otus = unexpected_in_otus
+)
 #Import your metadata
 
-metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt",row.names=1) 
+metadata <- read.delim("/Users/kyasparks/Library/Mobile Documents/com~apple~CloudDocs/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_metadata/ASCC_ITS_metadata_rem.txt",row.names=1) 
 
 # Import feature table
-otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_OG_rem.txt", row.names=1,header=TRUE)
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_denoise_files/ASCC_ITS_feature_table_OG_rem.txt",row.names=1,header=TRUE)
 
 # check that the names match - they must be in the same order! If all works the result of this line will read 'TRUE' 
 all.equal(names(otus),row.names(metadata)) #check to make sure row names and column names equal (aka the sample names), if this reads 'TRUE' you are good to move on!
@@ -63,7 +65,7 @@ all.equal(names(otus),row.names(metadata)) #check to make sure row names and col
 # now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
 otumat<-as.matrix(otus)
 OTU = otu_table(otumat, taxa_are_rows = TRUE)
-taxa<-read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxa<-read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/ITS/ITS_taxonomy/taxonomy_ITS_ASCC.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
 taxmat<-as.matrix(taxa)
 all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
 TAX = tax_table(taxmat)
@@ -234,3 +236,100 @@ pairwise.adonis2(mgd_relabund.bray ~ sample_tab$Site*sample_tab$Depth, data = me
 
 
 
+# beta disp:
+
+# Assume 'group_factor' is a vector or column in your metadata that groups samples (e.g., Site or Treatment)
+# Make sure it's a factor
+# Ensure grouping matches row order of community_matrix
+group_vector <- metadata$Ecosite
+
+beta_disp <- betadisper(mgd_relabund.bray, group_vector)
+
+
+
+# Significance test
+permutest(beta_disp)
+
+# Extract distances for plotting
+disp_df <- data.frame(
+  DistanceToCentroid = beta_disp$distances,
+  Ecosite = group_vector
+)
+
+# Plot
+library(ggplot2)
+# reordering legends, refactoring
+disp_df$Ecosite <- factor(disp_df$Ecosite, levels=c('SF_OM','SF_5','SF_15',
+                                                     'TP_OM','TP_5','TP_15',
+                                                     'SJ_OM','SJ_5','SJ_15'))
+
+ggplot(disp_df, aes(x = Ecosite, y = DistanceToCentroid, fill = Ecosite)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, size = 1.5) +
+  theme_minimal() +
+  labs(title = "Beta Dispersion by Ecosite",
+       y = "Distance to Centroid",
+       x = "Ecosite") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()
+
+ggplot(disp_df, aes(x = Ecosite, y = DistanceToCentroid, fill = Ecosite)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, size = 1.5, alpha = 0.5) +
+  facet_wrap(~ Ecosite, scales = "free_x", ncol = 3) +
+  theme_minimal() +
+  labs(title = "Beta Dispersion by Ecosite",
+       x = NULL,
+       y = "Distance to Centroid") +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(face = "bold"))+
+  theme_bw()
+
+
+anova(beta_disp)       # F-test for differences in dispersion
+permutest(beta_disp)
+TukeyHSD(beta_disp)   # Permutation-based test (more robust)
+
+  Tukey multiple comparisons of means
+    95% family-wise confidence level
+
+Fit: aov(formula = distances ~ group, data = df)
+
+$group
+                     diff          lwr           upr     p adj
+SF_5-SF_15   0.0021900156 -0.021781218  0.0261612494 0.9999987
+SF_OM-SF_15  0.0072761950 -0.017567003  0.0321193933 0.9920002
+SJ_15-SF_15 -0.0014757834 -0.023385425  0.0204338581 0.9999999
+SJ_5-SF_15  -0.0041288149 -0.026219681  0.0179620508 0.9996724
+SJ_OM-SF_15  0.0192801664 -0.002307730  0.0408680629 0.1224587
+TP_15-SF_15 -0.0290111424 -0.052621669 -0.0054006157 0.0047011
+TP_5-SF_15  -0.0243057337 -0.048091285 -0.0005201822 0.0409089
+TP_OM-SF_15  0.0031561290 -0.021222670  0.0275349275 0.9999799
+SF_OM-SF_5   0.0050861795 -0.018885054  0.0290574133 0.9991660
+SJ_15-SF_5  -0.0036657989 -0.024581533  0.0172499354 0.9997974
+SJ_5-SF_5   -0.0063188305 -0.027424325  0.0147866641 0.9907405
+SJ_OM-SF_5   0.0170901509 -0.003488305  0.0376686063 0.1930397
+TP_15-SF_5  -0.0312011580 -0.053892401 -0.0085099147 0.0007835
+TP_5-SF_5   -0.0264957492 -0.049369053 -0.0036224458 0.0103317
+TP_OM-SF_5   0.0009661134 -0.022523488  0.0244557147 1.0000000
+SJ_15-SF_OM -0.0087519784 -0.030661620  0.0131576631 0.9448555
+SJ_5-SF_OM  -0.0114050100 -0.033495876  0.0106858558 0.7969526
+SJ_OM-SF_OM  0.0120039714 -0.009583925  0.0335918679 0.7227146
+TP_15-SF_OM -0.0362873374 -0.059897864 -0.0126768108 0.0000863
+TP_5-SF_OM  -0.0315819287 -0.055367480 -0.0077963772 0.0014286
+TP_OM-SF_OM -0.0041200661 -0.028498865  0.0202587324 0.9998460
+SJ_5-SJ_15  -0.0026530316 -0.021384135  0.0160780719 0.9999599
+SJ_OM-SJ_15  0.0207559498  0.002620758  0.0388911411 0.0119921
+TP_15-SJ_15 -0.0275353590 -0.048036697 -0.0070340211 0.0011784
+TP_5-SJ_15  -0.0228299503 -0.043532616 -0.0021272851 0.0185575
+TP_OM-SJ_15  0.0046319124 -0.016749708  0.0260135331 0.9990300
+SJ_OM-SJ_5   0.0234089814  0.005055259  0.0417627037 0.0027126
+TP_15-SJ_5  -0.0248823275 -0.045577226 -0.0041874291 0.0063541
+TP_5-SJ_5   -0.0201769188 -0.041071279  0.0007174419 0.0677224
+TP_OM-SJ_5   0.0072849439 -0.014282338  0.0288522262 0.9798155
+TP_15-SJ_OM -0.0482913088 -0.068448435 -0.0281341824 0.0000000
+TP_5-SJ_OM  -0.0435859001 -0.063947757 -0.0232240428 0.0000000
+TP_OM-SJ_OM -0.0161240374 -0.037175845  0.0049277699 0.2914051
+TP_5-TP_15   0.0047054087 -0.017789589  0.0272004065 0.9992483
+TP_OM-TP_15  0.0321672714  0.009045890  0.0552886529 0.0006347
+TP_OM-TP_5   0.0274618627  0.004161782  0.0507619437 0.0082802

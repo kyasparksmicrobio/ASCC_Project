@@ -5,6 +5,7 @@ library(phyloseq)
 library(dplyr)
 ```
 
+
 //** Load ECM only feature table and metadata **//
 
 
@@ -23,8 +24,6 @@ taxa <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_Ju
 data_meta <- inner_join(ECM_feature, metadata, by =c("samples"="samples"))
 data_meta_taxa <- inner_join(data_meta, taxa, by =c("OTUID"="OTUID"))
 ```
-
-
 
 
 
@@ -634,6 +633,7 @@ fam_colors <- c(
   "#F2F2F2", "#BEBADA", "#80B1D3", "#FB8072"
 )
 ```
+
 
 
 
