@@ -25,10 +25,10 @@ library(readxl)
 #### Import metadata with soil chemistry, sample name, site , and depth
 
 ```{r}
-metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
+metadata <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_metadata_rem.txt",row.names=1) 
 
 # Import feature table
-otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem.txt", row.names=1,header=TRUE)
+otus <- read.delim("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_metadata/ASCC_16S_feature_table_rem.txt", row.names=1,header=TRUE)
 ```
 
 
@@ -46,7 +46,7 @@ all.equal(names(otus),row.names(metadata)) #check to make sure row names and col
 # now we need to re-arrange the files, read in taxa, and make sure everything aligns before downstream steps, and make the phyloseq object
 otumat<-as.matrix(otus)
 OTU = otu_table(otumat, taxa_are_rows = TRUE)
-taxa<-read.delim("/Users/kyasparks/Desktop/CSU 2023-2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
+taxa<-read.delim("/Users/kyasparks/Library/Mobile Documents/com~apple~CloudDocs/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Projects/ASCC/ASCC_July2024_USETHIS_ks/16S/16S_taxonomy/filtered/ASCC_16S_taxonomy_forprocessing_copy.txt",row.names=1) #this is a list of the ASV ids and the corresponding taxa strings
 taxmat<-as.matrix(taxa)
 all.equal(row.names(taxmat),row.names(otumat)) # again - check to make sure they are in the same order!
 TAX = tax_table(taxmat)
@@ -559,3 +559,79 @@ legend("topright", legend = rownames(radar_ready)[-c(1,2)],
        col = c("#B75347", "#94B594", "#D89241"), 
        lty = 1, lwd = 2, bty = "n", cex = 0.8)
 ```
+
+
+
+
+
+```{r}
+
+# beta disp:
+
+# Assume 'group_factor' is a vector or column in your metadata that groups samples (e.g., Site or Treatment)
+# Make sure it's a factor
+# Ensure grouping matches row order of community_matrix
+group_vector <- metadata$Ecosite
+
+beta_disp <- betadisper(mgd_relabund.bray, group_vector)
+
+
+
+# Significance test
+permutest(beta_disp)
+
+
+# Permutation test for homogeneity of multivariate dispersions
+# Permutation: free
+# Number of permutations: 999
+
+# Response: Distances
+#            Df  Sum Sq  Mean Sq      F N.Perm Pr(>F)    
+# Groups      8 0.64082 0.080102 9.9753    999  0.001 ***
+# Residuals 294 2.36083 0.008030                         
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+# Extract distances for plotting
+disp_df <- data.frame(
+  DistanceToCentroid = beta_disp$distances,
+  Ecosite = group_vector
+)
+
+# Plot
+library(ggplot2)
+
+# reordering legends, refactoring
+disp_df$Ecosite <- factor(disp_df$Ecosite, levels=c('SF_OM','SF_5','SF_15',
+                                                     'TP_OM','TP_5','TP_15',
+                                                     'SJ_OM','SJ_5','SJ_15'))
+
+ggplot(disp_df, aes(x = Ecosite, y = DistanceToCentroid, fill = Ecosite)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, size = 1.5) +
+  theme_minimal() +
+  labs(title = "Beta Dispersion by Ecosite",
+       y = "Distance to Centroid",
+       x = "Ecosite") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+
+  theme_bw()
+
+ggplot(disp_df, aes(x = Ecosite, y = DistanceToCentroid, fill = Ecosite)) +
+  geom_boxplot(outlier.shape = NA, alpha = 0.7) +
+  geom_jitter(width = 0.2, size = 1.5, alpha = 0.5) +
+  facet_wrap(~ Ecosite, scales = "free_x", ncol = 3) +
+  theme_minimal() +
+  labs(title = "Beta Dispersion by Ecosite",
+       x = NULL,
+       y = "Distance to Centroid") +
+  theme(axis.text.x = element_blank(),
+        strip.text = element_text(face = "bold"))+
+  theme_bw()
+
+anova(beta_disp)       # F-test for differences in dispersion
+permutest(beta_disp)
+TukeyHSD(beta_disp)   # Permutation-based test (more robust)
+
+```
+
+

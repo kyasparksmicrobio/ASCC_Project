@@ -16,7 +16,7 @@
 # install.packages("ggplot2")
 # devtools::install_github("pmartinezarbizu/pairwiseAdonis/pairwiseAdonis"
 
-install.packages("paletteer")
+#install.packages("paletteer")
 library(phyloseq)  # Includes microbiome data analysis tools, handles OTU tables
 library(vegan)     # For NMDS and other ordination methods
 library(ggplot2)   # For customizable data visualization
@@ -24,8 +24,8 @@ library(dplyr)     # For data manipulation (tidyverse core)
 library(paletteer) # For custom color palettes (optional, if using specific palettes)
 library(pairwiseadonis)
 
-#### this is to check for missing samples between files.
-## IGNORE UNLESS NEEDED
+# #### this is to check for missing samples between files.
+# ## IGNORE UNLESS NEEDED
 # sample_names_meta <- metadata %>% pull(Sample_ID)
 
 # column_names_otus <- colnames(otus)
@@ -120,3 +120,10 @@ pairwise.adonis2(mgd_relabund.bray ~ metadata$Site*metadata$Depth, data = metada
 #not working ?
 
 write.csv(sample_tab,"/Users/kyasparks/Desktop/Desktop - MacBook Pro (2)/Kyas_PhD/CSU_2023_2024/Courses/ESS523A/Final-Project-Explore/shinywebsite/www/sampletab.csv")
+
+
+
+
+
+
+
