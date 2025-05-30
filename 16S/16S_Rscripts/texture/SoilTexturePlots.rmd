@@ -1,0 +1,386 @@
+## Making soil texture plots
+
+```{r}
+library(readxl)
+library(ggplot2)
+library(ggtern)
+library(dplyr)
+library(stringr)
+library(tidyr)  # Add this line
+```
+
+
+```{r}
+# Load soil texture data
+soil_data <- read_excel("/Users/kyasparks/Desktop/CSU 2023-2028/Projects/ASCC/ASCC_July2024_USETHIS_ks/Soil_Chemistry_TimFegelRMRS/SoilChemAnalysis_16S_ASCC/ASCC_2023_SoilTexture.xlsx", sheet = "EDITED")
+
+# Step 2: Clean column names
+colnames(soil_data) <- str_trim(colnames(soil_data))  # remove extra spaces
+
+# Step 3: Select relevant columns and reshape
+soil_texture_long <- soil_data %>%
+  select(Site, Depth, Sand_perc, Silt_perc, Clay_perc, Silt_Clay_perc) %>%
+  pivot_longer(cols = ends_with("_perc"),
+               names_to = "Texture",
+               values_to = "Percentage") %>%
+  mutate(Texture = str_replace(Texture, "_perc", ""),
+         Texture = str_to_title(Texture))  # make "sand" → "Sand"
+
+# Step 4 (Optional): View or export
+View(soil_texture_long)
+# write.csv(soil_texture_long, "soil_texture_long.csv", row.names = FALSE)
+```
+
+
+
+
+
+```{r}
+ggplot(data = soil_texture_long, aes(x = Texture, y = Percentage, fill = Texture)) +
+  geom_boxplot() +
+  facet_grid(Site~Depth, scales = "free") +
+  theme_bw() +
+  labs(title = "Soil Texture Distribution by Site and Depth",
+       x = "Soil Texture",
+       y = "Percentage") +
+  theme(legend.position = "none")
+```
+
+
+```{r}
+ggplot(data = soil_texture_long, aes(x = Texture, y = Percentage, fill = Texture)) +
+  geom_boxplot() +
+  facet_grid(Depth~Site, scales = "free") +
+  theme_bw() +
+  labs(title = "Soil Texture Distribution by Site and Depth",
+       x = "Soil Texture",
+       y = "Percentage") +
+  theme(legend.position = "none")
+```
+
+```{r}
+soil_texture_long %>%
+  group_by(Site, Depth, Texture) %>%
+  summarize(mean_perc = mean(Percentage, na.rm = TRUE)) %>%
+  ggplot(aes(x = Site, y = mean_perc, fill = Texture)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Depth) +
+  #scale_y_continuous(labels = scales::percent) +
+  labs(title = "Relative Soil Texture Composition by Site and Depth",
+       x = "Site", y = "Relative Composition", fill = "Texture") +
+  theme_bw()
+```
+
+```{r}
+soil_texture_long %>%
+  group_by(Site, Depth, Texture) %>%
+  summarize(mean_perc = mean(Percentage, na.rm = TRUE)) %>%
+  ggplot(aes(x = Site, y = mean_perc, fill = Texture)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~Depth) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Relative Soil Texture Composition by Site and Depth",
+       x = "Site", y = "Relative Composition", fill = "Texture") +
+  theme_bw()
+```
+
+```{r}
+soil_texture_long %>%
+  group_by(Site, Depth, Texture) %>%
+  summarize(mean_perc = mean(Percentage, na.rm = TRUE)) %>%
+  ggplot(aes(x = Depth, y = mean_perc, fill = Texture)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Site) +
+  #scale_y_continuous(labels = scales::percent) +
+  labs(title = "Relative Soil Texture Composition by Site and Depth",
+       x = "Site", y = "Relative Composition", fill = "Texture") +
+  theme_bw()
+```
+
+```{r}
+  soil_texture_long %>%
+  group_by(Site, Depth, Texture) %>%
+  ggplot(aes(x = Depth, y = Percentage, fill = Texture)) +
+  geom_col(position = "dodge") +
+  facet_wrap(~Site) +
+  #scale_y_continuous(labels = scales::percent) +
+  labs(title = "Relative Soil Texture Composition by Site and Depth",
+       x = "Site", y = "Relative Composition", fill = "Texture") +
+  theme_bw()
+```
+
+```{r}
+library(ggtern)
+
+ggtern(soil_data, aes(x = Sand_perc, y = Silt_perc, z = Clay_perc, color = Site)) +
+  geom_point(size = 3, alpha = 0.8) +
+  facet_grid(Depth~Site) +
+  theme_bw() +
+  labs(title = "Soil Texture Ternary Plot by Depth", color = "Site")
+```
+
+
+
+```{r}
+library(FactoMineR)
+library(factoextra)
+
+# Step 1: Match PCA data and labels
+texture_data <- soil_data%>%
+  select(Sand_perc, Silt_perc, Clay_perc)
+
+site_labels <- soil_data$Site  # Make sure it's aligned row-wise
+
+# Step 1: Build PCA input with Site as a supplementary variable
+# Include both Site and Depth
+pca_input <- soil_data %>%
+  select(Sand_perc, Silt_perc, Clay_perc, Site, Depth)
+
+# Run PCA: treat Site and Depth as supplementary qualitative variables
+pca_result <- PCA(pca_input, quali.sup = c(4, 5), graph = FALSE)
+
+# Step 3: Plot individuals colored by Site
+fviz_pca_ind(pca_result,
+             habillage = 4,  # refers to the 4th column = Site
+             addEllipses = TRUE,
+             palette = "Dark2",
+             title = "PCA of Soil Texture by Site")
+
+ fviz_pca_biplot(pca_result,
+                habillage = 4,          # Site = column 4
+                addEllipses = TRUE,
+                label = "var",          # only show arrows for variables
+                col.var = "black",
+                palette = "Dark2",
+                repel = TRUE,
+                pointsize = 2,
+                title = "PCA Biplot of Soil Texture by Site")
+
+fviz_pca_biplot(pca_result,
+                habillage = 5,         # Depth = 5th column
+                label = "var",
+                addEllipses = TRUE,
+                pointsize = 2,
+                palette = "Dark2",
+                title = "PCA Biplot of Soil Texture by Depth")
+```
+
+
+```{r}
+# Get PCA coordinates
+library(factoextra)
+library(ggplot2)
+
+pca_ind <- get_pca_ind(pca_result)$coord %>%
+  as.data.frame() %>%
+  mutate(Site = soil_data$Site,
+         Depth = soil_data$Depth)
+
+# Plot with color = Site and shape = Depth
+# Get variable loadings (arrows)
+pca_var <- get_pca_var(pca_result)
+
+# Base PCA plot with points
+ggplot(pca_ind, aes(x = Dim.1, y = Dim.2, color = Site, shape = Depth)) +
+  geom_point(size = 4, alpha = 0.8) +
+  stat_ellipse(aes(group = Site), linetype = "dashed", alpha = 1) +
+
+  # Add arrows
+  geom_segment(data = as.data.frame(pca_var$coord),
+               aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "black", inherit.aes = FALSE) +
+
+  # Add variable labels
+  geom_text(data = as.data.frame(pca_var$coord),
+            aes(x = Dim.1, y = Dim.2, label = rownames(pca_var$coord)),
+            color = "black", vjust = -0.8, inherit.aes = FALSE) +
+
+  labs(x = "PC1", y = "PC2", 
+       title = "PCA of Soil Texture by Site (color) and Depth (shape)") +
+  theme_bw()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+# --- 1. Function to classify USDA soil texture ---
+classify_usda <- function(sand, silt, clay) {
+  if (clay >= 40 & silt < 40 & sand < 45) return("Clay")
+  else if (clay >= 35 & sand > 45) return("Sandy Clay")
+  else if (clay >= 35 & silt > 40) return("Silty Clay")
+  else if (clay >= 27 & clay < 40 & sand > 20 & sand <= 45) return("Clay Loam")
+  else if (clay >= 27 & clay < 40 & sand <= 20) return("Silty Clay Loam")
+  else if (clay >= 27 & clay < 35 & sand > 45) return("Sandy Clay Loam")
+  else if (clay >= 20 & clay < 27 & silt >= 28 & silt < 50 & sand <= 52) return("Loam")
+  else if (clay >= 20 & clay < 27 & silt >= 50) return("Silt Loam")
+  else if (clay >= 20 & clay < 27 & sand > 52) return("Sandy Loam")
+  else if (clay >= 7 & clay < 20 & silt >= 50 & sand <= 20) return("Silt")
+  else if (clay >= 7 & clay < 27 & silt >= 50 & sand > 20) return("Silt Loam")
+  else if (clay >= 7 & clay < 20 & silt < 50 & sand > 52) return("Sandy Loam")
+  else if (clay < 7 & silt < 50 & sand > 52) return("Loamy Sand")
+  else if (clay < 7 & silt < 20 & sand > 85) return("Sand")
+  else return("Other")
+}
+
+# Normalize to 100% (in case they don't already sum to 100)
+# Normalize to 100% (in case they don't already sum to 100)
+soil_data <- soil_data %>%
+  mutate(
+    total = Sand_perc + Silt_perc + Clay_perc,
+    Sand_perc = Sand_perc / total * 100,
+    Silt_perc = Silt_perc / total * 100,
+    Clay_perc = Clay_perc / total * 100,
+    USDA = mapply(classify_usda, Sand_perc, Silt_perc, Clay_perc)
+  )
+
+# 🛠️ Fix structure
+df <- as.data.frame(df)
+
+# --- 4. Plot with ggtern ---
+ggtern(soil_data, aes(x = Sand_perc, y = Silt_perc, z = Clay_perc, color = USDA)) +
+  geom_point(size = 4, alpha = 0.9) +
+  theme_bw() +
+  labs(title = "USDA Soil Texture Classification", color = "USDA Class")
+
+ggtern(soil_data, aes(x = Sand_perc, y = Silt_perc, z = Clay_perc)) +
+  geom_point(aes(fill = USDA), color = "black", size = 4, shape = 21) +
+  theme_bw() +
+  labs(title = "USDA Soil Texture Classification", fill = "USDA Class")
+```
+
+
+```{r}
+library(ggplot2)
+library(ggforce)
+
+ggplot(as.data.frame(pca_var$coord), aes(x = rownames(pca_var$coord), y = sqrt(Dim.1^2 + Dim.2^2))) +
+  geom_col(aes(fill = rownames(pca_var$coord))) +
+  coord_polar(start = 0) +
+  labs(title = "Variable Contributions to PC Axes", x = "", y = "Contribution") +
+  theme_minimal()
+```
+
+
+
+```{r}
+circle <- data.frame(x = cos(seq(0, 2 * pi, length.out = 100)),
+                     y = sin(seq(0, 2 * pi, length.out = 100)))
+
+ggplot() +
+  geom_path(data = circle, aes(x, y), color = "grey70") +
+  geom_segment(data = as.data.frame(pca_var$coord),
+               aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2),
+               arrow = arrow(length = unit(0.2, "cm")), color = "black") +
+  geom_text(data = as.data.frame(pca_var$coord),
+            aes(x = Dim.1, y = Dim.2, label = rownames(pca_var$coord)),
+            vjust = -0.7, color = "black") +
+  coord_fixed() +
+  theme_void() +
+  labs(title = "Correlation Circle (Scaled PCA Loadings)")
+```
+
+
+```{r}
+library(ggridges)
+
+ggplot(soil_texture_long, aes(x = Percentage, y = Texture, fill = Site)) +
+  geom_density_ridges(alpha = 0.6, scale = 1.2) +
+  facet_wrap(~Depth) +
+  theme_ridges() +
+  labs(title = "Soil Texture Distributions by Site and Depth")+
+  theme_bw()
+
+ggplot(soil_texture_long, aes(x = Percentage, y = Texture, fill = Depth)) +
+  geom_density_ridges(alpha = 0.6, scale = 1.2) +
+  facet_wrap(~Site) +
+  theme_ridges() +
+  labs(title = "Soil Texture Distributions by Site and Depth")+
+  theme_bw()
+
+ggplot(soil_texture_long, aes(x = Percentage, y = Texture, fill = Site)) +
+  geom_density_ridges(alpha = 0.6, scale = 1.2) +
+  facet_grid(Site~Depth) +
+  theme_ridges() +
+  labs(title = "Soil Texture Distributions by Site and Depth")+
+  theme_bw()
+```
+
+
+```{r}
+library(fmsb)
+
+# Create radar-ready data: each texture as a column, each site/depth as a row
+radar_data <- soil_texture_long %>%
+  group_by(Site, Texture) %>%
+  summarize(mean = mean(Percentage, na.rm = TRUE)) %>%
+  pivot_wider(names_from = Texture, values_from = mean)
+
+# Add required rows for radar chart bounds
+radar_ready <- rbind(rep(100, ncol(radar_data)-1), rep(0, ncol(radar_data)-1), radar_data[-1])
+
+radarchart(as.data.frame(radar_ready), axistype = 1, pcol = rainbow(3), pfcol = scales::alpha(rainbow(3), 0.3), plwd = 2)
+```
+
+```{r}
+library(GGally)
+
+ggparcoord(data = soil_data,
+           columns = 16:18, groupColumn = 4,  # assuming Sand/Silt/Clay in cols 1-3
+           scale = "uniminmax") +
+  labs(title = "Soil Texture Profiles by Site") +
+  theme_minimal()
+```
+
+```{r}
+# Calculate centroids
+centroids <- pca_ind %>%
+  group_by(Site, Depth) %>%
+  summarize(PC1 = mean(Dim.1), PC2 = mean(Dim.2))
+
+# Plot with arrows and centroid labels
+ggplot(pca_ind, aes(x = Dim.1, y = Dim.2, color = Site, shape = Depth)) +
+  geom_point(size = 3, alpha = 0.6) +
+  stat_ellipse(aes(group = Site), linetype = "dashed", alpha = 1) +
+  geom_segment(data = as.data.frame(pca_var$coord),
+               aes(x = 0, y = 0, xend = Dim.1, yend = Dim.2),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "black", inherit.aes = FALSE) +
+  geom_text(data = as.data.frame(pca_var$coord),
+            aes(x = Dim.1, y = Dim.2, label = rownames(pca_var$coord)),
+            color = "black", inherit.aes = FALSE, vjust = -0.7) +
+  geom_label(data = centroids, aes(x = PC1, y = PC2, label = paste(Site, Depth)), 
+             color = "black", fill = "white", size = 3, show.legend = FALSE) +
+  labs(x = "PC1", y = "PC2", 
+       title = "Annotated PCA of Soil Texture by Site and Depth") +
+  theme_bw()
+```
+
+
+
+```{r}
+library(plotly)
+
+plot_ly(pca_ind,
+        x = ~Dim.1, y = ~Dim.2,
+        color = ~Site, symbol = ~Depth,
+        type = 'scatter', mode = 'markers',
+        text = ~paste("Sample", rownames(pca_ind)),
+        marker = list(size = 8, opacity = 0.7)) %>%
+  layout(title = "Interactive PCA of Soil Texture",
+         xaxis = list(title = "PC1"),
+         yaxis = list(title = "PC2"))
+         
+```
+
